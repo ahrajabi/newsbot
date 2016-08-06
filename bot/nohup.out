@@ -1,0 +1,9 @@
+hello
+hello
+Performing system checks...
+
+System check identified no issues (0 silenced).
+August 06, 2016 - 06:45:14
+Django version 1.10, using settings 'newsbot.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
