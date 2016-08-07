@@ -1,7 +1,6 @@
-from django.conf import settings
 import telepot
-
-TOKEN = settings.TELEBOT_TOKEN  # get token from command-line
+import bot.token
+TOKEN = bot.token.TELEBOT_TOKEN  # get token from command-line
 
 def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
@@ -14,7 +13,3 @@ def handle(msg):
 bot = telepot.Bot(TOKEN)
 bot.message_loop(handle)
 print ('Listening ...')
-
-
-bot.message_loop()
-

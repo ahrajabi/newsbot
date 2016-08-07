@@ -21,7 +21,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'm&_n-o1j7n^1qbmg@-b2(9jjcp#q-f)&myg@1#as2!#v3yogfk'
-TELEBOT_TOKEN = '256460947:AAE3Glgg0-NVC78Cn7J58wsrYyEFzqWGBzA'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -31,15 +30,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'djcelery',
+    'bot',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    'djcelery',
-    'bot',
 ]
 
 MIDDLEWARE = [
@@ -110,11 +108,11 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
-USE_I18N = True
+USE_I18N = False
 
 USE_L10N = True
 
-USE_TZ = False
+USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -132,3 +130,8 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Tehran'
 CELERY_IMPORTS = ("bot.bottask", )
+
+
+import djcelery
+djcelery.setup_loader()
+
