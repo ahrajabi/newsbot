@@ -11,7 +11,7 @@ def handle(msg):
     print(msg)
 
     # Remove User for Testing
-    welcome.removeUser(bot,msg)
+    #welcome.removeUser(bot,msg)
     from bot.models import UserProfile
 
     userid = msg['from']['id']
@@ -21,9 +21,8 @@ def handle(msg):
         return
 
     user = welcome.getUser(bot, msg)
-    user.userprofile_set.update(last_chat=msg['date'])
     if content_type == 'text':
-        bot.sendMessage(chat_id, "salam</b>")
+        welcome.handle(bot,user, msg)
 
 
 bot = telepot.Bot(TOKEN)
