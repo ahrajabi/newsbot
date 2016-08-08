@@ -41,7 +41,7 @@ def handle(bot,user,msg):
     if text.startswith('/'):
         if text.startswith('/add_'):
             entity_id = int(text[5:])
-            if tasks.set_entity(user,entity_id , 'Active'):
+            if tasks.set_entity(user,entity_id , 'Fallow'):
                 bot.sendMessage(msg['from']['id'], "DONE")
             else:
                 keyboard, text = bot_template.error_text()
@@ -49,7 +49,7 @@ def handle(bot,user,msg):
 
         if text.startswith('/remove_'):
             entity_id = int(text[8:])
-            if tasks.set_entity(user,entity_id , 'Deactive'):
+            if tasks.set_entity(user,entity_id , 'Unfallow'):
                 bot.sendMessage(msg['from']['id'], "DONE")
             else:
                 keyboard, text = bot_template.error_text()
