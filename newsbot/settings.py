@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rss'
 ]
 
 MIDDLEWARE = [
@@ -75,10 +76,22 @@ WSGI_APPLICATION = 'newsbot.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 DATABASES = {
+    #     'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    # },
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'News_Bot',
+        'USER': 'postgres',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    },
+   #  'news_db': {
+   #    'ENGINE': 'django_mongodb_engine',
+   #    'NAME': 'my_database'
+   # }
 }
 
 
@@ -119,5 +132,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+
 
 
