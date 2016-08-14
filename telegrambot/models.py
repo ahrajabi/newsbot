@@ -8,6 +8,7 @@ class UserProfile(models.Model):
     first_name = models.CharField(max_length=140)
     last_name = models.CharField(max_length=140)
     last_chat = models.DateTimeField()
+    telegram_id = models.PositiveIntegerField()
 
     def __unicode__(self):
         return u'Profile of user: %s' % self.user.username
