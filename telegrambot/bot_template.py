@@ -4,6 +4,8 @@ import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram import ReplyKeyboardMarkup
 from entities import tasks
+from django.contrib.auth.models import User
+from telegrambot.models import UserProfile
 def welcome_text(bot, msg):
     keyboard = ReplyKeyboardMarkup(keyboard=[[
         '/HELP ⁉️ راهنمایی',
@@ -96,10 +98,10 @@ def help(bot, msg,user):
         ('/help', 'صفحه‌ی راهنمایی'),
         ('/live' ,'مشاهده‌ی اخبار به صورت لحظه‌ای'),
     ]
-    text = 'راهنمای ربات'+'\n'
+    text = 'راهنمایش ربات'+'\n'
     for i in menu:
         text += i[0] + ' ' + '<i>' + i[1] +'</i>\n'
-    send_telegram(bot, msg,text,None)
+    send_telegram_user(bot, user, text, None)
 
 def send_telegram(bot, msg, Text , keyboard=None):
     if len(Text) > 4096 :
@@ -110,9 +112,22 @@ def send_telegram(bot, msg, Text , keyboard=None):
                            reply_markup=keyboard,
                            parse_mode = telegram.ParseMode.HTML)
 
-def send_telegram_user(bot, user, Text , keyboard=None):
-
-    return bot.sendMessage(chat_id=user.userprofile_set ,
+def send_telegram_user(bot, User, Text , keyboard=None):
+    profile = UserProfile.objects.get(user=User)
+    id = profile.telegram_id
+    if id:
+        return bot.sendMessage(chat_id=id,
                            text = Text,
                            reply_markup=keyboard,
                            parse_mode = telegram.ParseMode.HTML)
+
+
+def send_telegram_alluser(bot, Text , keyboard=None):
+    allprofile = UserProfile.objects.all()
+    for profile in allprofile:
+        id = profile.telegram_id
+        if id:
+            bot.sendMessage(chat_id=id,
+                               text = Text,
+                               reply_markup=keyboard,
+                               parse_mode = telegram.ParseMode.HTML)

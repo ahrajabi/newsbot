@@ -13,3 +13,9 @@ class UserProfile(models.Model):
 
     def __unicode__(self):
         return u'Profile of user: %s' % self.user.username
+
+
+class UserAlert(models.Model):
+    text = models.TextField(null=True)
+    send_time = models.DateTimeField(null=True,blank=True)
+    is_sent = models.BooleanField(default=False)

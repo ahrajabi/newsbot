@@ -3,15 +3,23 @@ import wikipedia
 wikipedia.set_lang('fa')
 
 def get_entity_contain(Name):
-    wik = wikipedia.search(Name, results=10)
+    wik = wikipedia.search(Name, results=3, suggestion=True)
     ret = list()
-    for item in wik:
+    print(wik[0])
+    for item in wik[0]:
         ent = Entity.objects.filter(wiki_name=item)
-        if  not ent:
-            wiki_page = wikipedia.page(item)
-            ent = Entity.objects.create(name=item, wiki_name=item, status='P',
-                                        summary=wiki_page.summary)
-            ret.append(ent)
+        if not ent:
+            try:
+                wiki_page = wikipedia.page(item, redirect=True, auto_suggest=True)
+                ent = Entity.objects.create(name=item, wiki_name=item, status='P',
+                                            summary=wiki_page.summary)
+                ret.append(ent)
+            except wikipedia.exceptions.DisambiguationError as e:
+                wiki_page = wikipedia.page(e.options, redirect=True, auto_suggest=True)
+                ent = Entity.objects.create(name=e.options, wiki_name=e.options, status='P',
+                                            summary=wiki_page.summary)
+                ret.append(ent)
+
         else:
             ret.extend(ent)
     return ret

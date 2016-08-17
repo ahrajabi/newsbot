@@ -1,11 +1,14 @@
 from django.utils import timezone
 from telegrambot import bot_template
-
 from entities import tasks
 import re
+import datetime
 import sys
-from newsbot.celery import app
+from django.contrib.auth.models import User
+from telegrambot.models import UserAlert
 thismodule = sys.modules[__name__]
+
+from .models import UserProfile
 
 def handle(bot, msg):
     user = getUser(msg.message.from_user.id)
@@ -19,7 +22,6 @@ def handle(bot, msg):
 
 
 def welcome_bot(bot, msg):
-    from django.contrib.auth.models import User
     user = User.objects.create_user(username=msg.message.from_user.username)
     up = user.userprofile_set.create(first_name=msg.message.from_user.first_name,
                                      last_name=msg.message.from_user.last_name,
@@ -33,14 +35,13 @@ def welcome_bot(bot, msg):
 
 def verifyUser(bot,msg):
     user = getUser(msg.message.from_user.id)
-    if not user :
+    if not user:
         user = welcome_bot(bot, msg)
     return user
 
 
 def getUser(telegramid):
-    from django.contrib.auth.models import User
-    from .models import UserProfile
+
     profiles = UserProfile.objects.filter(telegram_id= telegramid)
     if not profiles:
         return False
@@ -84,3 +85,11 @@ def list_command(bot, msg,user):
 
 def help_command(bot, msg,user):
     bot_template.help(bot, msg,user)
+
+
+def user_alert_handler(bot,job):
+    bulk = UserAlert.objects.filter(is_sent=False)#,send_time__gte=datetime.datetime.now())
+    for item in bulk:
+        bot_template.send_telegram_alluser(bot, item.text)
+        item.is_sent = True
+        item.save()
