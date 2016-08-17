@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+
 class UserProfile(models.Model):
     user = models.ForeignKey(User)
     first_name = models.CharField(max_length=140)

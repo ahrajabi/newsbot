@@ -12,6 +12,7 @@ from telegram.error import (TelegramError, Unauthorized, BadRequest,
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
+
 def error_callback(bot, update, error):
     try:
         raise error
@@ -29,8 +30,8 @@ def error_callback(bot, update, error):
         print("# handle all other telegram related errors")
 
 
-
 TOKEN = token.TELEBOT_TOKEN  # get token from command-line
+
 
 @run_async
 def handle(bot, msg):
@@ -53,16 +54,16 @@ def commands(bot, msg):
     p = re.compile(r'[a-z]+')
     func = p.findall(msg.message.text.lower())[0] + '_command'
     print(func)
-    if hasattr( welcome ,func):
-        getattr( welcome , func)(bot, msg,user)
+    if hasattr(welcome, func):
+        getattr(welcome, func)(bot, msg, user)
     else:
-        bot_template.error_text(bot, msg, type = 'NoCommand')
+        bot_template.error_text(bot, msg, type='NoCommand')
 
 @run_async
-def callback_query(bot,msg):
+def callback_query(bot, msg):
     from telegrambot import callback
 
-    callback.handle(bot,msg)
+    callback.handle(bot, msg)
 
 
 def asdf(bot,update):
@@ -72,7 +73,7 @@ updater = Updater(token=TOKEN)
 dispatcher = updater.dispatcher
 dispatcher.add_handler(MessageHandler([Filters.command], commands))
 dispatcher.add_handler(MessageHandler([Filters.text], handle))
-dispatcher.add_handler( CallbackQueryHandler(callback_query) )
+dispatcher.add_handler(CallbackQueryHandler(callback_query))
 dispatcher.add_error_handler(error_callback)
 updater.start_polling()
-print ('Listening ...')
+print('Listening ...')

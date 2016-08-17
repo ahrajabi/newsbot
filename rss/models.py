@@ -1,7 +1,5 @@
 from django.db import models
-from datetime import datetime, timedelta
-import requests
-from bs4 import BeautifulSoup as bs
+from datetime import datetime
 
 
 class RssFeeds(models.Model):
@@ -19,31 +17,15 @@ class BaseNews(models.Model):
     rss = models.ForeignKey(RssFeeds, verbose_name='related rss feed', null=True, blank=True)
     title = models.TextField('Tittle', blank=True, null=True)
     published_date = models.DateTimeField('Published date ', blank=True, null=True)
-
-    def save_news(self):
-        page = requests.get(self.url).text
-        page_soup = bs(page, 'html.parser')
-        if page_soup:
-            news_body = page_soup.select(self.rss.selector)
-            try:
-                news_summary = page_soup.select(self.rss.summary_selector)
-            except (IndexError):
-                news_summary = ''
-            news = News.objects.create(body=news_body, summary=news_summary)
-            news.baseactivity_ptr = self
+    complete_news = models.BooleanField('Has full news', default=False)
 
 
-
-class News(BaseNews):
+class News(models.Model):
     body = models.TextField('News', blank=True, null=True)
     summary = models.TextField('summary', blank=True, null=True)
-    #
-    # def save(self, *args, **kwargs):
-    #     return super(News, self).save(*args, **kwargs)
-
+    base_news = models.OneToOneField(BaseNews, verbose_name='Related base news', null=True, blank=True)
 
 
 class ImageUrls(models.Model):
-    img_url = models.URLField('image url')
+    img_url = models.URLField('image url', max_length=500)
     news = models.ForeignKey(News, verbose_name='related news')
-
