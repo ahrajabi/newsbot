@@ -1,4 +1,4 @@
-from telegrambot import token
+from django.conf import settings
 from telegram.ext import Updater, Job
 from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 import telegram
@@ -31,7 +31,7 @@ def error_callback(bot, update, error):
         print("# handle all other telegram related errors")
 
 
-TOKEN = token.TELEBOT_TOKEN  # get token from command-line
+TOKEN = settings.TELEBOT_TOKEN  # get token from command-line
 
 
 @run_async

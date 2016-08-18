@@ -87,14 +87,15 @@ DATABASES = {
         'NAME': 'news_bot',
         'USER': 'postgres',
         'PASSWORD': 'hbCSrLS4MztknYnhMnBS',
-        'HOST': '127.0.0.1',
-        'PORT': '',
+        'HOST': '130.185.76.171',
+        'PORT': '5432',
     },
    #  'news_db': {
    #    'ENGINE': 'django_mongodb_engine',
    #    'NAME': 'my_database'
    # }
 }
+
 
 
 # Password validation
@@ -135,11 +136,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://127.0.0.1:9200/',
-        'INDEX_NAME': 'haystack',
-    },
-}
-
+TELEBOT_TOKEN = '256460947:AAE3Glgg0-NVC78Cn7J58wsrYyEFzqWGBzA'
