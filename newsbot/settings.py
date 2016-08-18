@@ -24,7 +24,7 @@ SECRET_KEY = 'm&_n-o1j7n^1qbmg@-b2(9jjcp#q-f)&myg@1#as2!#v3yogfk'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rss',
     'entities',
-    'haystack',
     'search',
 ]
 
@@ -85,10 +84,10 @@ DATABASES = {
     # },
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'News_Bot',
+        'NAME': 'news_bot',
         'USER': 'postgres',
-        'PASSWORD': '',
-        'HOST': '',
+        'PASSWORD': 'hbCSrLS4MztknYnhMnBS',
+        'HOST': '127.0.0.1',
         'PORT': '',
     },
    #  'news_db': {

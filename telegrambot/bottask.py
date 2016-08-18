@@ -1,4 +1,3 @@
-import telepot
 from telegrambot import token
 from telegram.ext import Updater, Job
 from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackQueryHandler
