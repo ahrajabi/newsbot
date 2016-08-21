@@ -14,12 +14,12 @@ class RssAdmin(admin.ModelAdmin):
 
 @admin.register(News)
 class NewsAdmin(admin.ModelAdmin):
-    list_display = ('base_news', 'summary')
+    list_display = ('base_news', 'summary', 'id')
 
 
 @admin.register(BaseNews)
 class BaseNewsAdmin(admin.ModelAdmin):
-    list_display = ('url', 'title', 'published_date', 'complete_news', 'rss_id')
+    list_display = ('url', 'title', 'published_date', 'complete_news', 'rss_id', 'id')
 
 
 @admin.register(ImageUrls)
