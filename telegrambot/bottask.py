@@ -4,12 +4,14 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackQueryH
 import telegram
 import re
 import logging
+from django.contrib.auth.models import User
+
 from telegram.ext.dispatcher import run_async
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, NetworkError)
 from telegrambot import welcome, bot_template, callback
 from telegrambot.models import UserProfile
-
+from rss import rss,news
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
@@ -63,6 +65,17 @@ def callback_query(bot, msg):
 def user_alert_handler(bot,job):
     welcome.user_alert_handler(bot,job)
 
+def fetch_news(bot, job):
+    rss.get_new_rss()
+    news.save_all_base_news()
+
+def random_publish_news(bot,job):
+    from rss.models import News
+    news = News.objects.filter(pic_number__gte=1,
+                               summary__isnull=False).order_by('?')
+    user = User.objects.get(username='ahrajabi')
+    bot_template.publish_news(bot, news[0], user )
+
 updater = Updater(token=TOKEN)
 dispatcher = updater.dispatcher
 dispatcher.add_handler(MessageHandler([Filters.command], commands))
@@ -72,7 +85,9 @@ dispatcher.add_error_handler(error_callback)
 
 q_bot = updater.job_queue
 
-q_bot.put(Job(user_alert_handler, 10, repeat=True))
+q_bot.put(Job(random_publish_news, 60*60, repeat=True))
+q_bot.put(Job(user_alert_handler, 100, repeat=True))
+q_bot.put(Job(fetch_news, 20, repeat=True))
 
 updater.start_polling()
 print('Listening ...')

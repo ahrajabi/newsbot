@@ -1,5 +1,3 @@
-
-
 import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram import ReplyKeyboardMarkup
@@ -103,6 +101,30 @@ def help(bot, msg,user):
         text += i[0] + ' ' + '<i>' + i[1] +'</i>\n'
     send_telegram_user(bot, user, text, None)
 
+
+def news_page(News, page=1):
+    buttons = [[
+        InlineKeyboardButton(text='پسند', callback_data='news-' + str(News.id) + '-like')],
+        [
+            InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(News.id) + '-overview'),
+            InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(News.id) + '-full'),
+            InlineKeyboardButton(text='آمار', callback_data='news-' + str(News.id) + '-stat'),
+    ], ]
+    keyboard = InlineKeyboardMarkup(buttons)
+    TEXT = News.base_news.title + '\n'
+    if page == 1:
+        TEXT += News.summary + '\n'
+    elif page == 2:
+        TEXT += News.body[0:1000] + '\n' + 'ادامه دارد'
+    elif page == 3:
+        TEXT += str(News.pic_number) + '\n'
+    TEXT = TEXT + '@mybot بات من'
+    return keyboard, TEXT
+
+def publish_news(bot, News, User, page=1, message_id=None):
+    keyboard, Text = news_page(News, page)
+    send_telegram_user(bot, User, Text, keyboard, message_id)
+
 def send_telegram(bot, msg, Text , keyboard=None):
     if len(Text) > 4096 :
         error_text(msg,type="LongMessage")
@@ -110,24 +132,39 @@ def send_telegram(bot, msg, Text , keyboard=None):
     return bot.sendMessage(chat_id=msg.message.chat_id,
                            text = Text,
                            reply_markup=keyboard,
-                           parse_mode = telegram.ParseMode.HTML)
+                           parse_mode =telegram.ParseMode.HTML)
 
-def send_telegram_user(bot, User, Text , keyboard=None):
+def send_telegram_user(bot, User, Text , keyboard=None, message_id=None):
     profile = UserProfile.objects.get(user=User)
     id = profile.telegram_id
     if id:
-        return bot.sendMessage(chat_id=id,
-                           text = Text,
-                           reply_markup=keyboard,
-                           parse_mode = telegram.ParseMode.HTML)
+        if not message_id:
+            return bot.sendMessage(chat_id=id,
+                               text = Text,
+                               reply_markup=keyboard,
+                               parse_mode = telegram.ParseMode.HTML)
+        else:
+            bot.editMessageText(text=Text,
+                                chat_id=id,
+                                message_id=message_id,
+                                reply_markup=keyboard,
+                                parse_mode=telegram.ParseMode.HTML,
+                                inline_message_id=None)
 
 
-def send_telegram_alluser(bot, Text , keyboard=None):
+def send_telegram_alluser(bot, Text , keyboard=None, Photo=None):
     allprofile = UserProfile.objects.all()
     for profile in allprofile:
         id = profile.telegram_id
         if id:
-            bot.sendMessage(chat_id=id,
-                               text = Text,
-                               reply_markup=keyboard,
-                               parse_mode = telegram.ParseMode.HTML)
+            if Photo:
+                bot.sendPhoto(chat_id=id,
+                              photo=Photo,
+                              caption=Text[0:199],
+                              reply_markup=keyboard,
+                              parse_mode=telegram.ParseMode.HTML)
+            else:
+                bot.sendMessage(chat_id=id,
+                                   text = Text,
+                                   reply_markup=keyboard,
+                                   parse_mode = telegram.ParseMode.HTML)

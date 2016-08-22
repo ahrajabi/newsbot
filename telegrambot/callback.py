@@ -6,6 +6,8 @@ from entities import tasks
 import re
 import sys
 from newsbot.celery import app
+from django.contrib.auth.models import User
+
 thismodule = sys.modules[__name__]
 import pprint
 import telegram
@@ -34,3 +36,30 @@ def score_inline_command(bot, msg,user):
                                 text=TEXT)
     else:
         bot_template.error_text(bot, msg)
+
+
+def news_inline_command(bot,msg,user):
+    news_id = re.compile(r'\d+').findall(msg.callback_query.data.lower())[0]
+    bot.answerCallbackQuery(msg.callback_query.id,
+                            text='news')
+    from rss.models import News
+
+    p = re.compile(r'[a-z]+')
+    pageTitle = p.findall(msg.callback_query.data.lower())[1]
+
+    Page = 1
+
+    if pageTitle == 'overview':
+        Page = 1
+    elif pageTitle == 'full':
+        Page = 2
+    elif pageTitle == 'stat':
+        Page = 3
+
+    News = News.objects.get(id=news_id)
+    user = UserProfile.objects.get(telegram_id=msg.callback_query.message.chat.id).user
+    bot_template.publish_news(bot, News, user,
+                 page=Page, message_id=msg.callback_query.message.message_id)
+
+
+

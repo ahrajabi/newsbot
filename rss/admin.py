@@ -14,7 +14,7 @@ class RssAdmin(admin.ModelAdmin):
 
 @admin.register(News)
 class NewsAdmin(admin.ModelAdmin):
-    list_display = ('base_news', 'summary', 'id')
+    list_display = ('base_news', 'pic_number', 'summary', 'id')
 
 
 @admin.register(BaseNews)

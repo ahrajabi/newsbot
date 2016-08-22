@@ -1,2 +1,4 @@
-tabnak.ir,tabnak,تابناک,http://www.tabnak.ir/fa/rss/allnews,div.body
-asriran.com,asriran,عصرایران,http://www.asriran.com/fa/rss/allnews,div.body
+#Website        Name        PName       main_rss       body        summary   image
+tabnak.ir,tabnak,تابناک,http://www.tabnak.ir/fa/rss/allnews,div.body,.subtitle,div.body img
+asriran.com,asriran,عصرایران,http://www.asriran.com/fa/rss/allnews,div.body,.subtitle, div.body
+irna.ir,irna,ایرنا,http://www.irna.ir/fa/rss.aspx?kind=-1,div.BodyText p, div.ContentStyle h3,div.BodyText > img

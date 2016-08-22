@@ -14,14 +14,14 @@ es = elasticsearch. Elasticsearch(['http://130.185.76.171:9200'])
 def save_news(base_news):
     # fix catch HeaderParsingError
     try:
-        page = requests.get(base_news.url,  timeout=20).text
-    except ConnectionError:
-        print('error')
+        print(str(base_news.url))
+        page = requests.get(str(base_news.url),  timeout=20)
+    except Exception:
+        base_news.delete()
         return False
 
-    page_soup = bs(page, 'html.parser')
+    page_soup = bs(page.text, 'html.parser')
     if page_soup:
-
         try:
             news_body = page_soup.select(base_news.rss.selector)[0].text
         except IndexError:
@@ -32,15 +32,23 @@ def save_news(base_news):
         except IndexError:
             news_summary = ''
 
-        news = News.objects.create(body=news_body, summary=news_summary, base_news=base_news)
+        news, is_created = News.objects.update_or_create(base_news=base_news,
+                                             defaults={'body': news_body,
+                                                       'pic_number': 0,
+                                                       'summary': news_summary, })
+
         # elastic_search_store(news_body, news_summary, news.id)
 
-        news_images = page_soup.select(base_news.rss.selector + ' img')
+        news_images = page_soup.select(base_news.rss.image_selector)
+        cnt = 0
         for img in news_images:
             try:
                 ImageUrls.objects.create(img_url=img['src'], news=news)
-            except DataError:
+                cnt += 1
+            except Exception:
                 continue
+        news.pic_number = cnt
+        news.save()
     return True
 
 
