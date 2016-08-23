@@ -68,6 +68,7 @@ def user_alert_handler(bot,job):
 def fetch_news(bot, job):
     rss.get_new_rss()
     news.save_all_base_news()
+    news.postgres_news_to_elastic()
 
 def random_publish_news(bot,job):
     from rss.models import News

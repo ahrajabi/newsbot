@@ -2,6 +2,7 @@ from django.db import models
 from datetime import datetime
 import pytz
 
+
 class RssFeeds(models.Model):
     url = models.URLField('Web site', max_length=600,  blank=False)
     name = models.CharField('site Name', max_length=200, blank=True)
@@ -15,15 +16,18 @@ class RssFeeds(models.Model):
     def __str__(self):
         return self.fa_name
 
+
 class BaseNews(models.Model):
-    url = models.URLField('News url',max_length=600, blank=True)
+    url = models.URLField('News url', max_length=600, blank=True)
     rss = models.ForeignKey(RssFeeds, verbose_name='related rss feed', null=True, blank=True)
     title = models.TextField('Tittle', blank=True, null=True)
     published_date = models.DateTimeField('Published date ', blank=True, null=True)
     complete_news = models.BooleanField('Has full news', default=False)
+    save_to_elastic = models.BooleanField('Saved to Elastic', default=False)
 
     def __str__(self):
         return self.url
+
 
 class News(models.Model):
     body = models.TextField('News', blank=True, null=True)

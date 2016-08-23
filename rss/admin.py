@@ -19,7 +19,7 @@ class NewsAdmin(admin.ModelAdmin):
 
 @admin.register(BaseNews)
 class BaseNewsAdmin(admin.ModelAdmin):
-    list_display = ('url', 'title', 'published_date', 'complete_news', 'rss_id', 'id')
+    list_display = ('url', 'title', 'published_date', 'complete_news', 'rss_id', 'id', 'save_to_elastic')
 
 
 @admin.register(ImageUrls)

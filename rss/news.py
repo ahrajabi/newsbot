@@ -66,16 +66,25 @@ def save_all_base_news():
     print(datetime.datetime.now() - now)
 
 
-def save_to_elastic_search(news_body, news_summary, news_id):
+def save_to_elastic_search(obj):
+    try:
+        body = {
+            'news_body': obj.body,
+            'news_summary': obj.summary,
+            'news_title': obj.base_news.title,
+        }
+        es.index(index='news', doc_type='new', id=obj.id, body=body, request_timeout=50)
+        return True
+    except Exception:
+        return False
 
-    body = {
-        'news_body': news_body,
-        'news_summary': news_summary,
-    }
-    es.index(index='news', doc_type='new', id=news_id, body=body, request_timeout=20)
 
-
-def postgres_news_to_elastic(obj):
+def postgres_news_to_elastic():
     start_time = datetime.datetime.now()
-    save_to_elastic_search(obj.body, obj.summary, obj.id)
+    for obj in News.objects.filter(base_news__save_to_elastic=False):
+        print('HI')
+        if save_to_elastic_search(obj):
+            obj.base_news.save_to_elastic = True
+            obj.base_news.save()
+
     print(datetime.datetime.now() - start_time)
