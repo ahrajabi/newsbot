@@ -17,7 +17,7 @@ def handle(bot, msg):
     if entity == None:
         bot_template.error_text(bot, msg,'NoEntity')
     else:
-        bot_template.show_entities(bot, msg,user, entity)
+        bot_template.show_entities(bot, msg, user, entity)
 
 
 
@@ -41,7 +41,6 @@ def verifyUser(bot,msg):
 
 
 def getUser(telegramid):
-
     profiles = UserProfile.objects.filter(telegram_id= telegramid)
     if not profiles:
         return False
@@ -49,7 +48,6 @@ def getUser(telegramid):
     if not user:
         return None
     return user
-
 
 
 def add_command(bot, msg,user):
@@ -64,6 +62,7 @@ def add_command(bot, msg,user):
         entity.save()
     else:
         bot_template.error_text(bot, msg)
+
 
 def remove_command(bot, msg,user):
     entity_id = int(msg.message.text[8:])
@@ -82,6 +81,7 @@ def remove_command(bot, msg,user):
 
 def list_command(bot, msg,user):
     bot_template.show_user_entity(bot, msg,user,tasks.get_user_entity(user))
+
 
 def help_command(bot, msg,user):
     bot_template.help(bot, msg,user)

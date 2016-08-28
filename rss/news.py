@@ -17,15 +17,16 @@ def save_news(base_news):
         print(str(base_news.url))
         page = requests.get(str(base_news.url),  timeout=20)
     except Exception:
-        base_news.delete()
         return False
 
     page_soup = bs(page.text, 'html.parser')
     if page_soup:
         try:
-            news_body = page_soup.select(base_news.rss.selector)[0].text
+            news_bodys = page_soup.select(base_news.rss.selector)
+            news_body = ' '.join([item.text for item in news_bodys])
         except IndexError:
             news_body = ''
+            return False
 
         try:
             news_summary = page_soup.select(base_news.rss.summary_selector)[0].text
@@ -37,7 +38,7 @@ def save_news(base_news):
                                                        'pic_number': 0,
                                                        'summary': news_summary, })
 
-        # elastic_search_store(news_body, news_summary, news.id)
+        #elastic_search_store(news_body, news_summary, news.id)
 
         news_images = page_soup.select(base_news.rss.image_selector)
         cnt = 0

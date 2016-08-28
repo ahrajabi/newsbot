@@ -9,7 +9,7 @@ def related_obj_id(obj):
 
 @admin.register(RssFeeds)
 class RssAdmin(admin.ModelAdmin):
-    list_display = ('fa_name', 'name', 'url', 'main_rss', 'last_modified', 'selector', 'summary_selector')
+    list_display = [x.name for x in RssFeeds._meta.local_fields]
 
 
 @admin.register(News)
