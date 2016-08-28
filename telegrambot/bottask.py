@@ -41,7 +41,7 @@ def handle(bot, msg):
     print(msg)
     bot.sendChatAction(chat_id=msg.message.chat_id, action=telegram.ChatAction.TYPING)
     user = welcome.verifyUser(bot, msg)
-    welcome.handle(bot, msg)
+    welcome.handle(bot, msg, user)
 
 
 @run_async
@@ -66,6 +66,7 @@ def user_alert_handler(bot,job):
     welcome.user_alert_handler(bot,job)
 
 def fetch_news(bot, job):
+    news.postgres_news_to_elastic()
     rss.get_new_rss()
     news.save_all_base_news()
 

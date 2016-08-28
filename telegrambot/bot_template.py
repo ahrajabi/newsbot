@@ -88,6 +88,8 @@ def error_text(bot, msg, type = None):
         TEXT = '''
         شما این دسته را دنبال نمی کرده اید.
         '''
+    elif type == 'InvalidEntity':
+        TEXT = ''' دسته اضافه شده مورد قبول نیست '''
     return send_telegram(bot, msg, TEXT, None)
 
 def help(bot, msg,user):
@@ -168,3 +170,9 @@ def send_telegram_alluser(bot, Text , keyboard=None, Photo=None):
                                    text = Text,
                                    reply_markup=keyboard,
                                    parse_mode = telegram.ParseMode.HTML)
+
+
+def after_user_add_entity(bot, msg, user, entity, entities):
+    text = "دسته %s اضافه شد" % entity
+    send_telegram(bot, msg, text)
+    show_user_entity(bot, msg, user, entities)
