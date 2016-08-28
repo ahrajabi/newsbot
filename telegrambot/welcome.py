@@ -7,17 +7,29 @@ import sys
 from django.contrib.auth.models import User
 from telegrambot.models import UserAlert
 thismodule = sys.modules[__name__]
-
+from rss.elastic import elastic_search_entity
 from .models import UserProfile
-
-def handle(bot, msg):
-    user = getUser(msg.message.from_user.id)
+from entities.models import Entity, UserEntity
+def handle(bot, msg, user):
     text = msg.message.text
-    entity = tasks.get_entity_contain(msg.message.text)
-    if entity == None:
-        bot_template.error_text(bot, msg,'NoEntity')
-    else:
-        bot_template.show_entities(bot, msg,user, entity)
+    # entity = tasks.get_entity_contain(msg.message.text)
+    # if entity == None:
+    #     bot_template.error_text(bot, msg,'NoEntity')
+    # else:
+    #     bot_template.show_entities(bot, msg,user, entity)
+    try:
+        entity = Entity.objects.get(name=text)
+    except Entity.DoesNotExist:
+        hits = elastic_search_entity(text)
+        # TODO set len hits
+        if len(hits) < 2:
+            bot_template.error_text(bot, msg, 'Invalid_Entity')
+            return
+        else:
+            entity = Entity.objects.create(name=text, wiki_name="")
+
+    UserEntity.objects.update_or_create(entity=entity, user=user)
+    bot_template.after_user_add_entity(bot, msg, user, entity, tasks.get_user_entity(user) )
 
 
 

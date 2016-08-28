@@ -40,7 +40,7 @@ TOKEN = settings.TELEBOT_TOKEN  # get token from command-line
 def handle(bot, msg):
     bot.sendChatAction(chat_id=msg.message.chat_id, action=telegram.ChatAction.TYPING)
     user = welcome.verifyUser(bot, msg)
-    welcome.handle(bot, msg)
+    welcome.handle(bot, msg, user)
 
 
 @run_async

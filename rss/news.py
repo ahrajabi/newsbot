@@ -1,14 +1,9 @@
 __author__ = 'nasim'
 import datetime
 import requests
-import elasticsearch
-from django.db import DataError
 from bs4 import BeautifulSoup as bs
-from requests.exceptions import ConnectionError
 
 from rss.models import BaseNews, News, ImageUrls
-
-es = elasticsearch. Elasticsearch(['http://130.185.76.171:9200'])
 
 
 def save_news(base_news):
@@ -64,27 +59,3 @@ def save_all_base_news():
         else:
             continue
     print(datetime.datetime.now() - now)
-
-
-def save_to_elastic_search(obj):
-    try:
-        body = {
-            'news_body': obj.body,
-            'news_summary': obj.summary,
-            'news_title': obj.base_news.title,
-        }
-        es.index(index='news', doc_type='new', id=obj.id, body=body, request_timeout=50)
-        return True
-    except Exception:
-        return False
-
-
-def postgres_news_to_elastic():
-    start_time = datetime.datetime.now()
-    for obj in News.objects.filter(base_news__save_to_elastic=False):
-        print('HI')
-        if save_to_elastic_search(obj):
-            obj.base_news.save_to_elastic = True
-            obj.base_news.save()
-
-    print(datetime.datetime.now() - start_time)
