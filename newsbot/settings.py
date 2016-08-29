@@ -137,6 +137,7 @@ USE_TZ = True
 STATIC_ROOT = "/tmp/"
 STATIC_URL = '/static/'
 
+TELEBOT_TOKEN = 'change in local_settings'
 
 try:
     from local_settings import *
