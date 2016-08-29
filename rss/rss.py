@@ -19,11 +19,19 @@ def get_new_rss():
 # can do with thread future.Future
 
     for rss in RssFeeds.objects.all():
+        if rss.activation==False:
+            continue
+
         feed = feedparser.parse(rss.main_rss)
         try:
             feed_time = dateutil.parser.parse(feed['feed']['updated'])
         except:
             feed_time =max([dateutil.parser.parse(ti['published']) for ti in feed['items']])
+
+
+        print(timezone.is_aware(rss.last_modified),rss.last_modified)
+        feed_time = feed_time.replace(tzinfo=pytz.UTC)
+        print(timezone.is_aware(feed_time),feed_time)
 
         if feed_time > rss.last_modified:
             last = rss.last_modified

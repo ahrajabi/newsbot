@@ -5,7 +5,7 @@ import telegram
 import re
 import logging
 from django.contrib.auth.models import User
-
+from newsbot import local_settings
 from telegram.ext.dispatcher import run_async
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, NetworkError)
@@ -34,11 +34,12 @@ def error_callback(bot, update, error):
         print("# handle all other telegram related errors")
 
 
-TOKEN = settings.TELEBOT_TOKEN  # get token from command-line
+TOKEN = local_settings.TELEBOT_TOKEN  # get token from command-line
 
 
 @run_async
 def handle(bot, msg):
+    print(msg)
     bot.sendChatAction(chat_id=msg.message.chat_id, action=telegram.ChatAction.TYPING)
     user = welcome.verifyUser(bot, msg)
     welcome.handle(bot, msg, user)
@@ -60,7 +61,6 @@ def commands(bot, msg):
 
 @run_async
 def callback_query(bot, msg):
-
     callback.handle(bot, msg)
 
 def user_alert_handler(bot,job):
@@ -88,9 +88,9 @@ dispatcher.add_error_handler(error_callback)
 
 q_bot = updater.job_queue
 
-q_bot.put(Job(random_publish_news, 60*60, repeat=True))
+q_bot.put(Job(random_publish_news, 10, repeat=True))
 q_bot.put(Job(user_alert_handler, 100, repeat=True))
-q_bot.put(Job(fetch_news, 20, repeat=True))
+q_bot.put(Job(fetch_news, 2, repeat=True))
 
 updater.start_polling()
 print('Listening ...')
