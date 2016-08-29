@@ -136,6 +136,8 @@ USE_TZ = True
 STATIC_ROOT = "/tmp/"
 STATIC_URL = '/static/'
 
+ELASTIC_URL = 'http://130.185.76.171:9200'
+
 try:
     from .local_settings import *
 except ImportError:

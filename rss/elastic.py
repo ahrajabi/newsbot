@@ -1,10 +1,10 @@
 import datetime
+from newsbot.settings import ELASTIC_URL
 from elasticsearch import Elasticsearch, helpers
 
 from rss.models import News
 
-es = Elasticsearch(['http://130.185.76.171:9200'])
-# es = Elasticsearch(['http://localhost:9200'])
+es = Elasticsearch([ELASTIC_URL])
 
 
 def save_to_elastic_search(obj):
