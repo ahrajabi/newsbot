@@ -38,6 +38,7 @@ def source_generator():
         fields_keys = ('news_body', 'summary', 'title', 'published_date')
         fields_values = (obj.body, obj.summary, obj.base_news.title, obj.base_news.published_date)
         source = dict(zip(fields_keys, fields_values))
+        # TODO below line msut execute after bulk save to elastic function
         obj.base_news.save_to_elastic = True
         obj.base_news.save()
         yield obj.id, source

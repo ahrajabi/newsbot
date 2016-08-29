@@ -27,13 +27,13 @@ class Entity(models.Model):
 
 class UserEntity(models.Model):
     STATUS = (
-        (True, 'Fallow'),
-        (False , 'Unfallow'),
+        (True, 'Follow'),
+        (False, 'Unfollow'),
     )
 
     user = models.ForeignKey(User)
     entity = models.ForeignKey(Entity)
-    status = models.BooleanField(default=True,choices=STATUS)
+    status = models.BooleanField(default=True, choices=STATUS)
     score = models.SmallIntegerField(default=0)
     last_news = models.DateTimeField(null=True,blank=True)
     news_count = models.IntegerField(default=0)

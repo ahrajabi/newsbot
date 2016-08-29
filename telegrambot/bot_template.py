@@ -1,20 +1,28 @@
+# -*- coding: utf-8 -*-
 import telegram
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram import ReplyKeyboardMarkup
 from entities import tasks
+from telegram.emoji import Emoji
+from telegram import ReplyKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from django.contrib.auth.models import User
+
 from telegrambot.models import UserProfile
+from entities.models import Entity
+from entities.tasks import get_user_entity
+
+
 def welcome_text(bot, msg):
     keyboard = ReplyKeyboardMarkup(keyboard=[[
         '/HELP ⁉️ راهنمایی',
-         ]],resize_keyboard=True)
+         ]], resize_keyboard=True)
+    # TODO insert bot name in below text
+    text = '''
+        سلام %s به بات خبری خوش آمدید.
+        از این پس می توانید اخبار مرتبط با موضوعات مورد علاقه خود را به راحتی دریافت کنید.
+        برای شروع لطفا موضوعات مورد علاقه خود را(به عنوان مثال: تهران) از طریق کادر پایین ارسال کنید%s
 
-    WELCOME_TEXT = '''
-    برای شروع لطفا بر روی موضوع های مورد علاقه‌یتان کلیک کنید. در آینده به راحتی می توانید موضوعات را اضافه ویا حذف نمایید.
-    %s
-    %s
-    '''
-    return send_telegram(bot, msg, WELCOME_TEXT, keyboard)
+        ''' % (Emoji.RAISED_HAND, Emoji.WHITE_DOWN_POINTING_BACKHAND_INDEX)
+    send_telegram(bot, msg, text, keyboard)
 
 
 def show_entities(bot, msg,user, entities):
@@ -22,22 +30,22 @@ def show_entities(bot, msg,user, entities):
     text = ''
     button = list()
     for item in entities:
-        text += tasks.get_link(user,item) + '\n'
+        text += tasks.get_link(user, item) + '\n'
     #    button.append([InlineKeyboardButton(text=item.name, callback_data="data")])
     #keyboard = InlineKeyboardMarkup(inline_keyboard=button)
     return send_telegram(bot, msg, text, keyboard)
 
-def show_user_entity(bot, msg, user , entities):
-    TEXT = ''
+
+def show_user_entity(bot, msg, user, entities):
     if entities:
-        TEXT = 'شما در دسته های زیر عضو شده اید:\n'
+        text = 'دسته هایی که آن ها را دنبال میکنید:\n'
         for i in entities:
-            TEXT +=  tasks.get_link(user,i) + '\n'
+            text += tasks.get_link(user, i) + '\n'
     else:
-        TEXT = '''
-        شما در دسته ای عضو نشده اید.
-        '''
-    send_telegram(bot, msg, TEXT, None)
+        text = ''' شما دسته ای را دنبال نمیکنید %s
+        می توانید موضوعات مورد علاقه خود را(به عنوان مثال: تهران) از طریق کادر پایین ارسال کنید%s
+        ''' % (Emoji.FACE_SCREAMING_IN_FEAR, Emoji.WHITE_DOWN_POINTING_BACKHAND_INDEX)
+    send_telegram(bot, msg, text, None)
 
 
 def change_entity(bot, msg, entity , type = 'fallow' ):
@@ -61,8 +69,6 @@ def change_entity(bot, msg, entity , type = 'fallow' ):
         برای اضافه کردن مجدد بر روی لینک %s کلیک کنید.
         ''' % (entity.name,"/add_"+str(entity.id))
         return send_telegram(bot, msg, TEXT, keyboard)
-
-
 
 
 def error_text(bot, msg, type = None):
@@ -174,6 +180,11 @@ def send_telegram_alluser(bot, Text , keyboard=None, Photo=None):
 
 
 def after_user_add_entity(bot, msg, user, entity, entities):
-    text = "دسته %s اضافه شد" % entity
+    text = "دسته ' %s ' اضافه شد %s" % (entity, Emoji.WINKING_FACE)
+    entity.followers += 1
     send_telegram(bot, msg, text)
     show_user_entity(bot, msg, user, entities)
+
+
+def entity_recommendation():
+    return Entity.objects.order_by('followers')[:5]
