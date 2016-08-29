@@ -22,7 +22,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'm&_n-o1j7n^1qbmg@-b2(9jjcp#q-f)&myg@1#as2!#v3yogfk'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -88,7 +87,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'newsbot',
         'USER': 'postgres',
-        'PASSWORD': '',
+        'PASSWORD': 'asdf',
         'HOST': 'localhost',
         'PORT': '',
     },
@@ -137,9 +136,7 @@ USE_TZ = True
 STATIC_ROOT = "/tmp/"
 STATIC_URL = '/static/'
 
-TELEBOT_TOKEN = 'change in local_settings'
-
 try:
-    from local_settings import *
+    from .local_settings import *
 except ImportError:
     pass
