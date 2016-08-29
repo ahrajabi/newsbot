@@ -67,7 +67,8 @@ def user_alert_handler(bot,job):
     welcome.user_alert_handler(bot,job)
 
 def fetch_news(bot, job):
-    news.postgres_news_to_elastic()
+    bulk_save_to_elastic()
+    # news.postgres_news_to_elastic()
     rss.get_new_rss()
     news.save_all_base_news()
 
