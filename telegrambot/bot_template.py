@@ -124,8 +124,10 @@ def news_page(News, page=1):
     return keyboard, TEXT
 
 def publish_news(bot, News, User, page=1, message_id=None):
-    keyboard, Text = news_page(News, page)
-    send_telegram_user(bot, User, Text, keyboard, message_id)
+    try:
+        keyboard, Text = news_page(News, page)
+    except Exception:
+        send_telegram_user(bot, User, Text, keyboard, message_id)
 
 def send_telegram(bot, msg, Text , keyboard=None):
     if len(Text) > 4096 :
