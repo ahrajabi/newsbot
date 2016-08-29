@@ -5,7 +5,7 @@ import telegram
 import re
 import logging
 from django.contrib.auth.models import User
-
+from newsbot import local_settings
 from telegram.ext.dispatcher import run_async
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, NetworkError)
@@ -34,7 +34,7 @@ def error_callback(bot, update, error):
         print("# handle all other telegram related errors")
 
 
-TOKEN = settings.TELEBOT_TOKEN  # get token from command-line
+TOKEN = local_settings.TELEBOT_TOKEN  # get token from command-line
 
 
 @run_async
