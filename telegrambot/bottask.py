@@ -12,6 +12,7 @@ from telegram.error import (TelegramError, Unauthorized, BadRequest,
 from telegrambot import welcome, bot_template, callback
 from telegrambot.models import UserProfile
 from rss import rss,news
+from rss.elastic import bulk_save_to_elastic
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 

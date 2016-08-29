@@ -1,11 +1,10 @@
-__author__ = 'nasim'
 import datetime
-import elasticsearch
+from elasticsearch import Elasticsearch, helpers
 
 from rss.models import News
 
-# es = elasticsearch. Elasticsearch(['http://130.185.76.171:9200'])
-es = elasticsearch. Elasticsearch(['http://localhost:9200'])
+# es = Elasticsearch(['http://130.185.76.171:9200'])
+es = Elasticsearch(['http://localhost:9200'])
 
 
 def save_to_elastic_search(obj):
@@ -31,6 +30,24 @@ def postgres_news_to_elastic():
             obj.base_news.save_to_elastic = True
             obj.base_news.save()
 
+    print(datetime.datetime.now() - start_time)
+
+
+def source_generator():
+    for obj in News.objects.filter(base_news__save_to_elastic=False):
+        fields_keys = ('news_body', 'summary', 'title', 'published_date')
+        fields_values = (obj.body, obj.summary, obj.base_news.title, obj.base_news.published_date)
+        source = dict(zip(fields_keys, fields_values))
+        obj.base_news.save_to_elastic = True
+        obj.base_news.save()
+        yield obj.id, source
+
+
+def bulk_save_to_elastic():
+    start_time = datetime.datetime.now()
+    k = ({'_index': 'news2', '_type': 'new', '_id': idx, "_source": source}
+         for idx, source in source_generator())
+    helpers.bulk(es, k)
     print(datetime.datetime.now() - start_time)
 
 
