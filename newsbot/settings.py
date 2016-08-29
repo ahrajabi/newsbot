@@ -99,7 +99,6 @@ DATABASES = {
 }
 
 
-
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
 
@@ -138,4 +137,8 @@ USE_TZ = True
 STATIC_ROOT = "/tmp/"
 STATIC_URL = '/static/'
 
-TELEBOT_TOKEN = '256460947:AAE3Glgg0-NVC78Cn7J58wsrYyEFzqWGBzA'
+
+try:
+    from local_settings import *
+except ImportError:
+    pass
