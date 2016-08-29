@@ -136,6 +136,7 @@ def send_telegram(bot, msg, Text , keyboard=None):
                            reply_markup=keyboard,
                            parse_mode =telegram.ParseMode.HTML)
 
+
 def send_telegram_user(bot, User, Text , keyboard=None, message_id=None):
     profile = UserProfile.objects.get(user=User)
     id = profile.telegram_id
