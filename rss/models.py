@@ -51,6 +51,7 @@ class News(models.Model):
     summary = models.TextField('summary', blank=True, null=True)
     base_news = models.OneToOneField(BaseNews, verbose_name='Related base news', null=True, blank=True)
     pic_number = models.PositiveSmallIntegerField('Number of Pictures')
+    like_count = models.PositiveIntegerField('Number of Likes', default=0)
 
 
 class ImageUrls(models.Model):

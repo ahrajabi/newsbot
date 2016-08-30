@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from rss.models import News
 # Create your models here.
 
 
@@ -18,7 +18,7 @@ class Entity(models.Model):
     status = models.CharField(max_length=1, default='N', choices=STATUS)
     followers = models.IntegerField(default=0)
     news_count = models.IntegerField(default=0)
-    last_news = models.DateTimeField(null=True, blank=True)
+    latest_news = models.ForeignKey(News, null=True,blank=True)
     summary = models.TextField(null=True)
 
     def __str__(self):
@@ -38,5 +38,15 @@ class UserEntity(models.Model):
     last_news = models.DateTimeField(null=True, blank=True)
     news_count = models.IntegerField(default=0)
 
+
     def __str__(self):
         return self.user.username + " has " + self.entity.name
+
+class NewsEntity(models.Model):
+    news = models.ForeignKey(News)
+    entity = models.ForeignKey(Entity)
+    score = models.SmallIntegerField(default=0)
+
+
+    def __str__(self):
+        return self.news_id + " has " + self.entity.name

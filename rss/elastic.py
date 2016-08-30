@@ -68,3 +68,20 @@ def elastic_search_entity(query):
     for hit in r['hits']['hits']:
         print(hit)
     return r['hits']['hits']
+
+def more_like_this(query, number):
+    body = {
+        "query": {
+            "more_like_this": {
+                "fields": ["title", "news_body"],
+                "like": query,
+                "min_term_freq": 1,
+            "max_query_terms": 12
+            }
+        },
+        'size': number,
+    }
+    r = es.search(index='news', body=body)
+    news_id = [item['_id'] for item in r['hits']['hits']]
+    return news_id
+

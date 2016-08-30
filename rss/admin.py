@@ -14,13 +14,15 @@ class RssAdmin(admin.ModelAdmin):
 
 @admin.register(News)
 class NewsAdmin(admin.ModelAdmin):
-    list_display = ('base_news', 'pic_number', 'summary', 'id')
+    list_display = [x.name for x in News._meta.local_fields]
 
 
 @admin.register(BaseNews)
 class BaseNewsAdmin(admin.ModelAdmin):
-    list_display = ('url', 'title', 'published_date', 'complete_news', 'rss_id', 'id', 'save_to_elastic')
-
+    list_display = [x.name for x in BaseNews._meta.local_fields]
+    list_filter = (
+        ('rss_id'),
+    )
 
 @admin.register(ImageUrls)
 class ImageUrlsAdmin(admin.ModelAdmin):

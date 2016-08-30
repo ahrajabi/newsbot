@@ -2,10 +2,10 @@ __author__ = 'nasim'
 import datetime
 import requests
 from bs4 import BeautifulSoup as bs
-
+from entities.tasks import get_entity_news
 from rss.models import BaseNews, News, ImageUrls
-
-
+from rss.ml import *
+import random
 
 def save_news(base_news):
     # fix catch HeaderParsingError
@@ -20,12 +20,14 @@ def save_news(base_news):
         try:
             news_bodys = page_soup.select(base_news.rss.selector)
             news_body = ' '.join([item.text for item in news_bodys])
+            news_body = normalize(news_body)
         except IndexError:
             news_body = ''
             return False
 
         try:
             news_summary = page_soup.select(base_news.rss.summary_selector)[0].text
+            news_summary = normalize(news_summary)
         except IndexError:
             news_summary = ''
 
@@ -45,6 +47,12 @@ def save_news(base_news):
             except Exception:
                 continue
         news.pic_number = cnt
+
+        #fake random like count
+        r = random.uniform(0,20)
+        news.like_count = random.choice([r, 0, 0, 0, 1, 2, 3])
+
+        get_entity_news([news])
         news.save()
     return True
 
