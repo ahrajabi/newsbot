@@ -1,7 +1,7 @@
 
 from telegrambot.models import UserProfile
 from django.utils import timezone
-from telegrambot import bot_template , welcome
+from telegrambot import bot_template , command_handler
 from entities import tasks
 import re
 import sys
@@ -12,8 +12,9 @@ thismodule = sys.modules[__name__]
 import pprint
 import telegram
 
+
 def handle(bot,msg):
-    user = welcome.getUser(msg.callback_query.message.chat.id)
+    user = command_handler.get_user(msg.callback_query.message.chat.id)
     p = re.compile(r'[a-z]+')
     func = p.findall(msg.callback_query.data.lower())[0] + '_inline_command'
     print(func)

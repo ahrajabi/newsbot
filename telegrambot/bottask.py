@@ -9,7 +9,7 @@ from newsbot import local_settings
 from telegram.ext.dispatcher import run_async
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, NetworkError)
-from telegrambot import welcome, bot_template, callback
+from telegrambot import command_handler, bot_template, callback
 from telegrambot.models import UserProfile
 from rss import rss,news
 from rss.elastic import bulk_save_to_elastic
@@ -41,20 +41,24 @@ TOKEN = local_settings.TELEBOT_TOKEN  # get token from command-line
 def handle(bot, msg):
     print(msg)
     bot.sendChatAction(chat_id=msg.message.chat_id, action=telegram.ChatAction.TYPING)
-    user = welcome.verifyUser(bot, msg)
-    welcome.handle(bot, msg, user)
+    user = command_handler.verify_user(bot, msg)[0]
+
+    command_handler.handle(bot, msg, user)
 
 
 @run_async
 def commands(bot, msg):
     bot.sendChatAction(chat_id=msg.message.chat_id, action=telegram.ChatAction.TYPING)
-    from telegrambot import welcome, bot_template
-    user = welcome.verifyUser(bot, msg)
+    from telegrambot import command_handler, bot_template
+    user, new_user = command_handler.verify_user(bot, msg)
 
     p = re.compile(r'[a-z]+')
     func = p.findall(msg.message.text.lower())[0] + '_command'
-    if hasattr(welcome, func):
-        getattr(welcome, func)(bot, msg, user)
+    if hasattr(command_handler, func):
+        if func == 'start_command':
+            getattr(command_handler, func)(bot, msg, new_user)
+        else:
+            getattr(command_handler, func)(bot, msg, user)
     else:
         bot_template.error_text(bot, msg, type='NoCommand')
 
@@ -65,7 +69,8 @@ def callback_query(bot, msg):
 
 
 def user_alert_handler(bot,job):
-    welcome.user_alert_handler(bot,job)
+    command_handler.user_alert_handler(bot,job)
+
 
 
 def fetch_news(bot, job):
@@ -87,6 +92,8 @@ def random_publish_news(bot,job):
     user = User.objects.get(username='ahrajabi')
     if user:
         bot_template.publish_news(bot, news[0], user )
+    user = User.objects.all()[0]
+    bot_template.publish_news(bot, news[0], user )
 
 updater = Updater(token=TOKEN)
 dispatcher = updater.dispatcher
