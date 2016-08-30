@@ -46,10 +46,12 @@ def source_generator():
 
 def bulk_save_to_elastic():
     start_time = datetime.datetime.now()
-    k = ({'_index': 'news2', '_type': 'new', '_id': idx, "_source": source}
+    print("Elastic started!")
+    k = ({'_index': 'news', '_type': 'new', '_id': idx, "_source": source}
          for idx, source in source_generator())
+    print("k created!")
     helpers.bulk(es, k)
-    print(datetime.datetime.now() - start_time)
+    print("bulked!", datetime.datetime.now() - start_time)
 
 
 def elastic_search_entity(query):

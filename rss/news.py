@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup as bs
 from rss.models import BaseNews, News, ImageUrls
 
 
+
 def save_news(base_news):
     # fix catch HeaderParsingError
     try:

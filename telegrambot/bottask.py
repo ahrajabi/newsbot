@@ -63,21 +63,30 @@ def commands(bot, msg):
 def callback_query(bot, msg):
     callback.handle(bot, msg)
 
+
 def user_alert_handler(bot,job):
     welcome.user_alert_handler(bot,job)
 
+
 def fetch_news(bot, job):
     bulk_save_to_elastic()
-    # news.postgres_news_to_elastic()
-    rss.get_new_rss()
+
+
+def fetch_news2(bot, job):
     news.save_all_base_news()
+
+
+def fetch_news3(bot, job):
+    rss.get_new_rss()
+
 
 def random_publish_news(bot,job):
     from rss.models import News
     news = News.objects.filter(pic_number__gte=1,
                                summary__isnull=False).order_by('?')
     user = User.objects.get(username='ahrajabi')
-    bot_template.publish_news(bot, news[0], user )
+    if user:
+        bot_template.publish_news(bot, news[0], user )
 
 updater = Updater(token=TOKEN)
 dispatcher = updater.dispatcher
@@ -88,9 +97,12 @@ dispatcher.add_error_handler(error_callback)
 
 q_bot = updater.job_queue
 
-q_bot.put(Job(random_publish_news, 10, repeat=True))
+q_bot.put(Job(random_publish_news, 60*60, repeat=True))
 q_bot.put(Job(user_alert_handler, 100, repeat=True))
-q_bot.put(Job(fetch_news, 2, repeat=True))
+
+q_bot.put(Job(fetch_news, 30, repeat=True))
+q_bot.put(Job(fetch_news2, 30, repeat=True))
+q_bot.put(Job(fetch_news3, 30, repeat=True))
 
 updater.start_polling()
 print('Listening ...')
