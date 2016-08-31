@@ -23,16 +23,16 @@ def handle(bot, msg, user):
         entity = Entity.objects.get(name=text)
 
     except Entity.DoesNotExist:
-
         related_entities = get_entity_text(text)
         # TODO set len hits
-        if len(hits) < 2:
-                if not related_entities:
-                    bot_template.error_text(bot, msg, 'InvalidEntity')
-                    return
-        else:
+
+        if len(hits) > 2:
             entity = Entity.objects.create(name=text, wiki_name="")
             related_entities.append(entity)
+        else:
+            if not related_entities:
+                bot_template.error_text(bot, msg, 'InvalidEntity')
+                return
 
         bot_template.show_related_entities(bot, msg, user, related_entities)
         return
@@ -141,7 +141,3 @@ def news_command(bot, msg, user):
 
 def command_separator(msg, command):
     return int(msg.message.text[len(command)+3:])
-
-
-# TODO news suumary and complete news, ...
-
