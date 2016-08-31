@@ -8,6 +8,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from rss.models import ImageUrls
 from rss.news import is_liked_news
 
+from entities import tasks
+from rss.models import News
 from entities.models import Entity
 from telegrambot.models import UserProfile, UserNews
 
@@ -106,6 +108,9 @@ def error_text(bot, msg, type=None):
         text = '''شما قبلا وارد شده ایدبرای استفاده بهتر
 ⁉️ راهنمایی را ببینید
 '''
+
+    elif type == 'NoneNews':
+        text = "خبر مورد نظر موجود نمی باشد!"
     return send_telegram(bot, msg, text, None)
 
 
@@ -257,8 +262,21 @@ def show_related_entities(bot, msg, user, related_entities):
     send_telegram(bot, msg, text)
 
 
-def publish_sample_news(news):
-    pass;
+def sample_news_page(news):
+    title = news.base_news.title
+    source = news.base_news.rss.fa_name
+    text = Emoji.BLACK_SMALL_SQUARE + title + '\n' + source + '\t\t\t/News_' + str(news.id) + '\n'
+    return text
 
-def send_sample_news(bot ,news, user, message_id=None):
-    pass
+
+def publish_sample_news(bot, user, msg, news_id_list):
+    news_count = 0
+    text = ""
+    for news_id in news_id_list:
+        try:
+            text += sample_news_page(News.objects.get(id=news_id))
+            if news_count > 4:
+                break
+        except News.DoesNotExist:
+            continue
+    send_telegram(bot, msg, text)

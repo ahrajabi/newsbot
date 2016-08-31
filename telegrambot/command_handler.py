@@ -17,7 +17,7 @@ thismodule = sys.modules[__name__]
 def handle(bot, msg, user):
     text = msg.message.text
     hits = elastic_search_entity(text)
-    send_news(bot, user, list(map(int, [hit['_id'] for hit in hits[:3]])))
+    bot_template.publish_sample_news(bot, user, msg, list(map(int, [hit['_id'] for hit in hits[:3]])))
 
     try:
         entity = Entity.objects.get(name=text)
@@ -130,13 +130,18 @@ def start_command(bot, msg, new_user):
         bot_template.error_text(bot, msg, type="RepetitiveStart")
 
 
-def send_news(bot, user, news_id_list):
-    for news_id in news_id_list:
-        try:
-            news = News.objects.get(id=int(news_id))
-            bot_template.publish_news(bot, news, user, message_id=None)
-        except News.DoesNotExist:
-            continue
+def news_command(bot, msg, user):
+    news_id = command_separator(msg, 'add')
+    try:
+        news = News.objects.get(id=news_id)
+        bot_template.publish_news(bot, news, user, page=1, message_id=None)
+    except News.DoesNotExist:
+        return bot_template.error_text(bot, msg, 'NoneNews')
 
 
-# TODO fix /add and /remove comment to correct status in user_entity
+def command_separator(msg, command):
+    return int(msg.message.text[len(command)+3:])
+
+
+# TODO news suumary and complete news, ...
+

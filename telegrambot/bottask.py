@@ -72,7 +72,6 @@ def user_alert_handler(bot,job):
     command_handler.user_alert_handler(bot,job)
 
 
-
 def fetch_news(bot, job):
     bulk_save_to_elastic()
 
@@ -85,7 +84,7 @@ def fetch_news3(bot, job):
     rss.get_new_rss()
 
 
-def random_publish_news(bot,job):
+def random_publish_news(bot,  job):
     from rss.models import News
     news = News.objects.filter(pic_number__gte=1,
                                summary__isnull=False).order_by('?')
