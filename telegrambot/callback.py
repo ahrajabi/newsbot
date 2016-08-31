@@ -1,10 +1,14 @@
 
-from telegrambot.models import UserProfile
+from telegrambot.models import UserProfile, UserNews
 from django.utils import timezone
 from telegrambot import bot_template , command_handler
 from entities import tasks
 import re
 import sys
+from rss.models import News
+from rss.news import set_news_like
+from telegram.emoji import Emoji
+
 from newsbot.celery import app
 from django.contrib.auth.models import User
 
@@ -41,26 +45,29 @@ def score_inline_command(bot, msg,user):
 
 def news_inline_command(bot,msg,user):
     news_id = re.compile(r'\d+').findall(msg.callback_query.data.lower())[0]
-    bot.answerCallbackQuery(msg.callback_query.id,
-                            text='news')
-    from rss.models import News
-
+    news = News.objects.get(id=news_id)
     p = re.compile(r'[a-z]+')
-    pageTitle = p.findall(msg.callback_query.data.lower())[1]
+    title = p.findall(msg.callback_query.data.lower())[1]
+    page = UserNews.objects.filter(news=news, user=user)[0].page
 
-    Page = 1
+    if title == 'like':
+        set_news_like(user,news,mark='Like')
+        bot.answerCallbackQuery(msg.callback_query.id, text='پسندش شما ثبت شد!')
+    elif title == 'unlike':
+        set_news_like(user, news, mark='Unlike')
+        bot.answerCallbackQuery(msg.callback_query.id, text='پسندش شما پس گرفته شد!')
+    elif title == 'overview':
+        page = 1
+        bot.answerCallbackQuery(msg.callback_query.id, text='خلاصه‌ی خبر')
+    elif title == 'full':
+        page = 2
+        bot.answerCallbackQuery(msg.callback_query.id, text='متن کامل خبر')
+    elif title == 'stat':
+        page = 3
+        bot.answerCallbackQuery(msg.callback_query.id, text='تحلیل خبر')
 
-    if pageTitle == 'overview':
-        Page = 1
-    elif pageTitle == 'full':
-        Page = 2
-    elif pageTitle == 'stat':
-        Page = 3
-
-    News = News.objects.get(id=news_id)
-    user = UserProfile.objects.get(telegram_id=msg.callback_query.message.chat.id).user
-    bot_template.publish_news(bot, News, user,
-                 page=Page, message_id=msg.callback_query.message.message_id)
+    bot_template.news_page(bot, news, user,
+                              page=page, message_id=msg.callback_query.message.message_id)
 
 
 

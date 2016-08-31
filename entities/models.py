@@ -47,6 +47,5 @@ class NewsEntity(models.Model):
     entity = models.ForeignKey(Entity)
     score = models.SmallIntegerField(default=0)
 
-
     def __str__(self):
         return self.news_id + " has " + self.entity.name

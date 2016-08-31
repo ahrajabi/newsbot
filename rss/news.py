@@ -3,7 +3,7 @@ import datetime
 import requests
 from bs4 import BeautifulSoup as bs
 from entities.tasks import get_entity_news
-from rss.models import BaseNews, News, ImageUrls
+from rss.models import BaseNews, News, ImageUrls, NewsLike
 from rss.ml import *
 import random
 
@@ -69,3 +69,24 @@ def save_all_base_news():
         else:
             continue
     print(datetime.datetime.now() - now)
+
+
+def set_news_like(user, news, mark='Like'):
+    obj, created = NewsLike.objects.update_or_create(news=news, user=user,
+                                                     defaults={'status': (mark=='Like')})
+    if mark == 'Like':
+        news.like_count += 1
+    elif mark == 'Unlike':
+        if news.like_count > 0:
+            news.like_count -= 1
+    news.save()
+
+    return obj
+
+
+def is_liked_news(user, news):
+     newslike = NewsLike.objects.filter(news=news, user=user)
+     if newslike:
+         return newslike[0].status
+     else:
+         return False

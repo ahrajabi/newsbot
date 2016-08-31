@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import datetime
+from django.contrib.auth.models import User
 import pytz
 
 class CategoryCode(models.Model):
@@ -57,3 +58,14 @@ class News(models.Model):
 class ImageUrls(models.Model):
     img_url = models.URLField('image url', max_length=500)
     news = models.ForeignKey(News, verbose_name='related news')
+
+
+class NewsLike(models.Model):
+    STATUS = (
+        (True, 'Like'),
+        (False, 'Unlike'),
+    )
+
+    news = models.ForeignKey(News)
+    user = models.ForeignKey(User)
+    status = models.BooleanField(default=True, choices=STATUS)

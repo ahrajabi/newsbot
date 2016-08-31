@@ -91,9 +91,10 @@ def random_publish_news(bot,job):
                                summary__isnull=False).order_by('?')
     user = User.objects.get(username='ahrajabi')
     if user:
-        bot_template.publish_news(bot, news[0], user )
-    user = User.objects.all()[0]
-    bot_template.publish_news(bot, news[0], user )
+        bot_template.publish_news(bot, news[0], user)
+    else:
+        user = User.objects.all()[0]
+        bot_template.publish_news(bot, news[0], user)
 
 updater = Updater(token=TOKEN)
 dispatcher = updater.dispatcher
@@ -104,12 +105,12 @@ dispatcher.add_error_handler(error_callback)
 
 q_bot = updater.job_queue
 
-q_bot.put(Job(random_publish_news, 60*60, repeat=True))
+q_bot.put(Job(random_publish_news, 10, repeat=True))
 q_bot.put(Job(user_alert_handler, 100, repeat=True))
 
-q_bot.put(Job(fetch_news, 30, repeat=True))
-q_bot.put(Job(fetch_news2, 30, repeat=True))
-q_bot.put(Job(fetch_news3, 30, repeat=True))
+#q_bot.put(Job(fetch_news, 30, repeat=True))
+#q_bot.put(Job(fetch_news2, 30, repeat=True))
+#q_bot.put(Job(fetch_news3, 30, repeat=True))
 
 updater.start_polling()
 print('Listening ...')

@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 import telegram
 from entities import tasks
+from rss.ml import normalize
 from telegram.emoji import Emoji
 from telegram import ReplyKeyboardMarkup
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from rss.models import ImageUrls
+from rss.news import is_liked_news
 
 from entities.models import Entity
-from telegrambot.models import UserProfile
+from telegrambot.models import UserProfile, UserNews
 
 
 def welcome_text(bot, msg):
@@ -118,14 +121,49 @@ def bot_help(bot, msg, user):
     send_telegram_user(bot, user, text, None)
 
 
-def news_page(news, page=1):
-    buttons = [[
-        InlineKeyboardButton(text='پسند', callback_data='news-' + str(news.id) + '-like')],
+def news_image_page(bot, news, user, page=1, message_id=None):
+    '''
+    keyboard = None
+    if news.pic_number > 1:
+        if page>1 and page<news.pic_number:
+            buttons = [[
+                InlineKeyboardButton(text='تصویر قبلی', callback_data='image-' + str(news.id) + '-previous'),
+                InlineKeyboardButton(text='تصویر بعدی', callback_data='image-' + str(news.id) + '-next'),
+            ]]
+        elif page == 0:
+            buttons = [[
+                InlineKeyboardButton(text='تصویر بعدی', callback_data='image-' + str(news.id) + '-next'),
+            ]]
+        elif page == news.pic_number:
+            buttons = [[
+                InlineKeyboardButton(text='تصویر قبلی', callback_data='image-' + str(news.id) + '-previous'),
+                InlineKeyboardButton(text='تصویر بعدی', callback_data='image-' + str(news.id) + '-next'),
+            ]]
+        keyboard = InlineKeyboardMarkup(buttons)
+    '''
+
+    keyboard = None
+    image_url = ImageUrls.objects.filter(news=news)[0].img_url
+    UserNews.objects.update_or_create(user=user, news=news, defaults={'image_page': page})
+    text = news.base_news.title
+    send_telegram_user(bot, user, text, keyboard, message_id, photo=image_url)
+
+
+def news_page(bot, news, user, page=1, message_id=None):
+    like = InlineKeyboardButton(text=Emoji.THUMBS_UP_SIGN + "(" + normalize(str(news.like_count)) + ")",
+                                callback_data='news-' + str(news.id) + '-like')
+
+    if is_liked_news(news=news,user=user):
+        like = InlineKeyboardButton(text=Emoji.THUMBS_DOWN_SIGN + "(" + normalize(str(news.like_count)) + ")",
+                                    callback_data='news-' + str(news.id) + '-unlike')
+
+    buttons = [[like, ],
         [
             InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(news.id) + '-overview'),
             InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(news.id) + '-full'),
             InlineKeyboardButton(text='آمار', callback_data='news-' + str(news.id) + '-stat'),
     ], ]
+
     keyboard = InlineKeyboardMarkup(buttons)
     text = news.base_news.title + '\n'
     if page == 1:
@@ -135,17 +173,14 @@ def news_page(news, page=1):
     elif page == 3:
         text += str(news.pic_number) + '\n'
     text = text + '@mybot بات من'
-    return keyboard, text
+    send_telegram_user(bot, user, text, keyboard, message_id)
+    UserNews.objects.update_or_create(user=user, news=news, defaults={'page': page})
 
-def publish_news(bot, News, User, page=1, message_id=None):
-    try:
-        keyboard, Text = news_page(News, page)
-    except Exception:
-        send_telegram_user(bot, User, Text, keyboard, message_id)
 
 def publish_news(bot, news, user, page=1, message_id=None):
-    keyboard, text = news_page(news, page)
-    send_telegram_user(bot, user, text, keyboard, message_id)
+    news_image_page(bot, news, user, page=1, message_id=None)
+    news_page(bot, news, user, page, message_id=None)
+
 
 
 def send_telegram(bot, msg, text, keyboard=None):
@@ -158,22 +193,31 @@ def send_telegram(bot, msg, text, keyboard=None):
                            parse_mode=telegram.ParseMode.HTML)
 
 
-def send_telegram_user(bot, user, text, keyboard=None, message_id=None):
+def send_telegram_user(bot, user, text, keyboard=None, message_id=None, photo=None):
     profile = UserProfile.objects.get(user=user)
     p_id = profile.telegram_id
+
     if p_id:
-        if not message_id:
-            return bot.sendMessage(chat_id=p_id,
-                                   text=text,
-                                   reply_markup=keyboard,
-                                   parse_mode=telegram.ParseMode.HTML)
+        if photo==None:
+            if not message_id:
+                return bot.sendMessage(chat_id=p_id,
+                                       text=text,
+                                       reply_markup=keyboard,
+                                       parse_mode=telegram.ParseMode.HTML)
+            else:
+                bot.editMessageText(text=text,
+                                    chat_id=p_id,
+                                    message_id=message_id,
+                                    reply_markup=keyboard,
+                                    parse_mode=telegram.ParseMode.HTML,
+                                    inline_message_id=None)
         else:
-            bot.editMessageText(text=text,
-                                chat_id=id,
-                                message_id=message_id,
-                                reply_markup=keyboard,
-                                parse_mode=telegram.ParseMode.HTML,
-                                inline_message_id=None)
+            bot.sendPhoto(chat_id=p_id,
+                          photo=photo,
+                          caption=text[0:199],
+                          reply_markup=keyboard,
+                          parse_mode=telegram.ParseMode.HTML)
+
 
 
 def send_telegram_all_user(bot, text, keyboard=None, photo=None):

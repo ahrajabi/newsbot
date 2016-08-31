@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from rss.models import News
 
 # Create your models here.
 
@@ -19,3 +20,11 @@ class UserAlert(models.Model):
     text = models.TextField(null=True)
     send_time = models.DateTimeField(null=True,blank=True)
     is_sent = models.BooleanField(default=False)
+
+
+class UserNews(models.Model):
+    user = models.ForeignKey(User)
+    news = models.ForeignKey(News)
+    page = models.PositiveIntegerField(default=0)
+    image_page = models.PositiveIntegerField(default=0)
+
