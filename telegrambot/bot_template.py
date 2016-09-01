@@ -11,6 +11,7 @@ from rss.news import is_liked_news
 from entities import tasks
 from rss.models import News
 from entities.models import Entity
+from rss.ml import sent_tokenize
 from telegrambot.models import UserProfile, UserNews
 
 
@@ -167,17 +168,34 @@ def news_page(bot, news, user, page=1, message_id=None):
             InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(news.id) + '-overview'),
             InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(news.id) + '-full'),
             InlineKeyboardButton(text='آمار', callback_data='news-' + str(news.id) + '-stat'),
+            InlineKeyboardButton(text='لینک خبر', url=str(news.base_news.url)),
     ], ]
 
     keyboard = InlineKeyboardMarkup(buttons)
-    text = news.base_news.title + '\n'
+    text = news.base_news.title + '\n\n'
     if page == 1:
-        text += news.summary + '\n'
+        summary = news.summary
+        has_summary = True
+
+        if not summary:
+            summary = news.body[:500]
+            has_summary = False
+
+        for sentence in sent_tokenize(summary):
+            text += Emoji.SMALL_BLUE_DIAMOND + sentence + '\n'
+            if len(text) > 300 and not has_summary:
+                break
+
     elif page == 2:
-        text += news.body[0:1000] + '\n' + 'ادامه دارد'
+        text += news.body[0:1000] + '\n' + 'ادامه دارد' + '\n'
     elif page == 3:
         text += str(news.pic_number) + '\n'
-    text = text + '@mybot بات من'
+        text += 'منبع خبر' + news.base_news.rss.fa_name + '\n'
+        text += 'تاریخ ارسال' + str(news.base_news.published_date) + '\n'
+
+
+    text += '@mybot بات من'
+
     send_telegram_user(bot, user, text, keyboard, message_id)
     UserNews.objects.update_or_create(user=user, news=news, defaults={'page': page})
 
@@ -185,7 +203,6 @@ def news_page(bot, news, user, page=1, message_id=None):
 def publish_news(bot, news, user, page=1, message_id=None):
     news_image_page(bot, news, user, page=1, message_id=None)
     news_page(bot, news, user, page, message_id=None)
-
 
 
 def send_telegram(bot, msg, text, keyboard=None):
@@ -224,7 +241,6 @@ def send_telegram_user(bot, user, text, keyboard=None, message_id=None, photo=No
                           parse_mode=telegram.ParseMode.HTML)
 
 
-
 def send_telegram_all_user(bot, text, keyboard=None, photo=None):
     all_profile = UserProfile.objects.all()
     for profile in all_profile:
@@ -254,7 +270,8 @@ def entity_recommendation():
 
 
 def show_related_entities(bot, msg, user, related_entities):
-    text = "دسته های مرتبط با متن وارد شده :\n"
+    text = ''' %s دسته های مرتبط با متن وارد شده در زیر آمده است
+    با انتخاب هرکدام اخبار مرتبط با آن برای شما ارسال خواهد شد\n''' %Emoji.DIAMOND_SHAPE_WITH_A_DOT_INSIDE
     # for entity in (related_entities.sort(key=lambda e: e.followers, reverse=True)):
     for entity in related_entities:
         text += tasks.prepare_advice_entity_link(entity) + '\n'
@@ -265,13 +282,13 @@ def show_related_entities(bot, msg, user, related_entities):
 def sample_news_page(news):
     title = news.base_news.title
     source = news.base_news.rss.fa_name
-    text = Emoji.BLACK_SMALL_SQUARE + title + '\n' + source + '\t\t\t/News_' + str(news.id) + '\n'
+    text = Emoji.SMALL_BLUE_DIAMOND + title + '\n' + source + '\t\t\t/News_' + str(news.id) + '\n'
     return text
 
 
 def publish_sample_news(bot, user, msg, news_id_list):
     news_count = 0
-    text = ""
+    text = "%s خبرهای مرتبط:\n" % Emoji.NEWSPAPER
     for news_id in news_id_list:
         try:
             text += sample_news_page(News.objects.get(id=news_id))

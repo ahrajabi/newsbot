@@ -17,7 +17,8 @@ thismodule = sys.modules[__name__]
 def handle(bot, msg, user):
     text = msg.message.text
     hits = elastic_search_entity(text)
-    bot_template.publish_sample_news(bot, user, msg, list(map(int, [hit['_id'] for hit in hits[:3]])))
+    if hits:
+        bot_template.publish_sample_news(bot, user, msg, list(map(int, [hit['_id'] for hit in hits[:3]])))
 
     try:
         entity = Entity.objects.get(name=text)

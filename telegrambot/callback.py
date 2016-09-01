@@ -28,14 +28,13 @@ def handle(bot,msg):
         bot_template.error_text(bot, msg, type='NoCommand')
 
 
-
-def score_inline_command(bot, msg,user):
+def score_inline_command(bot, msg, user):
     entity_id = re.compile(r'\d+').findall(msg.callback_query.data.lower())[0]
-    Score = re.compile(r'\(((-|)\d*?)\)').findall(msg.callback_query.data.lower())[0][0]
-    if tasks.set_score_entity(user,entity_id,int(Score)):
+    score = re.compile(r'\(((-|)\d*?)\)').findall(msg.callback_query.data.lower())[0][0]
+    if tasks.set_score_entity(user,entity_id,int(score)):
         TEXT = '''
 علاقه شما به اخبار  %s با مقدار %d تنظیم شد.
-        ''' % ( tasks.get_entity(entity_id).name ,int(Score)+3)
+        ''' % (tasks.get_entity(entity_id).name, int(score)+3)
         print(msg)
         bot.answerCallbackQuery(msg.callback_query.id,
                                 text=TEXT)
@@ -43,7 +42,7 @@ def score_inline_command(bot, msg,user):
         bot_template.error_text(bot, msg)
 
 
-def news_inline_command(bot,msg,user):
+def news_inline_command(bot, msg, user):
     news_id = re.compile(r'\d+').findall(msg.callback_query.data.lower())[0]
     news = News.objects.get(id=news_id)
     p = re.compile(r'[a-z]+')
@@ -65,9 +64,8 @@ def news_inline_command(bot,msg,user):
     elif title == 'stat':
         page = 3
         bot.answerCallbackQuery(msg.callback_query.id, text='تحلیل خبر')
-
     bot_template.news_page(bot, news, user,
-                              page=page, message_id=msg.callback_query.message.message_id)
+                           page=page, message_id=msg.callback_query.message.message_id)
 
 
 
