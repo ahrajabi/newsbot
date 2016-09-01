@@ -1,52 +1,46 @@
 __author__ = 'nasim'
 from rss.models import RssFeeds, BaseNews
 import feedparser
-import datetime
 import dateutil.parser
 from django.utils import timezone
-from django.utils.dateparse import parse_date
 import pytz
-import re
+from datetime import timedelta
 
-def link_preprocessing(url, name):
-    return url
-    if name == 'asriran':
-        p = re.compile(r'http:\/\/www.asriran.com\/fa\/news\/[0-9]*')
-        url = p.findall(url)[0]
-    return url
+def repair_datetime(input_datetime):
+    input_datetime = dateutil.parser.parse(input_datetime)
+    if not timezone.is_aware(input_datetime):
+        input_datetime = input_datetime.replace(tzinfo=pytz.UTC)
+    delta = timedelta(hours=4, minutes=30)
+    if input_datetime - timezone.now() > delta - timedelta(hours=1):
+        input_datetime -= delta
+    return input_datetime
 
 def get_new_rss():
 # can do with thread future.Future
-
     for rss in RssFeeds.objects.all():
-        if rss.activation==False:
+        print(rss.name)
+        if not rss.activation:
             continue
-
         feed = feedparser.parse(rss.main_rss)
         try:
-            feed_time = dateutil.parser.parse(feed['feed']['updated'])
+            feed_time = feed['feed']['updated']
         except:
-            feed_time =max([dateutil.parser.parse(ti['published']) for ti in feed['items']])
+            feed_time = max([ti['published'] for ti in feed['items']])
 
-
-        print(timezone.is_aware(rss.last_modified),rss.last_modified)
-        feed_time = feed_time.replace(tzinfo=pytz.UTC)
-        print(timezone.is_aware(feed_time),feed_time)
+        feed_time = repair_datetime(feed_time)
 
         if feed_time > rss.last_modified:
             last = rss.last_modified
             rss.last_modified = feed_time
             rss.save()
             for item in feed['items']:
-                item_publish_time = dateutil.parser.parse(item['published'])
+                item_publish_time = repair_datetime(item['published'])
                 if item_publish_time > last:
-                    try:
-                        BaseNews.objects.update_or_create(url=link_preprocessing(item['link'],rss.name),
-                                                defaults={
-                                                    'rss':rss,
-                                                    'title':item['title'],
-                                                    'published_date':item_publish_time})
-                    except Exception:
-                        continue
+                    BaseNews.objects.update_or_create(title=item['title'],
+                                                      url=item['link'],
+                                                      defaults={
+                                                          'rss': rss,
+                                                          'published_date': item_publish_time})
                 else:
                     break
+

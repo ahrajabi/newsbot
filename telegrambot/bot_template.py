@@ -14,6 +14,7 @@ from entities.models import Entity
 from rss.ml import sent_tokenize
 from telegrambot.models import UserProfile, UserNews
 
+from rss.elastic import more_like_this
 
 def welcome_text(bot, msg):
     keyboard = ReplyKeyboardMarkup(keyboard=[[
@@ -128,28 +129,29 @@ def bot_help(bot, msg, user):
 
 
 def news_image_page(bot, news, user, page=1, message_id=None):
-    '''
-    keyboard = None
-    if news.pic_number > 1:
-        if page>1 and page<news.pic_number:
-            buttons = [[
-                InlineKeyboardButton(text='تصویر قبلی', callback_data='image-' + str(news.id) + '-previous'),
-                InlineKeyboardButton(text='تصویر بعدی', callback_data='image-' + str(news.id) + '-next'),
-            ]]
-        elif page == 0:
-            buttons = [[
-                InlineKeyboardButton(text='تصویر بعدی', callback_data='image-' + str(news.id) + '-next'),
-            ]]
-        elif page == news.pic_number:
-            buttons = [[
-                InlineKeyboardButton(text='تصویر قبلی', callback_data='image-' + str(news.id) + '-previous'),
-                InlineKeyboardButton(text='تصویر بعدی', callback_data='image-' + str(news.id) + '-next'),
-            ]]
-        keyboard = InlineKeyboardMarkup(buttons)
-    '''
+    # keyboard = None
+    # if news.pic_number > 1:
+    #     if page>1 and page<news.pic_number:
+    #         buttons = [[
+    #             InlineKeyboardButton(text='تصویر قبلی', callback_data='image-' + str(news.id) + '-previous'),
+    #             InlineKeyboardButton(text='تصویر بعدی', callback_data='image-' + str(news.id) + '-next'),
+    #         ]]
+    #     elif page == 0:
+    #         buttons = [[
+    #             InlineKeyboardButton(text='تصویر بعدی', callback_data='image-' + str(news.id) + '-next'),
+    #         ]]
+    #     elif page == news.pic_number:
+    #         buttons = [[
+    #             InlineKeyboardButton(text='تصویر قبلی', callback_data='image-' + str(news.id) + '-previous'),
+    #             InlineKeyboardButton(text='تصویر بعدی', callback_data='image-' + str(news.id) + '-next'),
+    #         ]]
+    #     keyboard = InlineKeyboardMarkup(buttons)
 
     keyboard = None
-    image_url = ImageUrls.objects.filter(news=news)[0].img_url
+    image_url = ImageUrls.objects.filter(news=news)
+    if not image_url:
+        return
+    image_url = image_url[0].img_url
     UserNews.objects.update_or_create(user=user, news=news, defaults={'image_page': page})
     text = news.base_news.title
     send_telegram_user(bot, user, text, keyboard, message_id, photo=image_url)
@@ -167,12 +169,12 @@ def news_page(bot, news, user, page=1, message_id=None):
         [
             InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(news.id) + '-overview'),
             InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(news.id) + '-full'),
-            InlineKeyboardButton(text='آمار', callback_data='news-' + str(news.id) + '-stat'),
+            InlineKeyboardButton(text='تحلیل', callback_data='news-' + str(news.id) + '-stat'),
             InlineKeyboardButton(text='لینک خبر', url=str(news.base_news.url)),
     ], ]
 
     keyboard = InlineKeyboardMarkup(buttons)
-    text = news.base_news.title + '\n\n'
+    text = ''
     if page == 1:
         summary = news.summary
         has_summary = True
@@ -189,7 +191,13 @@ def news_page(bot, news, user, page=1, message_id=None):
     elif page == 2:
         text += news.body[0:1000] + '\n' + 'ادامه دارد' + '\n'
     elif page == 3:
-        text += str(news.pic_number) + '\n'
+        related = more_like_this(news.base_news.title, 5)
+        for item in related:
+            try:
+                text += sample_news_page(News.objects.get(id=item))
+            except:
+                pass
+        text += '----------------\n'
         text += 'منبع خبر' + news.base_news.rss.fa_name + '\n'
         text += 'تاریخ ارسال' + str(news.base_news.published_date) + '\n'
 

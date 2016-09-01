@@ -18,7 +18,7 @@ class Entity(models.Model):
     status = models.CharField(max_length=1, default='N', choices=STATUS)
     followers = models.IntegerField(default=0)
     news_count = models.IntegerField(default=0)
-    latest_news = models.ForeignKey(News, null=True,blank=True)
+    latest_news = models.ForeignKey(News, null=True, blank=True)
     summary = models.TextField(null=True)
 
     def __str__(self):

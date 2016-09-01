@@ -11,10 +11,18 @@ from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, NetworkError)
 from telegrambot import command_handler, bot_template, callback
 from telegrambot.models import UserProfile
+from entities.tasks import get_user_entity
+from entities.models import NewsEntity
 from rss import rss,news
 from rss.elastic import bulk_save_to_elastic
+from rss.models import News
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
+from django.utils import timezone
+from rss.models import BaseNews, News
+
+import pytz
+from datetime import datetime, timedelta
 
 
 def error_callback(bot, update, error):
@@ -84,16 +92,18 @@ def fetch_news3(bot, job):
     rss.get_new_rss()
 
 
-def random_publish_news(bot,  job):
-    from rss.models import News
-    news = News.objects.filter(pic_number__gte=1,
-                               summary__isnull=False).order_by('?')
-    user = User.objects.get(username='ahrajabi')
-    if user:
-        bot_template.publish_news(bot, news[0], user)
-    else:
-        user = User.objects.all()[0]
-        bot_template.publish_news(bot, news[0], user)
+def random_publish_news(bot,job):
+    delta = timezone.now()-timedelta(minutes=60*2)
+    for user in User.objects.all():
+        ent = get_user_entity(user)
+        print(ent)
+        news_ent = NewsEntity.objects.filter(entity__in=ent,
+                                             score__gte=2,
+                                             news__base_news__published_date__range=(delta, timezone.now()),
+                                             news__pic_number__gte=1).order_by('?')
+        for item in news_ent[0:2]:
+            bot_template.publish_news(bot, item.news, user)
+
 
 updater = Updater(token=TOKEN)
 dispatcher = updater.dispatcher
@@ -104,12 +114,12 @@ dispatcher.add_error_handler(error_callback)
 
 q_bot = updater.job_queue
 
-q_bot.put(Job(random_publish_news, 10, repeat=True))
+q_bot.put(Job(random_publish_news, 60*60*2, repeat=True))
 q_bot.put(Job(user_alert_handler, 100, repeat=True))
 
-#q_bot.put(Job(fetch_news, 30, repeat=True))
-#q_bot.put(Job(fetch_news2, 30, repeat=True))
-#q_bot.put(Job(fetch_news3, 30, repeat=True))
+q_bot.put(Job(fetch_news, 30, repeat=True))
+q_bot.put(Job(fetch_news2, 30, repeat=True))
+q_bot.put(Job(fetch_news3, 30, repeat=True))
 
 updater.start_polling()
 print('Listening ...')

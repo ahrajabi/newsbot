@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rss',
     'entities',
     'search',
+    'django_extensions',
 ]
 
 MIDDLEWARE_CLASSES = [
