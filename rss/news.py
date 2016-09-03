@@ -57,20 +57,6 @@ def save_news(base_news):
     return True
 
 
-def save_all_base_news():
-    """ for each base news with complete_news = False , get all news and create related News object """
-    print("starting ... ")
-    now = datetime.datetime.now()
-    for obj in BaseNews.objects.filter(complete_news=False):
-        print(obj.id)
-        if save_news(obj):
-            obj.complete_news = True
-            obj.save()
-        else:
-            continue
-    print(datetime.datetime.now() - now)
-
-
 def set_news_like(user, news, mark='Like'):
     obj, created = NewsLike.objects.update_or_create(news=news, user=user,
                                                      defaults={'status': (mark=='Like')})

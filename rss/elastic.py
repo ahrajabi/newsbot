@@ -1,5 +1,5 @@
 import datetime
-from newsbot.settings import ELASTIC_URL
+from newsbot.local_settings import ELASTIC_URL
 from elasticsearch import Elasticsearch, helpers
 
 from rss.models import News
@@ -44,12 +44,6 @@ def source_generator():
         yield obj.id, source
 
 
-def bulk_save_to_elastic():
-    start_time = datetime.datetime.now()
-    k = ({'_index': 'news', '_type': 'new', '_id': idx, "_source": source}
-         for idx, source in source_generator())
-    helpers.bulk(es, k)
-    print(datetime.datetime.now() - start_time)
 
 
 def elastic_search_entity(query):

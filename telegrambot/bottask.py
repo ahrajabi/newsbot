@@ -14,7 +14,6 @@ from telegrambot.models import UserProfile
 from entities.tasks import get_user_entity
 from entities.models import NewsEntity
 from rss import rss,news
-from rss.elastic import bulk_save_to_elastic
 from rss.models import News
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -80,18 +79,6 @@ def user_alert_handler(bot,job):
     command_handler.user_alert_handler(bot,job)
 
 
-def fetch_news(bot, job):
-    bulk_save_to_elastic()
-
-
-def fetch_news2(bot, job):
-    news.save_all_base_news()
-
-
-def fetch_news3(bot, job):
-    rss.get_new_rss()
-
-
 def random_publish_news(bot,job):
     delta = timezone.now()-timedelta(minutes=60*2)
     for user in User.objects.all():
@@ -106,6 +93,7 @@ def random_publish_news(bot,job):
 
 
 updater = Updater(token=TOKEN)
+
 dispatcher = updater.dispatcher
 dispatcher.add_handler(MessageHandler([Filters.command], commands))
 dispatcher.add_handler(MessageHandler([Filters.text], handle))
@@ -116,10 +104,6 @@ q_bot = updater.job_queue
 
 q_bot.put(Job(random_publish_news, 60*60*2, repeat=True))
 q_bot.put(Job(user_alert_handler, 100, repeat=True))
-
-q_bot.put(Job(fetch_news, 30, repeat=True))
-q_bot.put(Job(fetch_news2, 30, repeat=True))
-q_bot.put(Job(fetch_news3, 30, repeat=True))
 
 updater.start_polling()
 print('Listening ...')
