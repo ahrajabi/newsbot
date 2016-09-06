@@ -49,6 +49,12 @@ def get_user(telegram_id):
     user = [i.user for i in profiles][0]
     if not user:
         return None
+    ##
+    up = UserProfile.objects.get(user=user)
+    if up:
+        up.last_chat = timezone.now()
+    up.save()
+    ##
     return user
 
 
