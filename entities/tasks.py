@@ -1,7 +1,7 @@
 import wikipedia
-from entities.models import NewsEntity
+from telegram.emoji import Emoji
 
-from .models import UserEntity, Entity
+from .models import UserEntity, Entity, NewsEntity
 wikipedia.set_lang('fa')
 
 
@@ -101,6 +101,7 @@ def get_entity_news(news_list):
 
 
 def get_entity_text(input_text):
+    # TODO fix entitis , now و is entity !
     ent = Entity.objects.filter(status__in=['N', 'P', 'A'])
     ret = []
     for entity in ent:
@@ -110,4 +111,4 @@ def get_entity_text(input_text):
 
 
 def prepare_advice_entity_link(entity):
-    return "/add_"+str(entity.id)+" " + entity.name + ""
+    return Emoji.SMALL_ORANGE_DIAMOND + "/add_"+str(entity.id)+" " + entity.name + ""

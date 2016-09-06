@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import UserProfile, UserAlert
+from .models import UserProfile, UserAlert, UserNews
 
 def username(obj):
     return obj.user.username
@@ -24,3 +24,9 @@ class UserAlertListAdmin(admin.ModelAdmin):
         ('is_sent'),
     )
 admin.site.register(UserAlert,UserAlertListAdmin)
+
+
+@admin.register(UserNews)
+class UserNewsAdmin(admin.ModelAdmin):
+    list_display = [x.name for x in UserNews._meta.local_fields]
+

@@ -1,11 +1,13 @@
 __author__ = 'nasim'
 import datetime
+import random
 import requests
 from bs4 import BeautifulSoup as bs
+
+from rss.ml import *
 from entities.tasks import get_entity_news
 from rss.models import BaseNews, News, ImageUrls, NewsLike
-from rss.ml import *
-import random
+
 
 def save_news(base_news):
     # fix catch HeaderParsingError
@@ -85,8 +87,8 @@ def set_news_like(user, news, mark='Like'):
 
 
 def is_liked_news(user, news):
-     newslike = NewsLike.objects.filter(news=news, user=user)
-     if newslike:
-         return newslike[0].status
-     else:
-         return False
+    newslike = NewsLike.objects.filter(news=news, user=user)
+    if newslike:
+        return newslike[0].status
+    else:
+        return False
