@@ -141,9 +141,9 @@ STATIC_ROOT = "/tmp/"
 
 ELASTIC_URL = 'http://130.185.76.171:9200'
 
-BOT_NAME = '@KhabareMan_bot'
-PROJECT_FA_NAME = 'خبرِمن'
-PROJECT_EN_NAME = 'KhabareMan'
+BOT_NAME = '@soorirbot'
+PROJECT_FA_NAME = 'سور'
+PROJECT_EN_NAME = 'Soor'
 
 GLOBAL_SETTINGS = {
     'SAMPLE_NEWS_COUNT': 3,
