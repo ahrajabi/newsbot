@@ -150,7 +150,11 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
 
     elif page == 2:
         text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n    '
-        text += news.body[0:1000] + '\n' + 'ادامه دارد...' + '\n'
+        if len(news.body) < 4000:
+            text += news.body
+        else:
+            text += news.body[:4000].rsplit(' ', 1)[0]
+            text += '\n' + 'ادامه دارد...' + '\n'
     elif page == 3:
         related = more_like_this(news.base_news.title, 5)
         text, notext = prepare_multiple_sample_news(related, 5)

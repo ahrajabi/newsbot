@@ -44,8 +44,6 @@ def source_generator():
         yield obj.id, source
 
 
-
-
 def elastic_search_entity(query):
     body = {
         "query": {
