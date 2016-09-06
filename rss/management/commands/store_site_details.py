@@ -19,7 +19,7 @@ class Command(BaseCommand):
         with open(path) as f:
             reader = list(csv.reader(f))
             for row in reader[starting_line-1:]:
-                obj_cat, created = CategoryCode.objects.update_or_create(name=row[5], defaults={'fa_name': row[3],})
+                obj_cat, created = CategoryCode.objects.update_or_create(name=row[5], defaults={'fa_name': row[3]})
                 obj, created = RssFeeds.objects.update_or_create(main_rss=row[7],
                                                   defaults={'url': row[0],
                                                             'name': row[1],

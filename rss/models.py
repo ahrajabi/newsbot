@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 import pytz
 
+
 class CategoryCode(models.Model):
     name = models.CharField('site Name', max_length=50)
     fa_name = models.CharField('Persian Name', max_length=50)
@@ -69,3 +70,4 @@ class NewsLike(models.Model):
     news = models.ForeignKey(News)
     user = models.ForeignKey(User)
     status = models.BooleanField(default=True, choices=STATUS)
+
