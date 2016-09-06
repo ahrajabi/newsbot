@@ -10,7 +10,7 @@ from rss.models import News, ImageUrls
 from telegrambot.models import UserNews
 from rss.ml import normalize, sent_tokenize
 from entities.models import Entity, NewsEntity
-from telegrambot.news_template import sample_news_page
+from telegrambot.news_template import sample_news_page, prepare_multiple_sample_news
 from newsbot.settings import BOT_NAME, PROJECT_EN_NAME
 from telegrambot.bot_send import send_telegram, send_telegram_user
 
@@ -145,11 +145,7 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
         text += news.body[0:1000] + '\n' + 'ادامه دارد...' + '\n'
     elif page == 3:
         related = more_like_this(news.base_news.title, 5)
-        for item in related:
-            try:
-                text += sample_news_page(News.objects.get(id=item))
-            except:
-                pass
+        text, notext = prepare_multiple_sample_news(related, 5)
         # text += '----------------\n'
         # text += 'منبع خبر' + news.base_news.rss.fa_name + '\n'
         # text += 'تاریخ ارسال' + str(news.base_news.published_date) + '\n'

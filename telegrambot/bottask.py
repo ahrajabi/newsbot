@@ -8,12 +8,12 @@ from django.contrib.auth.models import User
 from telegram.ext import MessageHandler, Filters, CallbackQueryHandler, Updater, Job
 from telegram.error import TelegramError, Unauthorized, BadRequest, TimedOut, NetworkError
 
-from rss import rss, news
+from rss import tasks
 from newsbot import local_settings
 from entities.models import NewsEntity
 from entities.tasks import get_user_entity
 from telegrambot.bot_send import error_text
-from telegrambot import command_handler, bot_template, callback
+from telegrambot import command_handler, news_template, callback, bot_send
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -70,21 +70,27 @@ def callback_query(bot, msg):
     callback.handle(bot, msg)
 
 
-def user_alert_handler(bot,job):
-    command_handler.user_alert_handler(bot,job)
+def user_alert_handler(bot, job):
+    command_handler.user_alert_handler(bot, job)
 
+
+def crawler(bot, job):
+    print("RUN")
+    tasks.get_all_new_news.delay()
+    tasks.bulk_save_to_elastic.delay()
+    tasks.save_all_base_news.delay()
 
 def random_publish_news(bot,job):
-    delta = timezone.now()-timedelta(minutes=60*2)
+    print("BOBO")
+    delta = timezone.now()-timedelta(minutes=10)
     for user in User.objects.all():
         ent = get_user_entity(user)
-        print(ent)
-        news_ent = NewsEntity.objects.filter(entity__in=ent,
-                                             score__gte=2,
-                                             news__base_news__published_date__range=(delta, timezone.now()),
-                                             news__pic_number__gte=1).order_by('?')
-        for item in news_ent[0:2]:
-            bot_template.publish_news(bot, item.news, user, user_entity=ent)
+        news_ent = NewsEntity.objects.filter(entity__in=ent, )\
+            .order_by('news__base_news__published_date')
+        print(user.username, news_ent.count())
+        news_list = set([item.news_id for item in news_ent])
+        output = news_template.prepare_multiple_sample_news(list(news_list), 20)
+        bot_send.send_telegram_user(bot, user, output[0])
 
 
 updater = Updater(token=TOKEN)
@@ -97,8 +103,10 @@ dispatcher.add_error_handler(error_callback)
 
 q_bot = updater.job_queue
 
-q_bot.put(Job(random_publish_news, 60*60*2, repeat=True))
+q_bot.put(Job(random_publish_news, 10*60, repeat=True))
 q_bot.put(Job(user_alert_handler, 100, repeat=True))
+
+q_bot.put(Job(crawler, 30, repeat=True))
 
 updater.start_polling()
 print('Listening ...')

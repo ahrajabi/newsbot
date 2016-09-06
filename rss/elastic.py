@@ -76,6 +76,7 @@ def more_like_this(query, number):
         },
         'size': number,
     }
+
     r = es.search(index='news', body=body)
     news_id = [item['_id'] for item in r['hits']['hits']]
     return news_id

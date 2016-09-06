@@ -59,7 +59,8 @@ def news_inline_command(bot, msg, user):
         bot.answerCallbackQuery(msg.callback_query.id, text='متن کامل خبر')
     elif title == 'stat':
         page = 3
-        bot.answerCallbackQuery(msg.callback_query.id, text='تحلیل خبر')
+        bot.answerCallbackQuery(msg.callback_query.id, text='اخبار مرتبط')
+
     bot_template.news_page(bot, news, user,
                            page=page, message_id=msg.callback_query.message.message_id)
 
