@@ -42,6 +42,7 @@ class UserEntity(models.Model):
     def __str__(self):
         return self.user.username + " has " + self.entity.name
 
+
 class NewsEntity(models.Model):
     news = models.ForeignKey(News)
     entity = models.ForeignKey(Entity)

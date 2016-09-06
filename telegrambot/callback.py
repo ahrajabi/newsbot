@@ -1,20 +1,16 @@
 
-from telegrambot.models import UserProfile, UserNews
-from django.utils import timezone
-from telegrambot import bot_template , command_handler
-from entities import tasks
 import re
 import sys
+
+from entities import tasks
 from rss.models import News
 from rss.news import set_news_like
-from telegram.emoji import Emoji
+from telegrambot.models import UserNews
+from telegrambot.bot_send import error_text
+from telegrambot import bot_template, command_handler
 
-from newsbot.celery import app
-from django.contrib.auth.models import User
 
 thismodule = sys.modules[__name__]
-import pprint
-import telegram
 
 
 def handle(bot,msg):
@@ -25,7 +21,7 @@ def handle(bot,msg):
     if hasattr(thismodule, func):
         getattr(thismodule, func)(bot, msg, user)
     else:
-        bot_template.error_text(bot, msg, type='NoCommand')
+        error_text(bot, msg, type='NoCommand')
 
 
 def score_inline_command(bot, msg, user):
@@ -39,7 +35,7 @@ def score_inline_command(bot, msg, user):
         bot.answerCallbackQuery(msg.callback_query.id,
                                 text=TEXT)
     else:
-        bot_template.error_text(bot, msg)
+        error_text(bot, msg)
 
 
 def news_inline_command(bot, msg, user):

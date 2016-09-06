@@ -135,10 +135,19 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
-STATIC_ROOT = "/tmp/"
 STATIC_URL = '/static/'
+STATIC_ROOT = "/tmp/"
 
 ELASTIC_URL = 'http://130.185.76.171:9200'
+
+BOT_NAME = '@KhabareMan_bot'
+PROJECT_FA_NAME = 'خبرِمن'
+PROJECT_EN_NAME = 'KhabareMan'
+
+GLOBAL_SETTINGS = {
+    'SAMPLE_NEWS_COUNT': 3,
+    'MIN_HITS_ENTITY_VALIDATION': 3
+}
 
 try:
     from .local_settings import *

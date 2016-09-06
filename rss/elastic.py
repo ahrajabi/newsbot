@@ -52,16 +52,17 @@ def elastic_search_entity(query):
             "multi_match": {
                 "query": query,
                 "type": "phrase",
-                "fields": ["news_title^2", "news_body"]
+                "fields": ["title^2", "news_body"]
             }
         },
         "fields": ['published_date', '_uid', 'news_body'],
         "sort": [{"published_date": {"order": "desc"}}]
     }
-    r = es.search(index='news', body=body)
+    r = es.search(index='news', body=body, request_timeout=20)
     for hit in r['hits']['hits']:
         print(hit)
     return r['hits']['hits']
+
 
 def more_like_this(query, number):
     body = {

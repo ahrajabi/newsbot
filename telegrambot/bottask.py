@@ -1,27 +1,23 @@
-from django.conf import settings
-from telegram.ext import Updater, Job
-from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackQueryHandler
-import telegram
 import re
 import logging
-from django.contrib.auth.models import User
-from newsbot import local_settings
+import telegram
+from datetime import timedelta
+from django.utils import timezone
 from telegram.ext.dispatcher import run_async
-from telegram.error import (TelegramError, Unauthorized, BadRequest,
-                            TimedOut, NetworkError)
-from telegrambot import command_handler, bot_template, callback
-from telegrambot.models import UserProfile
-from entities.tasks import get_user_entity
+from django.contrib.auth.models import User
+from telegram.ext import MessageHandler, Filters, CallbackQueryHandler, Updater, Job
+from telegram.error import TelegramError, Unauthorized, BadRequest, TimedOut, NetworkError
+
+from rss import rss, news
+from newsbot import local_settings
 from entities.models import NewsEntity
-from rss import rss,news
-from rss.models import News
+from entities.tasks import get_user_entity
+from telegrambot.bot_send import error_text
+from rss.elastic import bulk_save_to_elastic
+from telegrambot import command_handler, bot_template, callback
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
-from django.utils import timezone
-from rss.models import BaseNews, News
-
-import pytz
-from datetime import datetime, timedelta
 
 
 def error_callback(bot, update, error):
@@ -67,7 +63,7 @@ def commands(bot, msg):
         else:
             getattr(command_handler, func)(bot, msg, user)
     else:
-        bot_template.error_text(bot, msg, type='NoCommand')
+        error_text(bot, msg, type='NoCommand')
 
 
 @run_async
@@ -89,7 +85,7 @@ def random_publish_news(bot,job):
                                              news__base_news__published_date__range=(delta, timezone.now()),
                                              news__pic_number__gte=1).order_by('?')
         for item in news_ent[0:2]:
-            bot_template.publish_news(bot, item.news, user)
+            bot_template.publish_news(bot, item.news, user, user_entity=ent)
 
 
 updater = Updater(token=TOKEN)
