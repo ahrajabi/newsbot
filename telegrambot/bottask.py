@@ -13,7 +13,6 @@ from newsbot import local_settings
 from entities.models import NewsEntity
 from entities.tasks import get_user_entity
 from telegrambot.bot_send import error_text
-from rss.elastic import bulk_save_to_elastic
 from telegrambot import command_handler, bot_template, callback
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
