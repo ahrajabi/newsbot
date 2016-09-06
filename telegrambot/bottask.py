@@ -75,7 +75,6 @@ def user_alert_handler(bot, job):
 
 
 def crawler(bot, job):
-    print("RUN")
     tasks.get_all_new_news.delay()
     tasks.bulk_save_to_elastic.delay()
     tasks.save_all_base_news.delay()

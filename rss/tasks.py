@@ -13,10 +13,9 @@ def get_all_new_news():
     for rss in RssFeeds.objects.all():
         if not rss.activation:
             continue
-        get_rss.delay(rss)
+        get_rss(rss)
 
 
-@shared_task
 def get_rss(rss):
     get_new_rss(rss)
 
