@@ -24,7 +24,7 @@ def get_new_rss(rss):
     feed = feedparser.parse(rss.main_rss)
 
     try:
-        if 'updated' in feed['feed'].keys() :
+        if 'updated' in feed['feed'].keys():
             feed_time = feed['feed']['updated']
         else:
             feed_time = max([ti['published'] for ti in feed['items']])

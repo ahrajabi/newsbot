@@ -10,7 +10,7 @@ from elasticsearch import helpers
 
 @shared_task
 def get_all_new_news():
-    for rss in RssFeeds.objects.all():
+    for rss in RssFeeds.objects.all().order_by('?'):
         if not rss.activation:
             continue
         get_rss(rss)
