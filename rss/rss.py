@@ -30,7 +30,7 @@ def get_new_rss(rss):
             feed_time = max([ti['published'] for ti in feed['items']])
     except:
         print("Failed")
-        continue
+        return
 
     feed_time = repair_datetime(feed_time, rss.name)
 
