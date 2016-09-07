@@ -13,7 +13,7 @@ def repair_datetime(input_datetime, rss_name):
         input_datetime = input_datetime.replace(tzinfo=pytz.utc)
 
     delta = timedelta(hours=4, minutes=30)
-    if rss_name in ['irna', 'fars']:
+    if rss_name in ['irna', 'fars', 'econews']:
         input_datetime -= delta
 
     return timezone.localtime(input_datetime)
@@ -22,10 +22,15 @@ def repair_datetime(input_datetime, rss_name):
 def get_new_rss(rss):
     print(rss.name)
     feed = feedparser.parse(rss.main_rss)
+
     try:
-        feed_time = feed['feed']['updated']
+        if 'updated' in feed['feed'].keys() :
+            feed_time = feed['feed']['updated']
+        else:
+            feed_time = max([ti['published'] for ti in feed['items']])
     except:
-        feed_time = max([ti['published'] for ti in feed['items']])
+        print("Failed")
+        continue
 
     feed_time = repair_datetime(feed_time, rss.name)
 
