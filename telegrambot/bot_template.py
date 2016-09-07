@@ -169,7 +169,10 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
 
 
 def publish_news(bot, news, user, page=1, message_id=None, **kwargs):
-    news_image_page(bot, news, user, page=1, message_id=message_id)
+    try:
+        news_image_page(bot, news, user, page=1, message_id=message_id)
+    except:
+        pass
     news_page(bot, news, user, page, message_id=message_id, **kwargs)
 
 
