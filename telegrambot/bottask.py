@@ -48,7 +48,6 @@ def handle(bot, msg):
     command_handler.handle(bot, msg, user)
 
 
-@run_async
 def commands(bot, msg):
     bot.sendChatAction(chat_id=msg.message.chat_id, action=telegram.ChatAction.TYPING)
     from telegrambot import command_handler, bot_template
@@ -65,7 +64,6 @@ def commands(bot, msg):
         error_text(bot, msg, type='NoCommand')
 
 
-@run_async
 def callback_query(bot, msg):
     callback.handle(bot, msg)
 
@@ -81,16 +79,22 @@ def crawler(bot, job):
 
 def random_publish_news(bot,job):
     print("BOBO")
-    delta = timezone.now()-timedelta(minutes=30)
+    delta = timezone.now()-timedelta(minutes=10)
     for user in User.objects.all():
         ent = get_user_entity(user)
         news_ent = NewsEntity.objects.filter(entity__in=ent,
                                              news__base_news__published_date__range=(delta, timezone.now()))\
             .order_by('news__base_news__published_date')
         print(user.username, news_ent.count())
-        news_list = set([item.news_id for item in news_ent])
-        output = news_template.prepare_multiple_sample_news(list(news_list), 20)
-        bot_send.send_telegram_user(bot, user, output[0])
+        if news_ent.count() > 0:
+            news_list = list(set([item.news_id for item in news_ent]))
+            output = 'اخبار مرتبط با دسته‌های شما'
+            output+= '\n'
+            output+= news_template.prepare_multiple_sample_news(news_list, 20)[0]
+            try:
+                bot_send.send_telegram_user(bot, user, output)
+            except:
+                print("ERROR BOT SENDING", user.username)
 
 
 updater = Updater(token=TOKEN)
@@ -103,7 +107,7 @@ dispatcher.add_error_handler(error_callback)
 
 q_bot = updater.job_queue
 
-q_bot.put(Job(random_publish_news, 30*60, repeat=True))
+q_bot.put(Job(random_publish_news, 10*60, repeat=True))
 q_bot.put(Job(user_alert_handler, 100, repeat=True))
 
 q_bot.put(Job(crawler, 45, repeat=True))
