@@ -25,9 +25,10 @@ class Command(BaseCommand):
                                                             'name': row[1],
                                                             'fa_name': row[2],
                                                             'category': row[3],
-                                                            'activation': row[4],
+                                                            'activation': (row[4] == 'True'),
                                                             'category_ref': obj_cat,
                                                             'order': row[6],
                                                             'selector': row[8],
                                                             'summary_selector': row[9],
-                                                            'image_selector': row[10]})
+                                                            'image_selector': row[10],
+                                                            'time_delay': (row[11] == 'True')})

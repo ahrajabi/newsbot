@@ -31,6 +31,7 @@ class RssFeeds(models.Model):
     summary_selector = models.CharField(max_length=300, blank=True)
     image_selector = models.CharField(max_length=300, blank=True)
     last_modified = models.DateTimeField(blank=True, default=datetime(2001, 8, 15, 8, 15, 12, 0, pytz.UTC))
+    time_delay = models.BooleanField('Time Delay', default=False)
 
     def __str__(self):
         return self.fa_name

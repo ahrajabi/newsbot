@@ -1,4 +1,4 @@
-from celery import shared_task
+from celery import shared_task, task
 from rss.rss import get_new_rss
 from rss.models import RssFeeds
 from rss.models import BaseNews, News, ImageUrls, NewsLike
@@ -6,34 +6,69 @@ import datetime
 from rss.news import save_news
 from rss.elastic import source_generator, es
 from elasticsearch import helpers
+from celery.utils.log import get_task_logger
+from django.core.cache import cache
+from hashlib import md5
+
+LOCK_EXPIRE = 60*2
 
 
 @shared_task
 def get_all_new_news():
-    for rss in RssFeeds.objects.all().order_by('?'):
+    THREAD_RSS_NUM = 3
+
+    all_rss = RssFeeds.objects.all()
+    all_rss = [item.id for item in all_rss]
+
+    for j in range(THREAD_RSS_NUM):
+        rss_list = all_rss[j::THREAD_RSS_NUM]
+        print(rss_list)
+        lock_id = '{0}-lock-{1}-{2}'.format('rss', str(j),str(THREAD_RSS_NUM))
+        acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
+        release_lock = lambda: cache.delete(lock_id)
+
+        if acquire_lock():
+            try:
+                get_new_rss_async.delay(rss_list)
+            finally:
+                release_lock()
+
+
+@shared_task
+def get_new_rss_async(rss_list):
+    for id in rss_list:
+        rss = RssFeeds.objects.get(id=id)
+        print(rss.name)
         if not rss.activation:
             continue
-        get_rss(rss)
-
-
-def get_rss(rss):
-    get_new_rss(rss)
+        get_new_rss(rss)
 
 
 @shared_task
 def save_all_base_news():
+    JOB_NUM = 20
     """ for each base news with complete_news = False , get all news and create related News object """
-    print("starting ... ")
-    now = datetime.datetime.now()
     for obj in BaseNews.objects.filter(complete_news=False):
-        print(obj.id)
-        if obj.complete_news == False:
-            if save_news(obj):
-                obj.complete_news = True
-                obj.save()
-            else:
-                continue
-    print(datetime.datetime.now() - now)
+        lock_id = '{0}-lock-{1}-{2}'.format('news', str(obj.id), str(JOB_NUM))
+
+        acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
+        release_lock = lambda: cache.delete(lock_id)
+
+        if acquire_lock():
+            try:
+                save_base_news_async.delay(obj.id)
+            finally:
+                release_lock()
+
+
+@shared_task
+def save_base_news_async(id):
+    obj = BaseNews.objects.get(id=id)
+    if obj.complete_news == True:
+        return
+    if save_news(obj):
+        obj.complete_news = True
+        obj.save()
 
 
 @shared_task
@@ -43,3 +78,4 @@ def bulk_save_to_elastic():
          for idx, source in source_generator())
     helpers.bulk(es, k)
     print(datetime.datetime.now() - start_time)
+

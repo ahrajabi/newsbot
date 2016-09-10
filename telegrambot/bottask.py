@@ -78,8 +78,7 @@ def crawler(bot, job):
     tasks.save_all_base_news.delay()
 
 def random_publish_news(bot,job):
-    print("BOBO")
-    delta = timezone.now()-timedelta(minutes=10)
+    delta = timezone.now()-timedelta(minutes=15)
     for user in User.objects.all():
         ent = get_user_entity(user)
         news_ent = NewsEntity.objects.filter(entity__in=ent,
@@ -89,8 +88,8 @@ def random_publish_news(bot,job):
         if news_ent.count() > 0:
             news_list = list(set([item.news_id for item in news_ent]))
             output = 'اخبار مرتبط با دسته‌های شما'
-            output+= '\n'
-            output+= news_template.prepare_multiple_sample_news(news_list, 20)[0]
+            output += '\n'
+            output += news_template.prepare_multiple_sample_news(news_list, 20)[0]
             try:
                 bot_send.send_telegram_user(bot, user, output)
             except:
@@ -107,10 +106,10 @@ dispatcher.add_error_handler(error_callback)
 
 q_bot = updater.job_queue
 
-q_bot.put(Job(random_publish_news, 10*60, repeat=True))
+q_bot.put(Job(random_publish_news, 15*60, repeat=True))
 q_bot.put(Job(user_alert_handler, 100, repeat=True))
 
-q_bot.put(Job(crawler, 45, repeat=True))
 
 updater.start_polling()
 print('Listening ...')
+

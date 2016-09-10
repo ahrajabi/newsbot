@@ -25,13 +25,15 @@ def save_news(base_news):
             news_body = normalize(news_body)
         except IndexError:
             news_body = ''
-            return False
 
         try:
             news_summary = page_soup.select(base_news.rss.summary_selector)[0].text
             news_summary = normalize(news_summary)
         except IndexError:
             news_summary = ''
+
+        if news_body == '' and news_summary == '':
+            return False
 
         news, is_created = News.objects.update_or_create(base_news=base_news,
                                              defaults={'body': news_body,
@@ -51,7 +53,7 @@ def save_news(base_news):
         news.pic_number = cnt
 
         #fake random like count
-        r = random.uniform(0,20)
+        r = random.uniform(0, 10)
         news.like_count = random.choice([r, 0, 0, 0, 1, 2, 3])
 
         get_entity_news([news])
