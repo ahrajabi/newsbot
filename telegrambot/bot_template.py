@@ -150,18 +150,14 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
 
     elif page == 2:
         text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n    '
-        if len(news.body) < 4000:
-            text += news.body
+        if len(news.body) < 3500:
+            text += news.body + '\n'
         else:
-            text += news.body[:4000].rsplit(' ', 1)[0]
+            text += news.body[:3500].rsplit(' ', 1)[0]
             text += '\n' + 'ادامه دارد...' + '\n'
     elif page == 3:
         related = more_like_this(news.base_news.title, 5)
         text, notext = prepare_multiple_sample_news(related, 5)
-        # text += '----------------\n'
-        # text += 'منبع خبر' + news.base_news.rss.fa_name + '\n'
-        # text += 'تاریخ ارسال' + str(news.base_news.published_date) + '\n'
-
     text += BOT_NAME
 
     send_telegram_user(bot, user, text, keyboard, message_id)
