@@ -1,11 +1,10 @@
-__author__ = 'nasim'
 from rss.models import BaseNews
 import feedparser
 import dateutil.parser
 from django.utils import timezone
 import pytz
 from datetime import timedelta
-from rss import tasks
+from rss.news import save_news
 
 
 def repair_datetime(input_datetime, rss_delay=False):
@@ -51,7 +50,17 @@ def get_new_rss(rss):
                                                                            'published_date': item_publish_time,
                                                                            })
                 if created:
-                    tasks.save_base_news_async(obj.id)
+                    save_base_news(obj)
             else:
                 break
 
+
+def save_base_news(obj):
+    if obj.complete_news:
+        return
+    try:
+        if save_news(obj):
+            obj.complete_news = True
+            obj.save()
+    except:
+        pass
