@@ -78,7 +78,7 @@ def crawler(bot, job):
     tasks.save_all_base_news.delay()
 
 def random_publish_news(bot,job):
-    delta = timezone.now()-timedelta(minutes=15)
+    delta = timezone.now()-timedelta(minutes=60)
     for user in User.objects.all():
         ent = get_user_entity(user)
         news_ent = NewsEntity.objects.filter(entity__in=ent,
@@ -106,7 +106,7 @@ dispatcher.add_error_handler(error_callback)
 
 q_bot = updater.job_queue
 
-q_bot.put(Job(random_publish_news, 15*60, repeat=True))
+q_bot.put(Job(random_publish_news, 60*60, repeat=True))
 q_bot.put(Job(user_alert_handler, 100, repeat=True))
 
 

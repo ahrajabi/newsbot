@@ -11,8 +11,8 @@ from rss.models import BaseNews, News, ImageUrls, NewsLike
 
 def save_news(base_news):
     # fix catch HeaderParsingError
+    print(str(base_news.url))
     try:
-        print(str(base_news.url))
         page = requests.get(str(base_news.url),  timeout=20)
         page_soup = bs(page.text, 'html.parser')
     except Exception:

@@ -145,7 +145,7 @@ farsnews.com,fars,فارس,فرهنگی,True,Culture,Date,http://www.farsnews.co
 farsnews.com,fars,فارس,ورزشی,True,Sport,Date,http://www.farsnews.com/rss/sports,"#nwstxtBodyPane, .phitmlead",#photoframe h2,"#photoframe img,#nwstxtBodyPane img, .phitmpaneitems img",True
 farsnews.com,fars,فارس,استان‌ها,True,States,Date,http://www.farsnews.com/rss/province,"#nwstxtBodyPane, .phitmlead",#photoframe h2,"#photoframe img,#nwstxtBodyPane img, .phitmpaneitems img",True
 farsnews.com,fars,فارس,تاریخ,True,History,Date,http://www.farsnews.com/rss/history,"#nwstxtBodyPane, .phitmlead",#photoframe h2,"#photoframe img,#nwstxtBodyPane img, .phitmpaneitems img",True
-eranico.com,eranico,ارانیکو,همه مطالب,True,All,Date,http://www.eranico.com/fa/rss,.contentDetails .body p,.contentDetails .lead,".contentDetails .body p:not(.source) img, .bodyImage img",True
+eranico.com,eranico,ارانیکو,همه مطالب,True,All,Date,http://www.eranico.com/fa/rss,.contentDetails .body p,.contentDetails .lead,".contentDetails .body p:not(.source) img, .bodyImage img",False
 http://donya-e-eqtesad.com/,donya-e-eqtesad,دنیای اقتصاد,خبر,True,News,Date,http://donya-e-eqtesad.com/general-news/rss/,.NewsText,.textform,".textform img, .cadr .largepic img",False
 http://donya-e-eqtesad.com/,donya-e-eqtesad,دنیای اقتصاد,صنعت و معدن,True,Mining-industry,Date,http://donya-e-eqtesad.com/mining-industry/rss/,.NewsText,.textform,".textform img, .cadr .largepic img",False
 http://donya-e-eqtesad.com/,donya-e-eqtesad,دنیای اقتصاد,دنیا,True,World,Date,http://donya-e-eqtesad.com/world/rss/,.NewsText,.textform,".textform img, .cadr .largepic img",False
@@ -171,7 +171,7 @@ http://donya-e-eqtesad.com/,donya-e-eqtesad,دنیای اقتصاد,کتاب,Tru
 http://donya-e-eqtesad.com/,donya-e-eqtesad,دنیای اقتصاد,تاریخ و اقتصاد,True,History and Economic,Date,http://donya-e-eqtesad.com/tarikhandeghtesad/rss/,.NewsText,.textform,".textform img, .cadr .largepic img",False
 http://donya-e-eqtesad.com/,donya-e-eqtesad,دنیای اقتصاد,سرمقاله,True,Editorial,Date,http://donya-e-eqtesad.com/editorial/rss/,.NewsText,.textform,".textform img, .cadr .largepic img",False
 http://eghtesadnews.com/,eghtesadnews,اقتصاد نیوز,تمام اخبار,True,All,Date,http://eghtesadnews.com/Live/Services/Rss/Selected/latest,.newsContent,.newsBrief,.newsContent img,False
-http://www.econews.ir/,econews,خبرگزاری اقتصادی ایران,تمام اخبار,True,All,Date,http://www.econews.ir/fa/rss.aspx?kind=-1,".BodyText p, .ContentStyle > p",.ContentStyle h3,".ContentStyle > img, .MediaContent .Center img, .BodyText .PhotoGallery img",False
+http://www.econews.ir/,econews,خبرگزاری اقتصادی ایران,تمام اخبار,True,All,Date,http://www.econews.ir/fa/rss.aspx?kind=-1,".BodyText p, .ContentStyle > p",.ContentStyle h3,".ContentStyle > img, .MediaContent .Center img, .BodyText .PhotoGallery img",True
 boursenews.ir,boursenews,بورس نیوز,تمام اخبار,True,All,Date,http://www.boursenews.ir/fa/rss/allnews,.body,.subtitle,.body img,False
 eghtesadonline.com/,eghtesadonline,اقتصاد آنلاین,تمام اخبار,True,All,Date,http://www.eghtesadonline.com/fa/feeds/,.df-text p,.df-lead,".df-text img, .df-img img",False
 naftema.com,naftema,نفت ما,تمام اخبار,True,All,Date,http://naftema.com/page/rss,#story,#lead,.news-cnt img,True

@@ -5,6 +5,7 @@ import dateutil.parser
 from django.utils import timezone
 import pytz
 from datetime import timedelta
+from rss import tasks
 
 
 def repair_datetime(input_datetime, rss_delay=False):
@@ -44,11 +45,13 @@ def get_new_rss(rss):
         for item in feed['items']:
             item_publish_time = repair_datetime(item['published'], rss.time_delay)
             if item_publish_time > last:
-                BaseNews.objects.update_or_create(title=item['title'],
-                                                  url=item['link'],
-                                                  defaults={
-                                                      'rss': rss,
-                                                      'published_date': item_publish_time})
+                obj, created = BaseNews.objects.update_or_create(title=item['title'],
+                                                                 url=item['link'],
+                                                                 defaults={'rss': rss,
+                                                                           'published_date': item_publish_time,
+                                                                           })
+                if created:
+                    tasks.save_base_news_async(obj.id)
             else:
                 break
 
