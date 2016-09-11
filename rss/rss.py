@@ -8,7 +8,10 @@ from datetime import timedelta
 
 
 def repair_datetime(input_datetime, rss_delay=False):
-    input_datetime = dateutil.parser.parse(input_datetime)
+    try:
+        input_datetime = dateutil.parser.parse(input_datetime)
+    except:
+        input_datetime = timezone.now()
     if not timezone.is_aware(input_datetime):
         input_datetime = input_datetime.replace(tzinfo=pytz.utc)
 

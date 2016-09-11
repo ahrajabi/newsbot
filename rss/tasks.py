@@ -48,7 +48,7 @@ def get_new_rss_async(rss_list):
 def save_all_base_news():
     JOB_NUM = 20
     """ for each base news with complete_news = False , get all news and create related News object """
-    for obj in BaseNews.objects.filter(complete_news=False):
+    for obj in BaseNews.objects.filter(complete_news=False).order_by('?'):
         lock_id = '{0}-lock-{1}-{2}'.format('news', str(obj.id), str(JOB_NUM))
 
         acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
@@ -56,7 +56,7 @@ def save_all_base_news():
 
         if acquire_lock():
             try:
-                save_base_news_async.delay(obj.id)
+                save_base_news_async(obj.id)
             finally:
                 release_lock()
 
@@ -66,9 +66,12 @@ def save_base_news_async(id):
     obj = BaseNews.objects.get(id=id)
     if obj.complete_news == True:
         return
-    if save_news(obj):
-        obj.complete_news = True
-        obj.save()
+    try:
+        if save_news(obj):
+            obj.complete_news = True
+            obj.save()
+    except:
+        pass
 
 
 @shared_task

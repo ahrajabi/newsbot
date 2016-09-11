@@ -14,10 +14,10 @@ def save_news(base_news):
     try:
         print(str(base_news.url))
         page = requests.get(str(base_news.url),  timeout=20)
+        page_soup = bs(page.text, 'html.parser')
     except Exception:
         return False
 
-    page_soup = bs(page.text, 'html.parser')
     if page_soup:
         try:
             news_bodys = page_soup.select(base_news.rss.selector)

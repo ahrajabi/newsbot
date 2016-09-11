@@ -167,6 +167,7 @@ CELERY_TIMEZONE = 'Asia/Tehran'
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
+DEBUG = False
 try:
     from .local_settings import *
 except ImportError:
