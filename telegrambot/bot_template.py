@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
-from telegram import ReplyKeyboardMarkup
 from telegram.emoji import Emoji
+from telegram import ReplyKeyboardMarkup
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from entities import tasks
+from rss.models import ImageUrls
 from rss.news import is_liked_news
 from rss.elastic import more_like_this
-from rss.models import News, ImageUrls
 from telegrambot.models import UserNews
 from rss.ml import normalize, sent_tokenize
 from entities.models import Entity, NewsEntity
-from telegrambot.news_template import sample_news_page, prepare_multiple_sample_news
 from newsbot.settings import BOT_NAME, PROJECT_EN_NAME
+from telegrambot.news_template import prepare_multiple_sample_news
 from telegrambot.bot_send import send_telegram, send_telegram_user
 
 
@@ -143,7 +143,7 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
         if 'user_entity' in kwargs:
             news_user_entity = NewsEntity.objects.filter(news=news, entity__in=kwargs['user_entity'])
             if news_user_entity:
-                text += '\n' + Emoji.BOOKMARK + ' به خاطر دسته های زیر این خبر را دریافت کردید:\n'
+                text += '\n' + Emoji.BOOKMARK + ' دسته های مشترک با علاقه مندی شما:\n'
                 for en in news_user_entity:
                     text += en.entity.name + ', '
                 text += '\n'
@@ -182,6 +182,10 @@ def entity_recommendation():
     return Entity.objects.order_by('followers')[:5]
 
 
+def prepare_advice_entity_link(entity):
+    return Emoji.SMALL_ORANGE_DIAMOND + "/add_"+str(entity.id)+" " + entity.name + ""
+
+
 def show_related_entities(related_entities):
     text = Emoji.HEAVY_MINUS_SIGN * 6 + Emoji.WHITE_LEFT_POINTING_BACKHAND_INDEX + " دسته های مرتبط " +\
            Emoji.WHITE_RIGHT_POINTING_BACKHAND_INDEX + Emoji.HEAVY_MINUS_SIGN * 6
@@ -190,9 +194,16 @@ def show_related_entities(related_entities):
     با انتخاب هرکدام، اخبار مرتبط با آن به صورت بر خط  برای شما ارسال خواهد شد.\n''' % Emoji.BOOKMARK
     # for entity in (related_entities.sort(key=lambda e: e.followers, reverse=True)):
     for entity in related_entities:
-        text += tasks.prepare_advice_entity_link(entity) + '\n'
+        text += prepare_advice_entity_link(entity) + '\n'
     return text
 
 
 def send_related_entities(bot, msg, user, related_entities):
     send_telegram(bot, msg, user, show_related_entities(related_entities))
+
+
+def one_entity_recommendation(entity):
+    text = ""
+    text += Emoji.WHITE_DOWN_POINTING_BACKHAND_INDEX + '\n'
+    text += prepare_advice_entity_link(entity)
+    return text

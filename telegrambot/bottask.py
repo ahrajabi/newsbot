@@ -3,8 +3,8 @@ import logging
 import telegram
 from datetime import timedelta
 from django.utils import timezone
-from telegram.ext.dispatcher import run_async
 from django.contrib.auth.models import User
+from telegram.ext.dispatcher import run_async
 from telegram.ext import MessageHandler, Filters, CallbackQueryHandler, Updater, Job
 from telegram.error import TelegramError, Unauthorized, BadRequest, TimedOut, NetworkError
 
@@ -13,6 +13,7 @@ from newsbot import local_settings
 from entities.models import NewsEntity
 from entities.tasks import get_user_entity
 from telegrambot.bot_send import error_text
+from telegrambot.models import MessageFromUser
 from telegrambot import command_handler, news_template, callback, bot_send
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -45,6 +46,11 @@ def handle(bot, msg):
     bot.sendChatAction(chat_id=msg.message.chat_id, action=telegram.ChatAction.TYPING)
     user = command_handler.verify_user(bot, msg)[0]
 
+    MessageFromUser.objects.create(user=user,
+                                   message_id=msg.message.message_id,
+                                   chat_id=msg.message.chat_id,
+                                   type=1,
+                                   message=msg.message.text)
     command_handler.handle(bot, msg, user)
 
 
@@ -52,7 +58,11 @@ def commands(bot, msg):
     bot.sendChatAction(chat_id=msg.message.chat_id, action=telegram.ChatAction.TYPING)
     from telegrambot import command_handler, bot_template
     user, new_user = command_handler.verify_user(bot, msg)
-
+    MessageFromUser.objects.create(user=user,
+                                   message_id=msg.message.message_id,
+                                   chat_id=msg.message.chat_id,
+                                   type=2,
+                                   message=msg.message.text)
     p = re.compile(r'[a-z]+')
     func = p.findall(msg.message.text.lower())[0] + '_command'
     if hasattr(command_handler, func):
@@ -76,6 +86,7 @@ def crawler(bot, job):
     tasks.get_all_new_news.delay()
     tasks.bulk_save_to_elastic.delay()
     tasks.save_all_base_news.delay()
+
 
 def random_publish_news(bot,job):
     delta = timezone.now()-timedelta(minutes=15)

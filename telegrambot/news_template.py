@@ -25,10 +25,11 @@ def prepare_multiple_sample_news(news_id_list, total_news):
                 break
         except News.DoesNotExist:
             continue
+    text += '\n'
     return text, news_count
 
 
-def publish_sample_news(bot, msg, news_id_list, total_news):
+def publish_sample_news(bot, msg, news_id_list, total_news, keyboard=None):
     text = "%s خبرهای مرتبط:\n" % Emoji.NEWSPAPER
     text += prepare_multiple_sample_news(news_id_list, total_news)
-    send_telegram(bot, msg, text)
+    send_telegram(bot, msg, text, keyboard=None)
