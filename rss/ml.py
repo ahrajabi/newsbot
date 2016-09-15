@@ -1,11 +1,14 @@
-from newsbot.settings import ELASTIC_URL
-from elasticsearch import Elasticsearch
 import hazm
+from nltk import bigrams, trigrams
+from elasticsearch import Elasticsearch
+
+from newsbot.settings import ELASTIC_URL
 
 norm = hazm.Normalizer()
 lemmatizer = hazm.Lemmatizer()
 
 es = Elasticsearch([ELASTIC_URL])
+
 
 def elastic_search_entity(query):
     body = {
@@ -38,3 +41,23 @@ def lemmatize(text):
     return lemmatizer.lemmatize(text)
 
 
+def word_tokenize(text):
+    return hazm.word_tokenize(text)
+
+
+def bi_gram(text):
+    bi_words = []
+    words = word_tokenize(text)
+    bi_tokens = set(bigrams(words))
+    for item in bi_tokens:
+        bi_words.append(item[0] + ' ' + item[1])
+    return bi_words
+
+
+def tri_gram(text):
+    tri_words = []
+    words = word_tokenize(text)
+    tri_tokens = set(trigrams(words))
+    for item in tri_tokens:
+        tri_words.append(item[0] + ' ' + item[1] + ' ' + item[2])
+    return tri_words

@@ -145,14 +145,6 @@ BOT_NAME = '@soorirbot'
 PROJECT_FA_NAME = 'سور'
 PROJECT_EN_NAME = 'Soor'
 
-GLOBAL_SETTINGS = {
-    'SAMPLE_NEWS_COUNT': 3,
-    'MIN_HITS_ENTITY_VALIDATION': 3
-}
-
-
-
-
 ## Celery Configuration
 import djcelery
 djcelery.setup_loader()
@@ -170,6 +162,7 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 DEBUG = False
 try:
     from .local_settings import *
+    from .global_settings import *
 except ImportError:
     pass
 

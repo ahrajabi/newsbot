@@ -1,26 +1,29 @@
+# -*- coding: utf-8 -*-
 import sys
 from telegram.emoji import Emoji
 from django.utils import timezone
+from telegram import InlineKeyboardMarkup
 from django.contrib.auth.models import User
+from telegram.inlinekeyboardbutton import InlineKeyboardButton
 
 
 from entities import tasks
 from rss.models import News
 from entities.models import Entity
 from telegrambot import bot_template
-from entities.tasks import get_entity_text
-from newsbot.settings import GLOBAL_SETTINGS
-from rss.elastic import elastic_search_entity
 from telegrambot.models import UserAlert, UserProfile
-from telegrambot.bot_template import show_related_entities
+from rss.ml import normalize, word_tokenize, bi_gram, tri_gram
+from telegrambot.bot_template import prepare_advice_entity_link
 from telegrambot.news_template import prepare_multiple_sample_news
-from telegrambot.bot_send import send_telegram, error_text, send_telegram_all_user
+from rss.elastic import elastic_search_entity, similar_news_to_query
+from telegrambot.bot_send import send_telegram_user, error_text, send_telegram_all_user
+from newsbot.settings import SAMPLE_NEWS_COUNT, MIN_HITS_ENTITY_VALIDATION, DAYS_FOR_SEARCH_NEWS
 thismodule = sys.modules[__name__]
 
 
 def handle(bot, msg, user):
     # TODO set len hits
-    search_box_result(bot, msg, user)
+        search_box_result(bot, msg, user)
 
 
 def verify_user(bot, msg):
@@ -114,7 +117,7 @@ def news_command(bot, msg, user):
     news_id = command_separator(msg, 'add')
     try:
         news = News.objects.get(id=news_id)
-        bot_template.publish_news(bot, news, user, page=1, message_id=None)
+        bot_template.publish_news(bot, news, user, page=1, message_id=None, user_entity=tasks.get_user_entity(user))
     except News.DoesNotExist:
         return error_text(bot, msg, 'NoneNews')
 
@@ -123,50 +126,83 @@ def command_separator(msg, command):
     return int(msg.message.text[len(command)+3:])
 
 
-def search_box_result(bot, msg, user):
-    text = msg.message.text
-    hits = elastic_search_entity(text)
-    related_entities = get_entity_text(text)
-    response = "%s خبرهای مرتبط:\n" % Emoji.NEWSPAPER
-    response_len = 0
-    news_id = []
+def search_box_result(bot, msg, user, msg_id=None, text=None):
 
+    if not text:
+        text = normalize(msg.message.text)
+    hits = elastic_search_entity(text, max(MIN_HITS_ENTITY_VALIDATION, SAMPLE_NEWS_COUNT) + 1)
+
+    response = ""
+
+    no_response = False
+    elastic_query = '0'
     if hits:
-        m_response, m_response_len = prepare_multiple_sample_news(list(map(int, [hit['_id'] for hit in hits])),
-                                                              GLOBAL_SETTINGS['SAMPLE_NEWS_COUNT'])
-        response += m_response
-        response_len += m_response_len
+        h_response, h_response_len = prepare_multiple_sample_news(list(map(int, [hit['_id'] for hit in hits])),
+                                                                  SAMPLE_NEWS_COUNT)
+        if len(hits) >= MIN_HITS_ENTITY_VALIDATION:
+            entity = Entity.objects.get_or_create(name=text, wiki_name='')[0]
+            response += "%s خبرهای مرتبط با دسته فوق:\n" % Emoji.NEWSPAPER + h_response + '\n'
+            response += Emoji.HEAVY_MINUS_SIGN * 5 + '\n'+ Emoji.BOOKMARK + \
+                        "با انتخاب دسته زیر ، اخبار مرتبط به صورت بر خط برای شما ارسال خواهد شد." + \
+                        '\n'+ prepare_advice_entity_link(entity)
+        else:
+            no_response = True
 
-        for index in hits[:GLOBAL_SETTINGS['SAMPLE_NEWS_COUNT']]:
-            news_id.append(index['_id'])
+    if not hits or no_response:
+        elastic_query = '1'
+        similar_news_id = similar_news_to_query(text, SAMPLE_NEWS_COUNT, DAYS_FOR_SEARCH_NEWS)
+        similar_news = prepare_multiple_sample_news(similar_news_id, 2)[0]
+        response += Emoji.NEWSPAPER + "خبرهای مشابه \n" + similar_news + '\n'
 
-    if response_len < GLOBAL_SETTINGS['SAMPLE_NEWS_COUNT']:
-        for entity in related_entities:
-            related_hits = elastic_search_entity(entity.name)
-            for hit in related_hits:
-                if response_len >= GLOBAL_SETTINGS['SAMPLE_NEWS_COUNT']:
-                    break
-                elif hit['_id'] not in news_id:
-                    news_id.append(hit['_id'])
-                    r_response, r_response_len = prepare_multiple_sample_news([int(hit['_id'])], 1)
-                    response += r_response
-                    response_len += r_response_len
+        def print_n_gram(n_gram):
+            gram_response = ""
+            not_response = True
+            for word in n_gram:
+                related_hits = elastic_search_entity(word, MIN_HITS_ENTITY_VALIDATION)
+                if len(related_hits) >= MIN_HITS_ENTITY_VALIDATION:
+                    en = Entity.objects.get_or_create(name=word, wiki_name='')[0]
+                    gram_response += prepare_advice_entity_link(en) + '\n'
+                    not_response = False
 
-    try:
-        entity = Entity.objects.get(name=text)
-        if entity not in related_entities:
-            related_entities.insert(0, entity)
-    except Entity.DoesNotExist:
-        if len(hits) >= GLOBAL_SETTINGS['MIN_HITS_ENTITY_VALIDATION']:
-            new_entity = Entity.objects.create(name=text, wiki_name="")
-            related_entities.insert(0, new_entity)
+            return not_response, gram_response
+        pre_response = Emoji.HEAVY_MINUS_SIGN * 5 + '\n'+ \
+                       Emoji.WARNING_SIGN + "متن وارد شده یافت نشد.\n" + Emoji.BOOKMARK + \
+                       "دسته های مشابه پیشنهادی:‌\n با انتخاب هر یک اخبار مرتبط به صورت بر خط برای شما ارسال خواهد شد.\n"
 
-    if not related_entities:
-        error_text(bot, msg, 'InvalidEntity')
-        return
+        three_gram = tri_gram(text)
+        no_three_gram_response, three_response = print_n_gram(three_gram)
+        if no_three_gram_response:
+            two_gram = bi_gram(text)
+            no_two_gram_response, two_response = print_n_gram(two_gram)
+            if no_two_gram_response:
+                one_gram = word_tokenize(text)
+                no_one_gram_response, one_response = print_n_gram(one_gram)
+                if no_one_gram_response:
+                    if not similar_news_id:
+                        error_text(bot, msg, 'InvalidEntity')
+                        return
+                else:
+                    response += pre_response + one_response
+            else:
+                response += pre_response + two_response
+        else:
+            response += pre_response + three_response
 
-    else:
-        e_response = show_related_entities(related_entities)
+    final_destination = None
+    call_back_id = None
+    if msg.callback_query is not None:
+        final_destination = msg.callback_query.message.message_id
+        call_back_id = msg_id
+    elif msg.message is not None:
+        call_back_id = msg.message.message_id
 
-    final_response = response + '\n' + e_response
-    send_telegram(bot, msg, final_response)
+    buttons = [[
+        InlineKeyboardButton(text='صفحه بعد', callback_data='continue-' + 'next-1-' + elastic_query +
+                                                            '-' + str(call_back_id)),
+    ], ]
+    keyboard = InlineKeyboardMarkup(buttons)
+
+    if len(hits) == SAMPLE_NEWS_COUNT:
+        keyboard = None
+
+    send_telegram_user(bot, user, response, keyboard, final_destination)

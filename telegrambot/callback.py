@@ -1,23 +1,35 @@
 
 import re
 import sys
+from telegram import InlineKeyboardMarkup
+from telegram.inlinekeyboardbutton import InlineKeyboardButton
 
 from entities import tasks
 from rss.models import News
 from rss.news import set_news_like
 from telegrambot.models import UserNews
 from telegrambot.bot_send import error_text
+from telegrambot.models import MessageFromUser
+from telegrambot.bot_send import send_telegram_user
 from telegrambot import bot_template, command_handler
-
+from telegrambot.command_handler import search_box_result
+from telegrambot.news_template import prepare_multiple_sample_news
+from rss.elastic import elastic_search_entity, similar_news_to_query
+from newsbot.global_settings import NEWS_PER_PAGE, DAYS_FOR_SEARCH_NEWS, SAMPLE_NEWS_COUNT
 
 thismodule = sys.modules[__name__]
 
 
-def handle(bot,msg):
+def handle(bot, msg):
     user = command_handler.get_user(msg.callback_query.message.chat.id)
     p = re.compile(r'[a-z]+')
     func = p.findall(msg.callback_query.data.lower())[0] + '_inline_command'
     print(func)
+    MessageFromUser.objects.create(user=user,
+                                   message_id=msg.callback_query.message.message_id,
+                                   chat_id=msg.callback_query.message.chat_id,
+                                   type=3,
+                                   message=msg.callback_query.data)
     if hasattr(thismodule, func):
         getattr(thismodule, func)(bot, msg, user)
     else:
@@ -27,7 +39,7 @@ def handle(bot,msg):
 def score_inline_command(bot, msg, user):
     entity_id = re.compile(r'\d+').findall(msg.callback_query.data.lower())[0]
     score = re.compile(r'\(((-|)\d*?)\)').findall(msg.callback_query.data.lower())[0][0]
-    if tasks.set_score_entity(user,entity_id,int(score)):
+    if tasks.set_score_entity(user, entity_id, int(score)):
         TEXT = '''
 علاقه شما به اخبار  %s با مقدار %d تنظیم شد.
         ''' % (tasks.get_entity(entity_id).name, int(score)+3)
@@ -46,7 +58,7 @@ def news_inline_command(bot, msg, user):
     page = UserNews.objects.filter(news=news, user=user)[0].page
 
     if title == 'like':
-        set_news_like(user,news,mark='Like')
+        set_news_like(user, news, mark='Like')
         bot.answerCallbackQuery(msg.callback_query.id, text='پسندش شما ثبت شد!')
     elif title == 'unlike':
         set_news_like(user, news, mark='Unlike')
@@ -62,7 +74,54 @@ def news_inline_command(bot, msg, user):
         bot.answerCallbackQuery(msg.callback_query.id, text='اخبار مرتبط')
 
     bot_template.news_page(bot, news, user,
-                           page=page, message_id=msg.callback_query.message.message_id)
+                           page=page, message_id=msg.callback_query.message.message_id,
+                           user_entity=tasks.get_user_entity(user))
 
 
+def continue_inline_command(bot, msg, user):
+    # elastic_query == 0 --> elastic_search_entity
+    # elastic_query == 1 --> similar_news_to_query
 
+    data_container = msg.callback_query.data.split('continue-')[1].partition('-')[2].partition('-')
+    news_id_list = []
+    page_number = int(data_container[0])
+    data_container_2 = data_container[2].partition('-')
+    elastic_query = data_container_2[0]
+    msg_id = data_container_2[2]
+
+    try:
+        query_text = MessageFromUser.objects.get(message_id=msg_id, type=1,
+                                                 chat_id=msg.callback_query.message.chat_id).message
+    except MessageFromUser.DoesNotExist:
+        bot.answerCallbackQuery(msg.callback_query.id, text='خطا')
+        return
+    if page_number != 0:
+        offset = page_number * NEWS_PER_PAGE - (NEWS_PER_PAGE - SAMPLE_NEWS_COUNT)
+
+        if elastic_query == '0':
+            hits = elastic_search_entity(query_text, NEWS_PER_PAGE, offset)
+            news_id_list = list(map(int, [hit['_id'] for hit in hits]))
+
+        elif elastic_query == '1':
+            news_id_list = similar_news_to_query(query_text, NEWS_PER_PAGE, DAYS_FOR_SEARCH_NEWS, offset)
+
+        if len(news_id_list) < NEWS_PER_PAGE:
+            buttons = [[
+                InlineKeyboardButton(text='صفحه قبل', callback_data='continue-' + 'previous-' + str(page_number - 1) +
+                                                                    '-' + elastic_query + '-' + msg_id),
+             ], ]
+        else:
+            buttons = [[
+                InlineKeyboardButton(text='صفحه قبل', callback_data='continue-' + 'previous-' + str(page_number - 1) +
+                                                                    '-' + elastic_query + '-' + msg_id),
+                InlineKeyboardButton(text='صفحه بعد', callback_data='continue-' + 'next-' + str(page_number + 1) + '-' +
+                                                                    elastic_query + '-' + msg_id),
+                 ], ]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+
+        response = prepare_multiple_sample_news(news_id_list, NEWS_PER_PAGE)[0]
+
+        send_telegram_user(bot, user, response, keyboard, msg.callback_query.message.message_id)
+    else:
+        search_box_result(bot, msg, user, msg_id, query_text)

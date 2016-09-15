@@ -1,8 +1,8 @@
 from django.db import models
+from django.utils import timezone
 from django.contrib.auth.models import User
-from rss.models import News
 
-# Create your models here.
+from rss.models import News
 
 
 class UserProfile(models.Model):
@@ -18,7 +18,7 @@ class UserProfile(models.Model):
 
 class UserAlert(models.Model):
     text = models.TextField(null=True)
-    send_time = models.DateTimeField(null=True,blank=True)
+    send_time = models.DateTimeField(null=True, blank=True)
     is_sent = models.BooleanField(default=False)
 
 
@@ -28,3 +28,21 @@ class UserNews(models.Model):
     page = models.PositiveIntegerField(default=0)
     image_page = models.PositiveIntegerField(default=0)
 
+
+class MessageFromUser(models.Model):
+    MESSAGE_TYPE = (
+        (1, 'Text'),
+        (2, 'Command'),
+        (3, 'Callback'),
+        (4, 'other')
+    )
+    user = models.ForeignKey(User)
+    message_id = models.CharField(null=True, blank=True, max_length=1000)
+    chat_id = models.CharField(null=True, blank=True, max_length=1000)
+    type = models.IntegerField(choices=MESSAGE_TYPE, default=4)
+    message = models.TextField()
+    date = models.DateTimeField(verbose_name='received date')
+
+    def save(self, *args, **kwargs):
+        self.date = timezone.now()
+        return super(MessageFromUser, self).save(*args, **kwargs)

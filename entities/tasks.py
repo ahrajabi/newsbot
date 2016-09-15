@@ -1,5 +1,4 @@
 import wikipedia
-from telegram.emoji import Emoji
 
 from .models import UserEntity, Entity, NewsEntity
 wikipedia.set_lang('fa')
@@ -108,7 +107,3 @@ def get_entity_text(input_text):
         if entity.name in input_text:
             ret.append(entity)
     return ret
-
-
-def prepare_advice_entity_link(entity):
-    return Emoji.SMALL_ORANGE_DIAMOND + "/add_"+str(entity.id)+" " + entity.name + ""
