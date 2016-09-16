@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import RssFeeds, News, BaseNews, ImageUrls, NewsLike, CategoryCode
+from .models import RssFeeds, News, BaseNews, ImageUrls, NewsLike, CategoryCode, NewsAgency
 
 
 def related_obj_id(obj):
@@ -35,4 +35,9 @@ class NewsLikeAdmin(admin.ModelAdmin):
 @admin.register(CategoryCode)
 class CategoryCodeAdmin(admin.ModelAdmin):
     list_display = [x.name for x in CategoryCode._meta.local_fields]
+
+
+@admin.register(NewsAgency)
+class NewsAgencyAdmin(admin.ModelAdmin):
+    list_display = [x.name for x in NewsAgency._meta.local_fields]
 

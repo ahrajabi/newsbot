@@ -22,6 +22,7 @@ class UserSettings(models.Model):
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User)
+    activated = models.BooleanField(default=True)
     first_name = models.CharField(max_length=140)
     last_name = models.CharField(max_length=140)
     last_chat = models.DateTimeField()
