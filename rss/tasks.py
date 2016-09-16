@@ -1,23 +1,24 @@
-from celery import shared_task, task
+from celery import shared_task
 from rss.rss import get_new_rss
 from rss.models import RssFeeds
-from rss.models import BaseNews, News, ImageUrls, NewsLike
+from rss.models import BaseNews
 import datetime
 from rss.news import save_news
 from rss.elastic import source_generator, es
 from elasticsearch import helpers
-from celery.utils.log import get_task_logger
 from django.core.cache import cache
 from hashlib import md5
 import random
-
+from django.conf import settings
 LOCK_EXPIRE = 60*2
 
 
 @shared_task
 def get_all_new_news():
-    THREAD_RSS_NUM = 3
 
+    bulk_save_to_elastic()
+
+    THREAD_RSS_NUM = settings.CELERY_WORKER_NUM
     all_rss = RssFeeds.objects.all()
     all_rss = [item.id for item in all_rss]
 
@@ -34,11 +35,12 @@ def get_all_new_news():
             finally:
                 release_lock()
 
-    bulk_save_to_elastic()
 
 
 @shared_task
 def get_new_rss_async(rss_list):
+    start_time = datetime.datetime.now()
+
     random.shuffle(rss_list)
     for id in rss_list:
         rss = RssFeeds.objects.get(id=id)
@@ -46,6 +48,8 @@ def get_new_rss_async(rss_list):
         if not rss.activation:
             continue
         get_new_rss(rss)
+
+    print('GET NEW RSS', datetime.datetime.now() - start_time)
 
 
 @shared_task
@@ -67,5 +71,5 @@ def bulk_save_to_elastic():
     k = ({'_index': 'news', '_type': 'new', '_id': idx, "_source": source}
          for idx, source in source_generator())
     helpers.bulk(es, k)
-    print(datetime.datetime.now() - start_time)
+    print('ELASTIC', datetime.datetime.now() - start_time)
 
