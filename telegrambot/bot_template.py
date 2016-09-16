@@ -138,7 +138,10 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
             text += Emoji.SMALL_BLUE_DIAMOND + sentence + '\n'
             if len(text) > 300 and not has_summary:
                 break
-        text += '\n' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + news.base_news.rss.fa_name + '\n'
+        try:
+            text += '\n' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + news.base_news.rss.news_agency.fa_name + '\n'
+        except Exception:
+            pass
 
         if 'user_entity' in kwargs:
             news_user_entity = NewsEntity.objects.filter(news=news, entity__in=kwargs['user_entity'])
@@ -149,7 +152,11 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
                 text += '\n'
 
     elif page == 2:
-        text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n    '
+        try:
+            text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n    '
+        except Exception:
+            pass
+
         if len(news.body) < 3500:
             text += news.body + '\n'
         else:

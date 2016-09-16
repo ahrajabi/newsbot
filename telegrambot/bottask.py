@@ -1,23 +1,13 @@
 import re
-import logging
 import telegram
-from datetime import timedelta
-from django.utils import timezone
-from django.contrib.auth.models import User
 from telegram.ext.dispatcher import run_async
 from telegram.ext import MessageHandler, Filters, CallbackQueryHandler, Updater, Job
 from telegram.error import TelegramError, Unauthorized, BadRequest, TimedOut, NetworkError
-
-from rss import tasks
-from newsbot import local_settings
-from entities.models import NewsEntity
-from entities.tasks import get_user_entity
+from django.conf import settings
+from telegrambot.publish import publish_handler
 from telegrambot.bot_send import error_text
 from telegrambot.models import MessageFromUser
 from telegrambot import command_handler, news_template, callback, bot_send
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
 
 
 def error_callback(bot, update, error):
@@ -37,10 +27,6 @@ def error_callback(bot, update, error):
         print("# handle all other telegram related errors")
 
 
-TOKEN = local_settings.TELEBOT_TOKEN  # get token from command-line
-
-
-@run_async
 def handle(bot, msg):
     print(msg)
     bot.sendChatAction(chat_id=msg.message.chat_id, action=telegram.ChatAction.TYPING)
@@ -51,6 +37,7 @@ def handle(bot, msg):
                                    chat_id=msg.message.chat_id,
                                    type=1,
                                    message=msg.message.text)
+
     command_handler.handle(bot, msg, user)
 
 
@@ -82,45 +69,18 @@ def user_alert_handler(bot, job):
     command_handler.user_alert_handler(bot, job)
 
 
-def crawler(bot, job):
-    tasks.get_all_new_news.delay()
-    tasks.bulk_save_to_elastic.delay()
-    tasks.save_all_base_news.delay()
+def setup():
+    updater = Updater(token=settings.TELEGRAM_TOKEN)
 
+    dispatcher = updater.dispatcher
+    dispatcher.add_handler(MessageHandler([Filters.command], commands))
+    dispatcher.add_handler(MessageHandler([Filters.text], handle))
+    dispatcher.add_handler(CallbackQueryHandler(callback_query))
+    #dispatcher.add_error_handler(error_callback)
+    q_bot = updater.job_queue
 
-def random_publish_news(bot,job):
-    delta = timezone.now()-timedelta(minutes=60)
-    for user in User.objects.all():
-        ent = get_user_entity(user)
-        news_ent = NewsEntity.objects.filter(entity__in=ent,
-                                             news__base_news__published_date__range=(delta, timezone.now()))\
-            .order_by('news__base_news__published_date')
-        print(user.username, news_ent.count())
-        if news_ent.count() > 0:
-            news_list = list(set([item.news_id for item in news_ent]))
-            output = 'اخبار مرتبط با دسته‌های شما'
-            output += '\n'
-            output += news_template.prepare_multiple_sample_news(news_list, 20)[0]
-            try:
-                bot_send.send_telegram_user(bot, user, output)
-            except:
-                print("ERROR BOT SENDING", user.username)
+    q_bot.put(Job(publish_handler, 5, repeat=True))
+    q_bot.put(Job(user_alert_handler, 100, repeat=True))
 
-
-updater = Updater(token=TOKEN)
-
-dispatcher = updater.dispatcher
-dispatcher.add_handler(MessageHandler([Filters.command], commands))
-dispatcher.add_handler(MessageHandler([Filters.text], handle))
-dispatcher.add_handler(CallbackQueryHandler(callback_query))
-dispatcher.add_error_handler(error_callback)
-
-q_bot = updater.job_queue
-
-q_bot.put(Job(random_publish_news, 60*60, repeat=True))
-q_bot.put(Job(user_alert_handler, 100, repeat=True))
-
-
-updater.start_polling()
-print('Listening ...')
-
+    updater.start_polling()
+    print('Listening ...')

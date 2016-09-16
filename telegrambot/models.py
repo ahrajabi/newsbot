@@ -3,6 +3,21 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 
 from rss.models import News
+import pytz
+from datetime import datetime
+
+
+class UserNewsList(models.Model):
+    user = models.ForeignKey(User, verbose_name='User')
+    datetime_publish = models.DateTimeField(default=datetime(2001, 8, 15, 8, 15, 12, 0, pytz.UTC))
+    number_of_news = models.PositiveIntegerField(verbose_name='Number of News of list')
+    message_id = models.PositiveIntegerField(verbose_name="Message ID", null=True)
+
+
+class UserSettings(models.Model):
+    live_news = models.BooleanField(default=False)
+    interval_news_list = models.PositiveSmallIntegerField(default=180)
+    last_news_list = models.OneToOneField(UserNewsList, verbose_name='Last News List', null=True)
 
 
 class UserProfile(models.Model):
@@ -11,6 +26,7 @@ class UserProfile(models.Model):
     last_name = models.CharField(max_length=140)
     last_chat = models.DateTimeField()
     telegram_id = models.PositiveIntegerField()
+    user_settings = models.OneToOneField(UserSettings, verbose_name='User Settings', null=True)
 
     def __unicode__(self):
         return u'Profile of user: %s' % self.user.username

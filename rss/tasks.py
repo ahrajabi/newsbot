@@ -9,6 +9,7 @@ from elasticsearch import helpers
 from celery.utils.log import get_task_logger
 from django.core.cache import cache
 from hashlib import md5
+import random
 
 LOCK_EXPIRE = 60*2
 
@@ -23,7 +24,7 @@ def get_all_new_news():
     for j in range(THREAD_RSS_NUM):
         rss_list = all_rss[j::THREAD_RSS_NUM]
         print(rss_list)
-        lock_id = '{0}-lock-{1}-{2}'.format('rss', str(j),str(THREAD_RSS_NUM))
+        lock_id = '{0}-lock-{1}-{2}'.format('rss', str(j), str(THREAD_RSS_NUM))
         acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
         release_lock = lambda: cache.delete(lock_id)
 
@@ -33,12 +34,15 @@ def get_all_new_news():
             finally:
                 release_lock()
 
+    bulk_save_to_elastic()
+
 
 @shared_task
 def get_new_rss_async(rss_list):
+    random.shuffle(rss_list)
     for id in rss_list:
         rss = RssFeeds.objects.get(id=id)
-        print(rss.name)
+        print(rss.news_agency.name)
         if not rss.activation:
             continue
         get_new_rss(rss)

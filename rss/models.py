@@ -4,6 +4,19 @@ from django.contrib.auth.models import User
 import pytz
 
 
+class NewsAgency(models.Model):
+    url = models.URLField('Web site', max_length=50)
+    name = models.CharField('site Name', max_length=50)
+    fa_name = models.CharField('Persian Name', max_length=50)
+    selector = models.CharField(max_length=100, blank=True)
+    summary_selector = models.CharField(max_length=100, blank=True)
+    image_selector = models.CharField(max_length=100, blank=True)
+    time_delay = models.BooleanField('Time Delay', default=False)
+
+    def __str__(self):
+        return self.name
+
+
 class CategoryCode(models.Model):
     name = models.CharField('site Name', max_length=50)
     fa_name = models.CharField('Persian Name', max_length=50)
@@ -19,27 +32,23 @@ class RssFeeds(models.Model):
         ('F', 'Front'),
     )
 
-    url = models.URLField('Web site', max_length=600,  blank=False)
-    name = models.CharField('site Name', max_length=200, blank=True)
-    fa_name = models.CharField('Persian Name', max_length=200, blank=True)
+    news_agency = models.ForeignKey(NewsAgency)
     category = models.CharField('Category', max_length=50, blank=True)
     activation = models.BooleanField('Activation', default=True)
     category_ref = models.ForeignKey(CategoryCode, blank=True, null=True)
     order = models.CharField('RSS Order', max_length=50, blank=True, choices=RSS_ORDER)
     main_rss = models.URLField('Web site RSS', max_length=300, blank=True)
-    selector = models.CharField(max_length=1000, blank=True)
-    summary_selector = models.CharField(max_length=300, blank=True)
-    image_selector = models.CharField(max_length=300, blank=True)
     last_modified = models.DateTimeField(blank=True, default=datetime(2001, 8, 15, 8, 15, 12, 0, pytz.UTC))
-    time_delay = models.BooleanField('Time Delay', default=False)
 
     def __str__(self):
-        return self.fa_name
+        return self.news_agency.fa_name +" " + self.category
 
 
 class BaseNews(models.Model):
     url = models.URLField('News url', max_length=600, blank=True)
-    rss = models.ForeignKey(RssFeeds, verbose_name='related rss feed', null=True, blank=True)
+    rss = models.ForeignKey(RssFeeds, verbose_name='related rss feed', null=True, blank=True, related_name='rss')
+    news_agency = models.ForeignKey(NewsAgency, verbose_name='News Agency')
+    all_rss = models.ManyToManyField(RssFeeds, verbose_name='all rss feed', default=rss)
     title = models.TextField('Tittle', blank=True, null=True)
     published_date = models.DateTimeField('Published date ', blank=True, null=True)
     complete_news = models.BooleanField('Has full news', default=False)
@@ -71,4 +80,3 @@ class NewsLike(models.Model):
     news = models.ForeignKey(News)
     user = models.ForeignKey(User)
     status = models.BooleanField(default=True, choices=STATUS)
-

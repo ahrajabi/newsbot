@@ -6,10 +6,18 @@ from telegrambot.bot_send import send_telegram
 
 def sample_news_page(news):
     title = news.base_news.title
-    source = news.base_news.rss.fa_name
+
+    try:
+        source = news.base_news.rss.news_agency.fa_name
+    except Exception:
+        pass
+
     text = Emoji.SMALL_BLUE_DIAMOND + title + '\n'
     text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + 'مشاهده خبر:' + '/News_' + str(news.id) + '\n'
-    text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n\n'
+    try:
+        text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n\n'
+    except Exception:
+        pass
     return text
 
 

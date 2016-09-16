@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
-
+import sys
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -142,24 +142,46 @@ STATIC_ROOT = "/tmp/"
 ELASTIC_URL = 'http://130.185.76.171:9200'
 
 BOT_NAME = '@soorirbot'
-PROJECT_FA_NAME = 'سور'
-PROJECT_EN_NAME = 'Soor'
+PROJECT_FA_NAME = 'خبرمن'
+PROJECT_EN_NAME = 'KhabareMan'
+
+GLOBAL_SETTINGS = {
+    'SAMPLE_NEWS_COUNT': 3,
+    'MIN_HITS_ENTITY_VALIDATION': 3
+}
+
+TELEGRAM_TOKEN = 'Add your telegram token in local_settings'
+
 
 ## Celery Configuration
 import djcelery
 djcelery.setup_loader()
 
-BROKER_URL = 'redis://localhost:6379/0'
 BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Tehran'
-CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 DEBUG = False
+
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+        }
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    }
+}
+
+
 try:
     from .local_settings import *
     from .global_settings import *

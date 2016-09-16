@@ -20,9 +20,6 @@ class NewsAdmin(admin.ModelAdmin):
 @admin.register(BaseNews)
 class BaseNewsAdmin(admin.ModelAdmin):
     list_display = [x.name for x in BaseNews._meta.local_fields]
-    list_filter = (
-        ('rss_id'),
-    )
 
 
 @admin.register(ImageUrls)
