@@ -4,13 +4,13 @@ from django.contrib.auth.models import User
 from entities.models import NewsEntity
 from entities.tasks import get_user_entity
 from telegrambot.models import UserNewsList, UserProfile
-from telegrambot import news_template, bot_send
+from telegrambot import news_template, bot_send, command_handler
 from django.core.cache import cache
 from rss import elastic
 from django.conf import settings
 from telegram.inlinekeyboardbutton import InlineKeyboardButton
 from telegram import InlineKeyboardMarkup
-
+from telegram.error import Unauthorized
 
 def publish_handler(bot, job):
     try:
@@ -39,7 +39,8 @@ def periodic_publish_news(bot, job):
         interval = up.user_settings.interval_news_list
         delta = timezone.now() - timedelta(minutes=interval)
         if up.user_settings.last_news_list and up.user_settings.last_news_list.datetime_publish >= delta:
-            pass
+            continue
+
         ent = get_user_entity(user)
         el_news = elastic.news_with_terms(terms_list=[item.name for item in ent],
                                           size=settings.NEWS_PER_PAGE,
@@ -72,7 +73,12 @@ def periodic_publish_news(bot, job):
                     InlineKeyboardButton(text='صفحه بعد', callback_data='entitynewslist-next'),
                 ], ]
                 keyboard = InlineKeyboardMarkup(buttons)
-            result = bot_send.send_telegram_user(bot, user, output, keyboard=keyboard)
+
+            try:
+                result = bot_send.send_telegram_user(bot, user, output, keyboard=keyboard)
+            except Unauthorized:
+                command_handler.deactive_profile(up)
+
             unl.message_id = result.message_id
             unl.save()
 
@@ -84,7 +90,7 @@ def live_publish_news(bot, job):
     end = timezone.now()
     cache.set('last_live_publish', timezone.now())
 
-    for up in UserProfile.objects.filter(user_settings__live_news=True):
+    for up in UserProfile.objects.filter(user_settings__live_news=True, activated=True):
         user = up.user
         ent = get_user_entity(user)
         news_ent = NewsEntity.objects.filter(entity__in=ent,
@@ -99,5 +105,8 @@ def live_publish_news(bot, job):
             output = 'اخبار زنده دسته‌های شما'
             output += '\n'
             output += news_template.prepare_multiple_sample_news(news_list, 20)[0]
+            try:
+                bot_send.send_telegram_user(bot, user, output)
+            except Unauthorized:
+                command_handler.deactive_profile(up)
 
-            bot_send.send_telegram_user(bot, user, output)

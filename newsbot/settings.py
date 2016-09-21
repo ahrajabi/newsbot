@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     'entities',
     'search',
     'django_extensions',
-    'raven.contrib.django.raven_compat',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -172,15 +171,18 @@ DEBUG = False
 
 LOGGING = {
     'version': 1,
+    'disable_existing_logger': False,
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'stream': sys.stdout,
         }
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
+    'loggers': {
+        'telegrambot': {
+            'handlers': ['console'],
+            'propagate': False,
+        }
     }
 }
 

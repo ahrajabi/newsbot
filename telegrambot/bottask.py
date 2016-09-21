@@ -2,7 +2,9 @@ import re
 import telegram
 from telegram.ext.dispatcher import run_async
 from telegram.ext import MessageHandler, Filters, CallbackQueryHandler, Updater, Job, InlineQueryHandler
-from telegram.error import TelegramError, Unauthorized, BadRequest, TimedOut, NetworkError
+from telegram.error import (TelegramError, Unauthorized, BadRequest,
+                            TimedOut, NetworkError)
+
 from django.conf import settings
 from telegrambot.publish import publish_handler
 from telegrambot.bot_send import error_text
@@ -11,22 +13,22 @@ from telegrambot import command_handler, news_template, callback, bot_send, inli
 
 
 def error_callback(bot, update, error):
+    print(":D:D:D::D:D:D::D:D:D::D:D:D")
     try:
         raise error
     except Unauthorized:
-        print("remove update.message.chat_id from conversation list")
+        print(update)
     except BadRequest:
         print("# handle malformed requests - read more below!")
     except TimedOut:
         print("# handle slow connection problems")
     except NetworkError:
         print("# handle other connection problems")
-    # except ChatMigrated as e:
-    #    print("# the chat_id of a group has changed, use e.new_chat_id instead")
     except TelegramError:
         print("# handle all other telegram related errors")
 
 
+@run_async
 def handle(bot, msg):
     print(msg)
     bot.sendChatAction(chat_id=msg.message.chat_id, action=telegram.ChatAction.TYPING)
@@ -41,6 +43,7 @@ def handle(bot, msg):
     command_handler.handle(bot, msg, user)
 
 
+@run_async
 def commands(bot, msg):
     bot.sendChatAction(chat_id=msg.message.chat_id, action=telegram.ChatAction.TYPING)
     from telegrambot import command_handler, bot_template
@@ -61,6 +64,7 @@ def commands(bot, msg):
         error_text(bot, msg, type='NoCommand')
 
 
+@run_async
 def callback_query(bot, msg):
     callback.handle(bot, msg)
 
@@ -72,17 +76,16 @@ def user_alert_handler(bot, job):
 def setup():
     updater = Updater(token=settings.TELEGRAM_TOKEN)
     dispatcher = updater.dispatcher
+
     dispatcher.add_handler(MessageHandler([Filters.command], commands))
     dispatcher.add_handler(MessageHandler([Filters.text], handle))
     dispatcher.add_handler(CallbackQueryHandler(callback_query))
-    #dispatcher.add_handler(InlineQueryHandler(inline.handler))
-    #dispatcher.add_error_handler(error_callback)
+    dispatcher.add_handler(InlineQueryHandler(inline.handler))
+    dispatcher.add_error_handler(error_callback)
 
     q_bot = updater.job_queue
-
     q_bot.put(Job(publish_handler, 5, repeat=True))
     q_bot.put(Job(user_alert_handler, 100, repeat=True))
-
     updater.start_polling()
 
     print('Listening ...')

@@ -34,6 +34,9 @@ def verify_user(bot, msg):
         user = create_new_user_profile(bot, msg)
     return user, new_user
 
+def deactive_profile(up):
+    up.activated = False
+    up.save()
 
 def create_new_user_profile(bot, msg):
     user = User.objects.create_user(username=msg.message.from_user.username)
@@ -52,10 +55,12 @@ def get_user(telegram_id):
     user = [i.user for i in profiles][0]
     if not user:
         return None
+
     ##
     up = UserProfile.objects.get(user=user)
     if up:
         up.last_chat = timezone.now()
+        up.activated = True
     up.save()
     ##
     return user

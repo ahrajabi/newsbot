@@ -62,12 +62,7 @@ class ColoredLogger(logging.Logger):
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        print('SET_________', settings.DEBUG)
         logging.config.dictConfig(settings.LOGGING)
         logging.setLoggerClass(ColoredLogger)
-
-        #TODO: Not working
-        if not settings.DEBUG:
-            logging.propagate = False
 
         bottask.setup()
