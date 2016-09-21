@@ -20,11 +20,12 @@ def sample_news_page(news):
 
     text = Emoji.SMALL_BLUE_DIAMOND + title + '\n'
     text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + 'مشاهده خبر:' + '/News_' + str(news.id) + '\n'
+    text += Emoji.CALENDAR + ' ' + GeorgianToJalali(news.base_news.published_date)
     try:
         text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n\n'
     except Exception:
         pass
-    text += Emoji.CALENDAR + ' ' + GeorgianToJalali(news.base_news.published_date)
+
     return text +'\n'
 
 
