@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'telegrambot',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_swagger',
     'rss',
     'entities',
     'search',
@@ -140,6 +142,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = "/tmp/"
 
 ELASTIC_URL = 'http://130.185.76.171:9200'
+ELASTIC_NEWS = 'news'
 
 BOT_NAME = '@soorirbot'
 PROJECT_FA_NAME = 'خبرمن'
@@ -181,6 +184,12 @@ LOGGING = {
     }
 }
 
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
+    'PAGE_SIZE': 10
+}
 
 try:
     from .local_settings import *

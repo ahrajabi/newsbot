@@ -41,7 +41,11 @@ def get_new_rss(rss):
         rss.last_modified = feed_time
         rss.save()
         for item in feed['items']:
-            item_publish_time = repair_datetime(item['published'], rss.news_agency.time_delay)
+            try:
+                item_publish_time = repair_datetime(item['published'], rss.news_agency.time_delay)
+            except Exception:
+                item_publish_time = timezone.localtime(timezone.now())
+
             if item_publish_time > last:
                 obj, created = BaseNews.objects.get_or_create(title=item['title'],
                                                               url=item['link'][0:BaseNews._meta.get_field('url').max_length-2],

@@ -30,6 +30,7 @@ class RssFeeds(models.Model):
         ('D', 'Date'),
         ('V', 'Visit'),
         ('F', 'Front'),
+        ('VF', 'Visit in frontpage'),
     )
 
     news_agency = models.ForeignKey(NewsAgency)

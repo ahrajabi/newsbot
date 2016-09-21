@@ -9,9 +9,11 @@ from datetime import datetime
 
 class UserNewsList(models.Model):
     user = models.ForeignKey(User, verbose_name='User')
+    datetime_start = models.DateTimeField(default=datetime(2001, 8, 15, 8, 15, 12, 0, pytz.UTC))
     datetime_publish = models.DateTimeField(default=datetime(2001, 8, 15, 8, 15, 12, 0, pytz.UTC))
     number_of_news = models.PositiveIntegerField(verbose_name='Number of News of list')
     message_id = models.PositiveIntegerField(verbose_name="Message ID", null=True)
+    page = models.PositiveIntegerField(verbose_name="Page that list is", default=1)
 
 
 class UserSettings(models.Model):

@@ -1,22 +1,22 @@
 import datetime
-from newsbot.settings import ELASTIC_URL
+from django.conf import settings
 from elasticsearch import Elasticsearch
-
+import six
 from rss.models import News
 
-es = Elasticsearch([ELASTIC_URL])
+es = Elasticsearch([settings.ELASTIC_URL])
 
 
 def save_to_elastic_search(obj):
     try:
         body = {
-            'news_body': obj.body,
-            'summary': obj.summary,
             'title': obj.base_news.title,
+            'summary': obj.summary,
+            'body': obj.body,
             'published_date': obj.base_news.published_date
 
         }
-        es.index(index='news', doc_type='new', id=obj.id, body=body, request_timeout=50)
+        es.index(index=settings.ELASTIC_NEWS, doc_type='new', id=obj.id, body=body, request_timeout=50)
         return True
     except Exception:
         return False
@@ -35,7 +35,7 @@ def postgres_news_to_elastic():
 
 def source_generator():
     for obj in News.objects.filter(base_news__save_to_elastic=False):
-        fields_keys = ('news_body', 'summary', 'title', 'published_date')
+        fields_keys = ('body', 'summary', 'title', 'published_date')
         fields_values = (obj.body, obj.summary, obj.base_news.title, obj.base_news.published_date)
         source = dict(zip(fields_keys, fields_values))
         # TODO below line msut execute after bulk save to elastic function
@@ -50,17 +50,15 @@ def elastic_search_entity(query, size, offset=0):
             "multi_match": {
                 "query": query,
                 "type": "phrase",
-                "fields": ["title^2", "news_body"]
+                "fields": ["title^2", "body"]
             }
         },
-        "fields": ['published_date', '_uid', 'news_body'],
+        "fields": ['published_date', '_uid', 'body'],
         "sort": [{"published_date": {"order": "desc"}}],
         "from": offset,
         "size": size
     }
-    r = es.search(index='news', body=body, request_timeout=20)
-    for hit in r['hits']['hits']:
-        print(hit)
+    r = es.search(index=settings.ELASTIC_NEWS, body=body, request_timeout=20)
     return r['hits']['hits']
 
 
@@ -68,7 +66,7 @@ def more_like_this(query, number):
     body = {
         "query": {
             "more_like_this": {
-                "fields": ["title", "news_body"],
+                "fields": ["title", "body"],
                 "like": query,
                 "min_term_freq": 1,
                 "max_query_terms": 12
@@ -77,7 +75,7 @@ def more_like_this(query, number):
         'size': number,
     }
 
-    r = es.search(index='news', body=body)
+    r = es.search(index=settings.ELASTIC_NEWS, body=body)
     news_id = [item['_id'] for item in r['hits']['hits']]
     return news_id
 
@@ -91,11 +89,11 @@ def similar_news_to_query(query, size, days, offset=0):
         "query": {
             "multi_match": {
                 "query": query,
-                "fields": ["title^2", "news_body"],
+                "fields": ["title^2", "body"],
                 "fuzziness": "AUTO"
             }
         },
-        "fields": ['published_date', '_uid', 'news_body'],
+        "fields": ['published_date', '_uid', 'body'],
         "size": size,
         "from": offset,
 
@@ -109,7 +107,74 @@ def similar_news_to_query(query, size, days, offset=0):
         }
     }
 
-    r = es.search(index='news', body=body, request_timeout=20)
-    for hit in r['hits']['hits']:
-        print(hit)
+    r = es.search(index=settings.ELASTIC_NEWS, body=body, request_timeout=20)
     return [hit['_id'] for hit in r['hits']['hits']]
+
+
+def news_with_terms(terms_list, size=10, start_time='now-3h', end_time='now', offset=0):
+    if not isinstance(start_time, six.string_types):
+        start_time = start_time.strftime('%Y-%m-%dT%H:%M:%S')
+
+    if not isinstance(end_time, six.string_types):
+        end_time = end_time.strftime('%Y-%m-%dT%H:%M:%S')
+
+    print(start_time)
+    body = {
+        "query": {
+            "filtered": {
+                "query": {
+                    "bool": {
+                        "should": [{"match_phrase": {"_all": item}} for item in terms_list]
+                    }
+                },
+                "filter": {
+                    "range": {
+                        "published_date": {
+                            "gte": start_time,
+                            "lte": end_time
+                        }
+                    }
+                }
+            }
+        },
+        "size": size,
+        "from": offset
+    }
+    print(size, offset, start_time, end_time, terms_list)
+    r = es.search(index=settings.ELASTIC_NEWS, body=body, request_timeout=20)
+    return r
+
+
+# {
+# 	"query":{
+#     	"filtered" :{
+# 	    	"query":{
+#     	    	"match_all" :{}
+#         	},
+# 	    	"filter": {
+#     	    	"range" :{
+#         	    	"published_date" :{
+#             	    	"gt": "now-100h"
+#                 	}
+# 	            }
+#     	    }
+#     	}
+#     },
+# 	"aggs": {
+#     	"trend_tags" :{
+#         	"date_histogram": {
+#             	"field": "published_date",
+#                 "interval": "1h",
+#                 "format": "yyyy-MM-dd hh-mm",
+#                 "min_doc_count":0
+#             },
+#             "aggs":{
+#         		"items_items": {
+#             		"significant_terms":{
+#                 		"field":"title"
+#                 	}
+# 				}
+#             }
+#         }
+#     }
+# }

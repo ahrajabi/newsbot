@@ -19,7 +19,12 @@ class NewsAdmin(admin.ModelAdmin):
 
 @admin.register(BaseNews)
 class BaseNewsAdmin(admin.ModelAdmin):
+    def get_all_rss(self, obj):
+        return "\n".join([p.news_agency.fa_name +" " + p.category for p in obj.all_rss.all()])
+
     list_display = [x.name for x in BaseNews._meta.local_fields]
+    list_display.append('get_all_rss')
+
 
 
 @admin.register(ImageUrls)

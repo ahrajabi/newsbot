@@ -1,7 +1,13 @@
 from telegram.emoji import Emoji
-
+import jdatetime
 from rss.models import News
 from telegrambot.bot_send import send_telegram
+import locale
+
+def GeorgianToJalali(datetime):
+    jal = jdatetime.GregorianToJalali(datetime.year, datetime.month, datetime.day)
+    locale.setlocale(locale.LC_ALL, "fa_IR")
+    return jdatetime.datetime(jal.jyear, jal.jmonth, jal.jday).strftime("%a, %d %b %Y")
 
 
 def sample_news_page(news):
@@ -18,7 +24,8 @@ def sample_news_page(news):
         text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n\n'
     except Exception:
         pass
-    return text
+    text += Emoji.CALENDAR + ' ' + GeorgianToJalali(news.base_news.published_date)
+    return text +'\n'
 
 
 def prepare_multiple_sample_news(news_id_list, total_news):

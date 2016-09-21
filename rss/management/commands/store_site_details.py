@@ -19,6 +19,7 @@ class Command(BaseCommand):
         with open(path) as f:
             reader = list(csv.reader(f))
             for row in reader[starting_line-1:]:
+                print(row[7])
                 obj_site, created = NewsAgency.objects.update_or_create(name=row[1],
                                                                         defaults={'url': row[0],
                                                                                   'fa_name': row[2],
@@ -29,15 +30,8 @@ class Command(BaseCommand):
                 obj_cat, created = CategoryCode.objects.update_or_create(name=row[5],
                                                                          defaults={'fa_name': row[3]})
                 obj, created = RssFeeds.objects.update_or_create(main_rss=row[7],
-                                                                 defaults={'url': row[0],
-                                                                           'name': row[1],
-                                                                           'fa_name': row[2],
-                                                                           'category': row[3],
+                                                                 defaults={'category': row[3],
                                                                            'activation': (row[4] == 'True'),
                                                                            'category_ref': obj_cat,
                                                                            'order': row[6],
-                                                                           'selector': row[8],
-                                                                           'summary_selector': row[9],
-                                                                           'image_selector': row[10],
-                                                                           'time_delay': (row[11] == 'True'),
                                                                            'news_agency': obj_site})

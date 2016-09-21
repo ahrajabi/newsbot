@@ -116,13 +116,16 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
         like = InlineKeyboardButton(text=Emoji.THUMBS_DOWN_SIGN + "(" + normalize(str(news.like_count)) + ")",
                                     callback_data='news-' + str(news.id) + '-unlike')
 
-    buttons = [[like, ],
+    buttons = [
         [
             InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(news.id) + '-overview'),
             InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(news.id) + '-full'),
+         ],
+        [
+            like,
             InlineKeyboardButton(text='اخبار مرتبط', callback_data='news-' + str(news.id) + '-stat'),
             InlineKeyboardButton(text='لینک خبر', url=str(news.base_news.url)),
-    ], ]
+        ], ]
 
     keyboard = InlineKeyboardMarkup(buttons)
     text = ''

@@ -51,16 +51,16 @@ def send_telegram_all_user(bot, text, keyboard=None, photo=None):
         id = profile.telegram_id
         if id:
             if photo:
-                bot.sendPhoto(chat_id=id,
-                              photo=photo,
-                              caption=text[0:199],
-                              reply_markup=keyboard,
-                              parse_mode=telegram.ParseMode.HTML)
+                return bot.sendPhoto(chat_id=id,
+                                     photo=photo,
+                                     caption=text[0:199],
+                                     reply_markup=keyboard,
+                                     parse_mode=telegram.ParseMode.HTML)
             else:
-                bot.sendMessage(chat_id=id,
-                                text=text,
-                                reply_markup=keyboard,
-                                parse_mode=telegram.ParseMode.HTML)
+                return bot.sendMessage(chat_id=id,
+                                       text=text,
+                                       reply_markup=keyboard,
+                                       parse_mode=telegram.ParseMode.HTML)
 
 
 def error_text(bot, msg, type=None):

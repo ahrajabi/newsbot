@@ -3,20 +3,21 @@ import re
 import sys
 from telegram import InlineKeyboardMarkup
 from telegram.inlinekeyboardbutton import InlineKeyboardButton
-
+import math
 from entities import tasks
 from rss.models import News
 from rss.news import set_news_like
-from telegrambot.models import UserNews
+from telegrambot.models import UserNews, MessageFromUser, UserNewsList
 from telegrambot.bot_send import error_text
-from telegrambot.models import MessageFromUser
 from telegrambot.bot_send import send_telegram_user
 from telegrambot import bot_template, command_handler
 from telegrambot.command_handler import search_box_result
 from telegrambot.news_template import prepare_multiple_sample_news
 from rss.elastic import elastic_search_entity, similar_news_to_query
 from newsbot.global_settings import NEWS_PER_PAGE, DAYS_FOR_SEARCH_NEWS, SAMPLE_NEWS_COUNT
-
+from django.conf import settings
+from rss import elastic
+from entities.tasks import get_user_entity
 thismodule = sys.modules[__name__]
 
 
@@ -59,23 +60,25 @@ def news_inline_command(bot, msg, user):
 
     if title == 'like':
         set_news_like(user, news, mark='Like')
-        bot.answerCallbackQuery(msg.callback_query.id, text='پسندش شما ثبت شد!')
+        ttt = 'پسندش شما ثبت شد!'
     elif title == 'unlike':
         set_news_like(user, news, mark='Unlike')
-        bot.answerCallbackQuery(msg.callback_query.id, text='پسندش شما پس گرفته شد!')
+        ttt = 'پسندش شما پس گرفته شد!'
     elif title == 'overview':
         page = 1
-        bot.answerCallbackQuery(msg.callback_query.id, text='خلاصه‌ی خبر')
+        ttt = 'خلاصه‌ی خبر'
     elif title == 'full':
         page = 2
-        bot.answerCallbackQuery(msg.callback_query.id, text='متن کامل خبر')
+        ttt = 'متن کامل خبر'
     elif title == 'stat':
         page = 3
-        bot.answerCallbackQuery(msg.callback_query.id, text='اخبار مرتبط')
+        ttt = 'اخبار مرتبط'
 
     bot_template.news_page(bot, news, user,
                            page=page, message_id=msg.callback_query.message.message_id,
                            user_entity=tasks.get_user_entity(user))
+
+    bot.answerCallbackQuery(msg.callback_query.id, text=ttt)
 
 
 def continue_inline_command(bot, msg, user):
@@ -125,3 +128,56 @@ def continue_inline_command(bot, msg, user):
         send_telegram_user(bot, user, response, keyboard, msg.callback_query.message.message_id)
     else:
         search_box_result(bot, msg, user, msg_id, query_text)
+
+
+def entitynewslist_inline_command(bot, msg, user):
+    import logging
+    logging.config.dictConfig(settings.LOGGING)
+
+    unl = UserNewsList.objects.get(message_id=msg.callback_query.message.message_id)
+    p = re.compile(r'[a-z]+')
+    func = p.findall(msg.callback_query.data.lower())[1]
+
+    if func == 'next':
+        next_page = unl.page+1
+    elif func == 'previous':
+        next_page = unl.page-1
+
+    print(func, next_page)
+
+    ent = get_user_entity(user)
+    el_news = elastic.news_with_terms(terms_list=[item.name for item in ent],
+                                      size=settings.NEWS_PER_PAGE,
+                                      start_time=unl.datetime_start,
+                                      end_time=unl.datetime_publish,
+                                      offset=(next_page-1)*settings.NEWS_PER_PAGE
+                                      )
+    print(el_news)
+    # start_time=up.user_settings.last_news_list.datetime_publish)
+    print(math.ceil(unl.number_of_news/settings.NEWS_PER_PAGE))
+    if next_page > 1 and next_page < math.ceil(unl.number_of_news/settings.NEWS_PER_PAGE):
+        buttons = [[
+            InlineKeyboardButton(text='صفحه بعد', callback_data='entitynewslist-next'),
+            InlineKeyboardButton(text='صفحه قبل', callback_data='entitynewslist-previous'),
+        ], ]
+    elif next_page == 1:
+        buttons = [[
+            InlineKeyboardButton(text='صفحه بعد', callback_data='entitynewslist-next'),
+        ], ]
+    else:
+        buttons = [[
+            InlineKeyboardButton(text='صفحه قبل', callback_data='entitynewslist-previous'),
+        ], ]
+    keyboard = InlineKeyboardMarkup(buttons)
+
+    news_ent = [item['_id'] for item in el_news['hits']['hits']]
+    news_list = list(set([item for item in news_ent]))
+    output = 'اخبار مرتبط با دسته‌های شما'
+    output += '\n'
+    print(news_list)
+    output += prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
+
+    unl.page= next_page
+    unl.save()
+
+    send_telegram_user(bot, user, output, keyboard, unl.message_id)

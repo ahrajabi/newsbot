@@ -1,13 +1,13 @@
 import re
 import telegram
 from telegram.ext.dispatcher import run_async
-from telegram.ext import MessageHandler, Filters, CallbackQueryHandler, Updater, Job
+from telegram.ext import MessageHandler, Filters, CallbackQueryHandler, Updater, Job, InlineQueryHandler
 from telegram.error import TelegramError, Unauthorized, BadRequest, TimedOut, NetworkError
 from django.conf import settings
 from telegrambot.publish import publish_handler
 from telegrambot.bot_send import error_text
 from telegrambot.models import MessageFromUser
-from telegrambot import command_handler, news_template, callback, bot_send
+from telegrambot import command_handler, news_template, callback, bot_send, inline
 
 
 def error_callback(bot, update, error):
@@ -71,16 +71,18 @@ def user_alert_handler(bot, job):
 
 def setup():
     updater = Updater(token=settings.TELEGRAM_TOKEN)
-
     dispatcher = updater.dispatcher
     dispatcher.add_handler(MessageHandler([Filters.command], commands))
     dispatcher.add_handler(MessageHandler([Filters.text], handle))
     dispatcher.add_handler(CallbackQueryHandler(callback_query))
+    #dispatcher.add_handler(InlineQueryHandler(inline.handler))
     #dispatcher.add_error_handler(error_callback)
+
     q_bot = updater.job_queue
 
     q_bot.put(Job(publish_handler, 5, repeat=True))
     q_bot.put(Job(user_alert_handler, 100, repeat=True))
 
     updater.start_polling()
+
     print('Listening ...')
