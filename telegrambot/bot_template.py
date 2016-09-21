@@ -122,8 +122,8 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
             InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(news.id) + '-full'),
          ],
         [
-            like,
             InlineKeyboardButton(text='اخبار مرتبط', callback_data='news-' + str(news.id) + '-stat'),
+            like,
             InlineKeyboardButton(text='لینک خبر', url=str(news.base_news.url)),
         ], ]
 

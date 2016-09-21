@@ -3,11 +3,16 @@ import jdatetime
 from rss.models import News
 from telegrambot.bot_send import send_telegram
 import locale
+from django.utils import timezone
+from rss.ml import normalize
 
 def GeorgianToJalali(datetime):
     jal = jdatetime.GregorianToJalali(datetime.year, datetime.month, datetime.day)
     locale.setlocale(locale.LC_ALL, "fa_IR")
-    return jdatetime.datetime(jal.jyear, jal.jmonth, jal.jday).strftime("%a, %d %b %Y")
+    ret =  jdatetime.datetime(jal.jyear, jal.jmonth, jal.jday).strftime("%a, %d %b") + ' ' + \
+           timezone.localtime(datetime).strftime("%M:%-H")
+    return normalize(ret)
+
 
 
 def sample_news_page(news):
@@ -19,13 +24,12 @@ def sample_news_page(news):
         pass
 
     text = Emoji.SMALL_BLUE_DIAMOND + title + '\n'
-    text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + 'مشاهده خبر:' + '/News_' + str(news.id) + '\n'
-    text += Emoji.CALENDAR + ' ' + GeorgianToJalali(news.base_news.published_date)
+    text += '    ' + Emoji.CALENDAR + ' ' + GeorgianToJalali(news.base_news.published_date) + '\n'
     try:
-        text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n\n'
+        text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n'
     except Exception:
         pass
-
+    text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + 'مشاهده خبر:' + '/News_' + str(news.id) + '\n'
     return text +'\n'
 
 

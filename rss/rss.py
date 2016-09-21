@@ -15,7 +15,7 @@ def repair_datetime(input_datetime, rss_delay=False):
     if not timezone.is_aware(input_datetime):
         input_datetime = input_datetime.replace(tzinfo=pytz.utc)
 
-    delta = timedelta(hours=4, minutes=30)
+    delta = timedelta(hours=3, minutes=30)
     if rss_delay:
         input_datetime -= delta
 
