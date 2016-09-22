@@ -2,7 +2,7 @@ import datetime
 from django.conf import settings
 from elasticsearch import Elasticsearch
 import six
-from rss.models import News
+from rss.models import News, BaseNews
 
 es = Elasticsearch([settings.ELASTIC_URL])
 
@@ -34,7 +34,7 @@ def postgres_news_to_elastic():
 
 
 def source_generator():
-    for obj in News.objects.filter(base_news__save_to_elastic=False):
+    for obj in News.objects.filter(base_news__save_to_elastic=False)[0:500]:
         fields_keys = ('body', 'summary', 'title', 'published_date')
         fields_values = (obj.body, obj.summary, obj.base_news.title, obj.base_news.published_date)
         source = dict(zip(fields_keys, fields_values))
@@ -143,6 +143,51 @@ def news_with_terms(terms_list, size=10, start_time='now-3h', end_time='now', of
     print(size, offset, start_time, end_time, terms_list)
     r = es.search(index=settings.ELASTIC_NEWS, body=body, request_timeout=20)
     return r
+
+
+def list_missed_elastic(li):
+    if len(li) == 0:
+        return list()
+    BODY = {
+            "docs" : [{"_id": str(item), "_source": "false"} for item in li]
+        }
+    ret = es.mget(index='news', doc_type='new', body=BODY)
+
+    missed = []
+    for item in ret['docs']:
+        missed.append(int(item['_id']))
+    return missed
+
+
+def miss_elastic():
+    cnt = 0
+    li = []
+    all_missed = []
+    for item in BaseNews.objects.filter(complete_news=True, save_to_elastic=True):
+        cnt += 1
+        li.append(item.id)
+        if cnt % 5000 == 0:
+            print("YES", cnt)
+            all_missed.extend(list_missed_elastic(li))
+            li = []
+    all_missed.extend(list_missed_elastic(li))
+    return all_missed
+
+
+def repair_missed_elastic():
+    start_time = datetime.datetime.now()
+
+    missed_list = miss_elastic()
+    cnt = 0
+    for item in missed_list:
+        cnt += 1
+        s = BaseNews.objects.get(id=item)
+        s.save_to_elastic = False
+        s.save()
+        if cnt % 5000 == 0:
+            print('Wait', cnt)
+    print('Repair', datetime.datetime.now() - start_time)
+
 
 
 # {

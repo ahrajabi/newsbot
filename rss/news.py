@@ -6,18 +6,19 @@ from rss.ml import *
 from entities.tasks import get_entity_news
 from rss.models import BaseNews, News, ImageUrls, NewsLike
 from django.contrib.auth.models import User
+from urllib.parse import urljoin, urlsplit
 
 
 def save_news(base_news):
     # fix catch HeaderParsingError
     print(str(base_news.url))
-    try:
-        page = requests.get(str(base_news.url), timeout=20)
-        page_soup = bs(page.text, 'html.parser')
-    except Exception:
-        return False
+    page = requests.get(str(base_news.url), timeout=20)
+    page_soup = bs(page.text, 'html.parser')
 
     if page_soup:
+        base_url = "{0.scheme}://{0.netloc}/".format(urlsplit(base_news.url))
+        print("base url", base_url)
+
         try:
             news_bodys = page_soup.select(base_news.rss.news_agency.selector)
             news_body = ' '.join([item.text for item in news_bodys])
@@ -39,13 +40,15 @@ def save_news(base_news):
                                                                    'pic_number': 0,
                                                                    'summary': news_summary,})
 
-        # elastic_search_store(news_body, news_summary, news.id)
-
         news_images = page_soup.select(base_news.rss.news_agency.image_selector)
         cnt = 0
         for img in news_images:
             try:
-                ImageUrls.objects.create(img_url=img['src'], news=news)
+                imglink = img['src']
+                if not imglink.startswith('http'):
+                    imglink = urljoin(base_url, imglink)
+                print(imglink)
+                ImageUrls.objects.create(img_url=imglink, news=news)
                 cnt += 1
             except Exception:
                 continue

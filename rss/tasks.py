@@ -15,9 +15,7 @@ LOCK_EXPIRE = 60*2
 
 @shared_task
 def get_all_new_news():
-
     bulk_save_to_elastic()
-
     THREAD_RSS_NUM = settings.CELERY_WORKER_NUM
     all_rss = RssFeeds.objects.all()
     all_rss = [item.id for item in all_rss]
@@ -71,5 +69,5 @@ def bulk_save_to_elastic():
     k = ({'_index': 'news', '_type': 'new', '_id': idx, "_source": source}
          for idx, source in source_generator())
     helpers.bulk(es, k)
-    print('ELASTIC', datetime.datetime.now() - start_time)
+    print('_ELASTIC_', datetime.datetime.now() - start_time)
 
