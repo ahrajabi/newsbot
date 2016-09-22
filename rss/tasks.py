@@ -66,7 +66,7 @@ def save_base_news_async(id):
 @shared_task
 def bulk_save_to_elastic():
     start_time = datetime.datetime.now()
-    k = ({'_index': 'news', '_type': 'new', '_id': idx, "_source": source}
+    k = ({'_index': settings.ELASTIC_NEWS, '_type': 'new', '_id': idx, "_source": source}
          for idx, source in source_generator())
     helpers.bulk(es, k)
     print('_ELASTIC_', datetime.datetime.now() - start_time)

@@ -148,10 +148,10 @@ def news_with_terms(terms_list, size=10, start_time='now-3h', end_time='now', of
 def list_missed_elastic(li):
     if len(li) == 0:
         return list()
-    BODY = {
-            "docs" : [{"_id": str(item), "_source": "false"} for item in li]
+    body = {
+            "docs": [{"_id": str(item), "_source": "false"} for item in li]
         }
-    ret = es.mget(index='news', doc_type='new', body=BODY)
+    ret = es.mget(index=settings.ELASTIC_NEWS, doc_type='new', body=body)
 
     missed = []
     for item in ret['docs']:
