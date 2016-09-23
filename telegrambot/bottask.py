@@ -86,14 +86,14 @@ def setup():
     q_bot = updater.job_queue
     q_bot.put(Job(publish_handler, 5, repeat=True))
     q_bot.put(Job(user_alert_handler, 100, repeat=True))
-    if settings.DEBUG:
+    if settings.DEBUG or True:
         updater.start_polling()
     else:
         updater.start_webhook(listen='130.185.76.171',
                               port='8443',
                               url_path=settings.TELEGRAM_TOKEN,
-                              key='/etc/letsencrypt/live/django.soor.ir/privkey.pem',
-                              cert='/etc/letsencrypt/live/django.soor.ir/fullchain.pem',
+                              key='/etc/letsencrypt/live/soor.ir/privkey.pem',
+                              cert='/etc/letsencrypt/live/soor.ir/fullchain.pem',
                               webhook_url='https://soor.ir:8443/'+settings.TELEGRAM_TOKEN)
 
     print('Listening ...')

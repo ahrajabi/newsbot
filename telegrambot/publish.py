@@ -51,7 +51,7 @@ def periodic_publish_news(bot, job):
 
         el_news = elastic.news_with_terms(terms_list=[item.name for item in ent],
                                           size=settings.NEWS_PER_PAGE,
-                                          start_time=up.user_settings.last_news_list.datetime_publish)
+                                          start_time=start_time)
 
 
         try:
