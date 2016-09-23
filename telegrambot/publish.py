@@ -83,11 +83,12 @@ def periodic_publish_news(bot, job):
 
             try:
                 result = bot_send.send_telegram_user(bot, user, output, keyboard=keyboard)
+                unl.message_id = result.message_id
+                unl.save()
             except Unauthorized:
                 command_handler.deactive_profile(up)
 
-            unl.message_id = result.message_id
-            unl.save()
+
 
 
 def live_publish_news(bot, job):
