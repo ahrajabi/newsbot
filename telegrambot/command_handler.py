@@ -11,7 +11,7 @@ from entities import tasks
 from rss.models import News
 from entities.models import Entity
 from telegrambot import bot_template
-from telegrambot.models import UserAlert, UserProfile
+from telegrambot.models import UserAlert, UserProfile, UserSettings
 from rss.ml import normalize, word_tokenize, bi_gram, tri_gram
 from telegrambot.bot_template import prepare_advice_entity_link
 from telegrambot.news_template import prepare_multiple_sample_news
@@ -61,6 +61,9 @@ def get_user(telegram_id):
     if up:
         up.last_chat = timezone.now()
         up.activated = True
+        if not up.user_settings:
+            up.user_settings = UserSettings.objects.create()
+
     up.save()
     ##
     return user

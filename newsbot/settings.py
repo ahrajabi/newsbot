@@ -143,10 +143,10 @@ STATIC_ROOT = "/tmp/"
 ELASTIC_URL = 'http://130.185.76.171:9200'
 ELASTIC_NEWS = 'news'
 
-BOT_NAME = '@soorirbot'
+BOT_NAME = '@KhabareManbot'
 PROJECT_FA_NAME = 'خبرمن'
-PROJECT_EN_NAME = 'KhabareMan'
-
+PROJECT_EN_NAME = 'Khabare Man'
+TELEGRAM_LOGO = 'http://soor.ir/logo-1.png'
 GLOBAL_SETTINGS = {
     'SAMPLE_NEWS_COUNT': 3,
     'MIN_HITS_ENTITY_VALIDATION': 3

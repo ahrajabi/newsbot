@@ -34,22 +34,29 @@ def periodic_publish_news(bot, job):
     if HOUR_NOW > 0 and HOUR_NOW < 6 :
         return False
 
-    for up in UserProfile.objects.all():
+    for up in UserProfile.objects.all().order_by('?'):
         user = up.user
         interval = up.user_settings.interval_news_list
         delta = timezone.now() - timedelta(minutes=interval)
+
         if up.user_settings.last_news_list and up.user_settings.last_news_list.datetime_publish >= delta:
             continue
 
         ent = get_user_entity(user)
+
+        if up.user_settings.last_news_list:
+            start_time = up.user_settings.last_news_list.datetime_publish
+        else:
+            start_time = delta
+
         el_news = elastic.news_with_terms(terms_list=[item.name for item in ent],
                                           size=settings.NEWS_PER_PAGE,
                                           start_time=up.user_settings.last_news_list.datetime_publish)
 
+
         try:
             news_ent = [item['_id'] for item in el_news['hits']['hits']]
         except Exception:
-            news_ent = []
             print("ES DIDNT RETURN RIGHT JSON! See publish.py")
             return False
 

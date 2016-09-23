@@ -13,7 +13,7 @@ from entities.models import Entity, NewsEntity
 from newsbot.settings import BOT_NAME, PROJECT_EN_NAME
 from telegrambot.news_template import prepare_multiple_sample_news
 from telegrambot.bot_send import send_telegram, send_telegram_user
-
+from django.conf import settings
 
 def welcome_text(bot, msg):
     keyboard = ReplyKeyboardMarkup(keyboard=[[
@@ -91,7 +91,8 @@ def bot_help(bot, msg, user):
         ('/list', 'تمام دسته هایی که عضو شده اید.'),
         ('/help', 'صفحه‌ی راهنمایی'),
     ]
-    text = 'راهنمایش ربات'+'\n'
+    text = 'راهنما'+'\n'
+
     for i in menu:
         text += i[0] + ' ' + i[1] + '\n'
     send_telegram_user(bot, user, text, None)
@@ -100,12 +101,16 @@ def bot_help(bot, msg, user):
 def news_image_page(bot, news, user, page=1, message_id=None):
     keyboard = None
     image_url = ImageUrls.objects.filter(news=news)
-    if not image_url:
-        return
-    image_url = image_url[0].img_url
+    if image_url:
+        image_url = image_url[0].img_url
+    else:
+        image_url = settings.TELEGRAM_LOGO
+
+
     UserNews.objects.update_or_create(user=user, news=news, defaults={'image_page': page})
     text = news.base_news.title
     send_telegram_user(bot, user, text, keyboard, message_id, photo=image_url)
+    print(image_url)
 
 
 def news_page(bot, news, user, page=1, message_id=None, **kwargs):
