@@ -61,7 +61,7 @@ def periodic_publish_news(bot, job):
             return False
 
         unl = UserNewsList.objects.create(user=user,
-                                          datetime_start=up.user_settings.last_news_list.datetime_publish,
+                                          datetime_start=start_time,
                                           datetime_publish=timezone.now(),
                                           number_of_news=el_news['hits']['total'],
                                           page=1
