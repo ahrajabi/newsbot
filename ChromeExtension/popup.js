@@ -1,21 +1,23 @@
-document.addEventListener('DOMContentLoaded', function() {
-  var checkPageButton = document.getElementById('checkPage');
-  checkPageButton.addEventListener('click', function() {
+// Copyright 2013 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-    chrome.tabs.getSelected(null, function(tab) {
-      d = document;
+var URL = 'http://django.soor.ir/chrome_extension/news/1'
 
-      var f = d.createElement('form');
-      f.action = 'http://gtmetrix.com/analyze.html?bm';
-      f.method = 'post';
-      var i = d.createElement('input');
-      i.type = 'hidden';
-      i.name = 'url';
-      i.value = tab.url;
-      f.appendChild(i);
-      d.body.appendChild(f);
-      f.submit();
-    });
-  }, false);
-}, false);
+function httpGet(theUrl)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+}
 
+function connect() {
+  var results = document.getElementById('results')
+  results.innerHTML = httpGet(URL)
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('submit').addEventListener(
+      'click', connect);
+});

@@ -168,7 +168,7 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
     if not text:
         text = normalize(msg.message.text)
     hits = elastic_search_entity(text, max(MIN_HITS_ENTITY_VALIDATION, SAMPLE_NEWS_COUNT) + 1)
-
+    print(hits)
     response = ""
 
     no_response = False
