@@ -150,6 +150,7 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
             summary = news.body[:500]
             has_summary = False
 
+
         for sentence in sent_tokenize(summary):
             text += Emoji.SMALL_BLUE_DIAMOND + sentence + '\n'
             if len(text) > 300 and not has_summary:
@@ -213,17 +214,11 @@ def inline_news_page(news_id):
     keyboard = InlineKeyboardMarkup(buttons)
     text = ''
 
-    summary = news.summary
-    has_summary = True
+    text += news.get_summary()
 
-    if not summary:
-        summary = news.body[:500]
-        has_summary = False
-
-    for sentence in sent_tokenize(summary):
-        text += Emoji.SMALL_BLUE_DIAMOND + sentence + '\n'
-        if len(text) > 300 and not has_summary:
-            break
+    text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + \
+            '<a href=' + '"https://telegram.me/' + settings.BOT_NAME[1:] + '?start=' + 'N' + str(
+        news.id) + '">' + 'مشاهده‌ی سریع خبر' + '</a>\n'
     try:
         text += '\n' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + news.base_news.rss.news_agency.fa_name + '\n'
     except Exception:
