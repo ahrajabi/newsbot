@@ -2,6 +2,7 @@ from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
 import pytz
+from rss import ml
 
 
 class NewsAgency(models.Model):
@@ -66,6 +67,15 @@ class News(models.Model):
     pic_number = models.PositiveSmallIntegerField('Number of Pictures')
     like_count = models.PositiveIntegerField('Number of Likes', default=0)
 
+    def get_summary(self):
+        if len(self.summary) > 5:
+            text = self.summary
+        elif len(self.body) > 5:
+            text = self.body[0:300]
+        else:
+            text = self.base_news.title
+        return ' '.join(ml.sent_tokenize(text, num_char=300))
+
 
 class ImageUrls(models.Model):
     img_url = models.URLField('image url', max_length=500)
@@ -81,3 +91,4 @@ class NewsLike(models.Model):
     news = models.ForeignKey(News)
     user = models.ForeignKey(User)
     status = models.BooleanField(default=True, choices=STATUS)
+

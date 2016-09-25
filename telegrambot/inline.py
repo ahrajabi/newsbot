@@ -1,36 +1,50 @@
 from telegram import InlineQueryResultArticle, InputTextMessageContent, InlineQueryResultPhoto
 from rss.models import BaseNews, ImageUrls
 from rss.models import News
+from rss import elastic
+from django.conf import settings
+from telegrambot import news_template, bot_template
+from telegram import ParseMode
+
 def handler(bot, msg):
     query = msg.inline_query.query
     if not query:
         return
 
-    newses = News.objects.filter(base_news__title__contains=query)
-    print("_________", query, newses.count())
+    el_news = elastic.news_with_terms(terms_list=[query],
+                                      size=5,
+                                      start_time='now-1000h')
+
+    try:
+        news_ent = [item['_id'] for item in el_news['hits']['hits']]
+    except Exception:
+        print("ES DIDNT RETURN RIGHT JSON! See publish.py")
+        return False
+
+    print("_________", query, len(news_ent))
     results = list()
-    for item in newses[0:40]:
-        if item.pic_number == 0:
-            results.append(
-                InlineQueryResultArticle(
-                    id=item.id,
-                    title=item.base_news.title,
-                    input_message_content=InputTextMessageContent(item.body[0:250])
-                )
+    results.append(
+        InlineQueryResultArticle(
+            id=query,
+            title="لیست جدیدترین خبر‌های %s"%(query),
+            input_message_content=InputTextMessageContent(
+                news_template.prepare_multiple_sample_news(news_ent, settings.NEWS_PER_PAGE, inline=True)[0],
+                parse_mode=ParseMode.HTML
             )
-        else:
-
-            photo = ImageUrls.objects.filter(news=item)[0]
-
-            if not photo.img_url.startswith('http'):
-                continue
-            results.append(
-                InlineQueryResultPhoto(
-                    id=item.id,
-                    photo_url=photo.img_url,
-                    thumb_url=photo.img_url,
-                    caption=item.body[0:200],
-
-                )
+        )
+    )
+    print(el_news)
+    for item in el_news['hits']['hits']:
+        news_themed = bot_template.inline_news_page(item['_id'])
+        if not news_themed:
+            continue
+        results.append(
+            InlineQueryResultArticle(
+                id=item['_id'],
+                title=item['_source']['title'],
+                input_message_content=InputTextMessageContent(news_themed[0], parse_mode=ParseMode.HTML),
+        #        reply_markup=news_themed[1]
             )
-    bot.answerInlineQuery(msg.inline_query.id, results, switch_pm_text="heyyy")
+        )
+
+    ret = bot.answerInlineQuery(msg.inline_query.id, results, switch_pm_text="خبرِمن")

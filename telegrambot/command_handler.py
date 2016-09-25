@@ -114,11 +114,40 @@ def user_alert_handler(bot, job):
         item.save()
 
 
-def start_command(bot, msg, new_user):
+def start_command(bot, msg, new_user, user):
+    inp = msg.message.text.split(' ')
+
     if new_user:
         bot_template.welcome_text(bot, msg)
     else:
-        error_text(bot, msg, type="RepetitiveStart")
+        up = UserProfile.objects.get(user=user)
+        if up and up.stopped:
+            up.stopped = False
+            up.save()
+        text = '''
+        حساب شما مجددا فعال شد.
+        '''
+        send_telegram_user(bot, user, text)
+    if inp[1]:
+        arg = inp[1]
+
+        if arg.startswith('N'):
+            try:
+                news = News.objects.get(id=arg[1:])
+                bot_template.publish_news(bot, news, user, page=1)
+            except News.DoesNotExist:
+                return error_text(bot, msg, 'NoneNews')
+
+
+def stop_command(bot, msg, user):
+    up = UserProfile.objects.get(user=user)
+    if up and not up.stopped:
+        up.stopped = True
+        up.save()
+        text = '''
+        حساب شما متوقف شد.
+        '''
+        send_telegram_user(bot, user, text)
 
 
 def news_command(bot, msg, user):

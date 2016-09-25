@@ -2,9 +2,11 @@ from telegram.emoji import Emoji
 import jdatetime
 from rss.models import News
 from telegrambot.bot_send import send_telegram
+from telegrambot import bot_info
 import locale
 from django.utils import timezone
 from rss.ml import normalize
+from django.conf import settings
 
 def GeorgianToJalali(datetime):
     jal = jdatetime.GregorianToJalali(datetime.year, datetime.month, datetime.day)
@@ -15,7 +17,7 @@ def GeorgianToJalali(datetime):
 
 
 
-def sample_news_page(news):
+def sample_news_page(news, inline=False):
     title = news.base_news.title
 
     try:
@@ -23,29 +25,40 @@ def sample_news_page(news):
     except Exception:
         pass
 
-    text = Emoji.SMALL_BLUE_DIAMOND + title + '\n'
+    text = ''
+    if not inline:
+        text = Emoji.SMALL_BLUE_DIAMOND + title + '\n'
+    text += '    ' + news.get_summary() + '\n'
     text += '    ' + Emoji.CALENDAR + ' ' + GeorgianToJalali(news.base_news.published_date) + '\n'
     try:
         text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n'
     except Exception:
         pass
-    text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + 'مشاهده خبر:' + '/News_' + str(news.id) + '\n'
+    if not inline:
+        text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + 'مشاهده خبر:' + '/News_' + str(news.id) + '\n'
+    else:
+        #https://telegram.me/chvotebot?start=f9830f23b29d139df0377496211a599b9eddeb5e2eb75ce71e12
+        text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER +\
+                '<a href=' +'"https://telegram.me/'+settings.BOT_NAME[1:]+'?start=' +'N' + str(news.id) +'">' + 'مشاهده‌ی سریع خبر' + '</a>\n'
+
     return text +'\n'
 
 
-def prepare_multiple_sample_news(news_id_list, total_news):
+def prepare_multiple_sample_news(news_id_list, total_news, inline=False):
     "just prepare multiple news"
     news_count = 0
     text = ''
     for news_id in news_id_list:
         try:
-            text += sample_news_page(News.objects.get(id=news_id))
+            text += sample_news_page(News.objects.get(id=news_id), inline)
             news_count += 1
             if news_count >= total_news:
                 break
         except News.DoesNotExist:
             continue
+
     text += '\n'
+    text += bot_info.botpromote
     return text, news_count
 
 

@@ -33,8 +33,20 @@ def normalize(text):
     return norm.normalize(text)
 
 
-def sent_tokenize(text):
-    return hazm.sent_tokenize(text)
+def sent_tokenize(text, num_char=-1):
+    ret = hazm.sent_tokenize(text)
+    if num_char == -1:
+        return ret
+
+    cnt = 0
+    ret2 = []
+    for item in ret:
+        if cnt + len(item) > num_char:
+            return ret2
+        else:
+            ret2.append(item)
+            cnt += len(item)
+    return ret2
 
 
 def lemmatize(text):

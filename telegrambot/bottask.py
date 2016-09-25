@@ -23,9 +23,11 @@ def error_callback(bot, update, error):
     except TimedOut:
         print("# handle slow connection problems")
     except NetworkError:
-        print("# handle other connection problems")
+        print(error)
     except TelegramError:
         print("# handle all other telegram related errors")
+        print(error)
+        raise error
 
 
 @run_async
@@ -57,7 +59,7 @@ def commands(bot, msg):
     func = p.findall(msg.message.text.lower())[0] + '_command'
     if hasattr(command_handler, func):
         if func == 'start_command':
-            getattr(command_handler, func)(bot, msg, new_user)
+            getattr(command_handler, func)(bot, msg, new_user, user)
         else:
             getattr(command_handler, func)(bot, msg, user)
     else:
@@ -87,7 +89,7 @@ def setup():
     q_bot.put(Job(publish_handler, 5, repeat=True))
     q_bot.put(Job(user_alert_handler, 100, repeat=True))
     if settings.DEBUG or True:
-        updater.start_polling()
+        updater.start_polling(bootstrap_retries=2)
     else:
         updater.start_webhook(listen='130.185.76.171',
                               port='8443',

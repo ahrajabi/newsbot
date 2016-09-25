@@ -24,7 +24,8 @@ class UserSettings(models.Model):
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User)
-    activated = models.BooleanField(default=True)
+    activated = models.BooleanField(verbose_name='Bot Blocked', default=True)
+    stopped = models.BooleanField(verbose_name='Bot Stopped', default=False)
     first_name = models.CharField(max_length=140)
     last_name = models.CharField(max_length=140)
     last_chat = models.DateTimeField()

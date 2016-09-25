@@ -4,16 +4,17 @@ from telegram import ReplyKeyboardMarkup
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from entities import tasks
-from rss.models import ImageUrls
+from rss.models import ImageUrls, News
 from rss.news import is_liked_news
 from rss.elastic import more_like_this
-from telegrambot.models import UserNews
+from telegrambot.models import UserNews, UserProfile
 from rss.ml import normalize, sent_tokenize
 from entities.models import Entity, NewsEntity
 from newsbot.settings import BOT_NAME, PROJECT_EN_NAME
 from telegrambot.news_template import prepare_multiple_sample_news
 from telegrambot.bot_send import send_telegram, send_telegram_user
 from django.conf import settings
+from telegrambot import bot_info
 
 def welcome_text(bot, msg):
     keyboard = ReplyKeyboardMarkup(keyboard=[[
@@ -91,6 +92,13 @@ def bot_help(bot, msg, user):
         ('/list', 'تمام دسته هایی که عضو شده اید.'),
         ('/help', 'صفحه‌ی راهنمایی'),
     ]
+    up = UserProfile.objects.get(user=user)
+    if up:
+        if not up.stopped:
+            menu.append( ('/stop', 'توقف دریافت پیام از بات') )
+        else:
+            menu.append( ('/start', 'شما دریافت پیام از بات را متوقف کرده اید. توسط این گزینه می توانید این محدودیت را بردارید.') )
+
     text = 'راهنما'+'\n'
 
     for i in menu:
@@ -177,6 +185,53 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
 
     send_telegram_user(bot, user, text, keyboard, message_id)
     UserNews.objects.update_or_create(user=user, news=news, defaults={'page': page})
+
+
+def inline_news_page(news_id):
+    news = News.objects.get(id=news_id)
+    if not news:
+        return None
+
+    like = InlineKeyboardButton(text=Emoji.THUMBS_UP_SIGN + "(" + normalize(str(news.like_count)) + ")",
+                                callback_data='news-' + str(news.id) + '-like')
+
+    if False:
+        like = InlineKeyboardButton(text=Emoji.THUMBS_DOWN_SIGN + "(" + normalize(str(news.like_count)) + ")",
+                                    callback_data='news-' + str(news.id) + '-unlike')
+
+    buttons = [
+        [
+            InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(news.id) + '-overview'),
+            InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(news.id) + '-full'),
+         ],
+        [
+            InlineKeyboardButton(text='اخبار مرتبط', callback_data='news-' + str(news.id) + '-stat'),
+            like,
+            InlineKeyboardButton(text='لینک خبر', url=str(news.base_news.url)),
+        ], ]
+
+    keyboard = InlineKeyboardMarkup(buttons)
+    text = ''
+
+    summary = news.summary
+    has_summary = True
+
+    if not summary:
+        summary = news.body[:500]
+        has_summary = False
+
+    for sentence in sent_tokenize(summary):
+        text += Emoji.SMALL_BLUE_DIAMOND + sentence + '\n'
+        if len(text) > 300 and not has_summary:
+            break
+    try:
+        text += '\n' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + news.base_news.rss.news_agency.fa_name + '\n'
+    except Exception:
+        pass
+
+    text += bot_info.botpromote
+
+    return text, keyboard
 
 
 def publish_news(bot, news, user, page=1, message_id=None, **kwargs):

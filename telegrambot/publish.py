@@ -39,6 +39,9 @@ def periodic_publish_news(bot, job):
         interval = up.user_settings.interval_news_list
         delta = timezone.now() - timedelta(minutes=interval)
 
+        if not up.activated or up.stopped:
+            continue
+
         if up.user_settings.last_news_list and up.user_settings.last_news_list.datetime_publish >= delta:
             continue
 
@@ -101,6 +104,10 @@ def live_publish_news(bot, job):
     for up in UserProfile.objects.filter(user_settings__live_news=True, activated=True):
         user = up.user
         ent = get_user_entity(user)
+
+        if not up.activated or up.stopped:
+            continue
+
         news_ent = NewsEntity.objects.filter(entity__in=ent,
                                              news__base_news__published_date__range=(start, end))
 

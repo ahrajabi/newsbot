@@ -1,12 +1,31 @@
 <!doctype html>
 <html>
   <head>
-    <title>GTmetrix Analyzer</title>
+    <title>KhabareMan Live2!</title>
     <script src="popup.js"></script>
+    <script type="text/javascript">
+
+      function handleIt() {
+        chrome.browserAction.onClicked.addListener(
+            alert(1)
+        );
+      }
+
+    </script>
   </head>
   <body>
-    <h1>GTmetrix Analyzer</h1>
-    <button id="checkPage">Check this page now!</button>
+    <h3>KhabareMan Live!</h3>
+    <form action="javascript:handleIt()">
+          Username:<br>
+          <input type="text" name="username">
+          <br>
+          Password:<br>
+          <input type="text" name="password">
+          <br><br>
+          <input type="submit" value="Save">
+    </form>
+
+
   </body>
 </html>
 
