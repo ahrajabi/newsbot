@@ -13,7 +13,7 @@ def handler(bot, msg):
 
     el_news = elastic.news_with_terms(terms_list=[query],
                                       size=5,
-                                      start_time='now-1000h')
+                                      start_time='now-3h')
 
     try:
         news_ent = [item['_id'] for item in el_news['hits']['hits']]
