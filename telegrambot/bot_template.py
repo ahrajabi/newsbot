@@ -4,16 +4,11 @@ from telegram import ReplyKeyboardMarkup
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from entities import tasks
-from rss.models import ImageUrls
-from rss.news import is_liked_news
-from rss.elastic import more_like_this
-from telegrambot.models import UserNews
-from rss.ml import normalize, sent_tokenize
-from entities.models import Entity, NewsEntity
-from newsbot.settings import BOT_NAME, PROJECT_EN_NAME
-from telegrambot.news_template import prepare_multiple_sample_news
+from entities.models import Entity
+from newsbot.settings import PROJECT_EN_NAME
 from telegrambot.bot_send import send_telegram, send_telegram_user
-from django.conf import settings
+from telegrambot.news_template import news_image_page, news_page
+
 
 def welcome_text(bot, msg):
     keyboard = ReplyKeyboardMarkup(keyboard=[[
@@ -96,87 +91,6 @@ def bot_help(bot, msg, user):
     for i in menu:
         text += i[0] + ' ' + i[1] + '\n'
     send_telegram_user(bot, user, text, None)
-
-
-def news_image_page(bot, news, user, page=1, message_id=None):
-    keyboard = None
-    image_url = ImageUrls.objects.filter(news=news)
-    if image_url:
-        image_url = image_url[0].img_url
-    else:
-        image_url = settings.TELEGRAM_LOGO
-
-
-    UserNews.objects.update_or_create(user=user, news=news, defaults={'image_page': page})
-    text = news.base_news.title
-    send_telegram_user(bot, user, text, keyboard, message_id, photo=image_url)
-    print(image_url)
-
-
-def news_page(bot, news, user, page=1, message_id=None, **kwargs):
-    like = InlineKeyboardButton(text=Emoji.THUMBS_UP_SIGN + "(" + normalize(str(news.like_count)) + ")",
-                                callback_data='news-' + str(news.id) + '-like')
-
-    if is_liked_news(news=news, user=user):
-        like = InlineKeyboardButton(text=Emoji.THUMBS_DOWN_SIGN + "(" + normalize(str(news.like_count)) + ")",
-                                    callback_data='news-' + str(news.id) + '-unlike')
-
-    buttons = [
-        [
-            InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(news.id) + '-overview'),
-            InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(news.id) + '-full'),
-         ],
-        [
-            InlineKeyboardButton(text='اخبار مرتبط', callback_data='news-' + str(news.id) + '-stat'),
-            like,
-            InlineKeyboardButton(text='لینک خبر', url=str(news.base_news.url)),
-        ], ]
-
-    keyboard = InlineKeyboardMarkup(buttons)
-    text = ''
-    if page == 1:
-        summary = news.summary
-        has_summary = True
-
-        if not summary:
-            summary = news.body[:500]
-            has_summary = False
-
-        for sentence in sent_tokenize(summary):
-            text += Emoji.SMALL_BLUE_DIAMOND + sentence + '\n'
-            if len(text) > 300 and not has_summary:
-                break
-        try:
-            text += '\n' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + news.base_news.rss.news_agency.fa_name + '\n'
-        except Exception:
-            pass
-
-        if 'user_entity' in kwargs:
-            news_user_entity = NewsEntity.objects.filter(news=news, entity__in=kwargs['user_entity'])
-            if news_user_entity:
-                text += '\n' + Emoji.BOOKMARK + ' دسته های مشترک با علاقه مندی شما:\n'
-                for en in news_user_entity:
-                    text += en.entity.name + ', '
-                text += '\n'
-
-    elif page == 2:
-        try:
-            text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n    '
-        except Exception:
-            pass
-
-        if len(news.body) < 3500:
-            text += news.body + '\n'
-        else:
-            text += news.body[:3500].rsplit(' ', 1)[0]
-            text += '\n' + 'ادامه دارد...' + '\n'
-    elif page == 3:
-        related = more_like_this(news.base_news.title, 5)
-        text, notext = prepare_multiple_sample_news(related, 5)
-    text += BOT_NAME
-
-    send_telegram_user(bot, user, text, keyboard, message_id)
-    UserNews.objects.update_or_create(user=user, news=news, defaults={'page': page})
 
 
 def publish_news(bot, news, user, page=1, message_id=None, **kwargs):

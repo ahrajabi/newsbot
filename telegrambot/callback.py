@@ -7,12 +7,11 @@ import math
 from entities import tasks
 from rss.models import News
 from rss.news import set_news_like
-from telegrambot.models import UserNews, MessageFromUser, UserNewsList
-from telegrambot.bot_send import error_text
-from telegrambot.bot_send import send_telegram_user
-from telegrambot import bot_template, command_handler
+from telegrambot import command_handler, news_template
 from telegrambot.command_handler import search_box_result
+from telegrambot.bot_send import send_telegram_user, error_text
 from telegrambot.news_template import prepare_multiple_sample_news
+from telegrambot.models import UserNews, MessageFromUser, UserNewsList
 from rss.elastic import elastic_search_entity, similar_news_to_query
 from newsbot.global_settings import NEWS_PER_PAGE, DAYS_FOR_SEARCH_NEWS, SAMPLE_NEWS_COUNT
 from django.conf import settings
@@ -74,7 +73,7 @@ def news_inline_command(bot, msg, user):
         page = 3
         ttt = 'اخبار مرتبط'
 
-    bot_template.news_page(bot, news, user,
+    news_template.news_page(bot, news, user,
                            page=page, message_id=msg.callback_query.message.message_id,
                            user_entity=tasks.get_user_entity(user))
 
