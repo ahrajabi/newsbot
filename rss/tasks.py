@@ -1,7 +1,7 @@
 from celery import shared_task
 from rss.rss import get_new_rss
 from rss.models import RssFeeds
-from rss.models import BaseNews
+from rss.models import BaseNews, News
 import datetime
 from rss.news import save_news
 from rss.elastic import source_generator, es
@@ -66,8 +66,22 @@ def save_base_news_async(id):
 @shared_task
 def bulk_save_to_elastic():
     start_time = datetime.datetime.now()
-    k = ({'_index': settings.ELASTIC_NEWS, '_type': 'new', '_id': idx, "_source": source}
-         for idx, source in source_generator())
-    helpers.bulk(es, k)
+    sources = list()
+    for obj in News.objects.filter(base_news__save_to_elastic=False)[0:500]:
+        fields_keys = ('body', 'summary', 'title', 'published_date')
+        fields_values = (obj.body, obj.summary, obj.base_news.title, obj.base_news.published_date)
+        source = dict(zip(fields_keys, fields_values))
+        sources.append((obj, source))
+
+    k = ({'_index': settings.ELASTIC_NEWS, '_type': 'new', '_id': ret[0].id, "_source": ret[1]}
+         for ret in sources)
+    ret = helpers.bulk(es, k, chunk_size=500, max_chunk_bytes=200 * 1024 * 1024)
+
+    if ret[0] == len(sources):
+        for item in sources:
+            item[0].base_news.save_to_elastic = True
+            item[0].base_news.save()
+    else:
+        print("___ERROR IN ELASTIC BULK SAVE", ret)
     print('_ELASTIC_', datetime.datetime.now() - start_time)
 

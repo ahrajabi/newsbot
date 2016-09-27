@@ -4,21 +4,25 @@
   "name": "Khabare Man",
   "description": "Khabare Man Notification!",
   "version": "0.00009",
-
+  "options_page": "options.html",
   "browser_action": {
    "default_icon": "icon.png",
    "default_popup": "popup.html",
    "default_title": "Click here!"
   },
+   "background": {
+    "persistent": true,
+    "scripts": ["jquery-3.1.1.min.js","bg.js"]
+  },
   "content_scripts": [
     {
-      "matches" : ["http://*/*"],
-      "js": ["bg.js"]
+      "matches" : ["*://*/*"],
+      "js": ["jquery-3.1.1.min.js", "noty/js/noty/packaged/jquery.noty.packaged.min.js" ,"alert.js"]
     }
   ],
   "permissions": [
-   "activeTab",
-    "stoarge",
-    "tabs"
+    "*://*/*",
+    "storage",
+    ""
    ]
 }

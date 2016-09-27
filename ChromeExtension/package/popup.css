@@ -1,0 +1,22 @@
+body{
+    direction: rtl;
+}
+
+body#options-page{
+    text-align: center;
+}
+
+body#popup-page {
+    width: 300px;
+}
+
+body{
+    text-align: center;
+}
+
+#news-wrapper{
+    text-align: right;
+}
+#popup-page #results .news-item {
+    display: block;
+}

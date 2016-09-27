@@ -6,16 +6,16 @@ from rss.models import News
 from rss.elastic import news_with_terms
 from entities.tasks import get_user_entity
 from newsbot.settings import NEWS_PER_PAGE
-
+from django.utils import timezone
 
 @api_view(['GET'])
-def chrome_extension_response(request, user_id):
-    return Response(get_user_news(user_id))
+def chrome_extension_response(request, username):
+    return Response(get_user_news(username))
 
 
-def get_user_news(user_id):
+def get_user_news(username):
     try:
-        user = User.objects.get(id=user_id)
+        user = User.objects.get(username=username)
     except User.DoesNotExist:
         # raise ValueError(u'invalid user')
         return 0
@@ -23,7 +23,7 @@ def get_user_news(user_id):
     ent = get_user_entity(user)
     el_news = news_with_terms(terms_list=[item.name for item in ent],
                               size=NEWS_PER_PAGE,
-                              start_time='now-10m')
+                              start_time='now-100m')
     try:
         news_ent = [item['_id'] for item in el_news['hits']['hits']]
     except KeyError:
@@ -38,9 +38,11 @@ def get_user_news(user_id):
             continue
 
         news = {'id': news.id,
-                'body': news.body,
                 'summary': news.summary,
-                'title': news.base_news.title
+                'title': news.base_news.title,
+                'published_date': timezone.localtime(news.base_news.published_date),
+                'link': news.base_news.url
                 }
         response.append(news)
+    response = sorted(response, key=lambda k: k['published_date'], reverse=True)
     return response

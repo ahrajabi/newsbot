@@ -155,7 +155,8 @@ def list_missed_elastic(li):
 
     missed = []
     for item in ret['docs']:
-        missed.append(int(item['_id']))
+        if not item['found']:
+            missed.append(int(item['_id']))
     return missed
 
 
@@ -163,7 +164,7 @@ def miss_elastic():
     cnt = 0
     li = []
     all_missed = []
-    for item in BaseNews.objects.filter(complete_news=True, save_to_elastic=True):
+    for item in News.objects.filter(base_news__complete_news=True):
         cnt += 1
         li.append(item.id)
         if cnt % 5000 == 0:
@@ -181,9 +182,9 @@ def repair_missed_elastic():
     cnt = 0
     for item in missed_list:
         cnt += 1
-        s = BaseNews.objects.get(id=item)
-        s.save_to_elastic = False
-        s.save()
+        s = News.objects.get(id=item)
+        s.base_news.save_to_elastic = False
+        s.base_news.save()
         if cnt % 5000 == 0:
             print('Wait', cnt)
     print('Repair', datetime.datetime.now() - start_time)
