@@ -111,7 +111,7 @@ def similar_news_to_query(query, size, days, offset=0):
     return [hit['_id'] for hit in r['hits']['hits']]
 
 
-def news_with_terms(terms_list, size=10, start_time='now-3h', end_time='now', offset=0):
+def news_with_terms(terms_list, size=10, start_time='now-3h', end_time='now', offset=0, sort='_score'):
     if not isinstance(start_time, six.string_types):
         start_time = start_time.strftime('%Y-%m-%dT%H:%M:%S')
 
@@ -120,6 +120,9 @@ def news_with_terms(terms_list, size=10, start_time='now-3h', end_time='now', of
 
     print(start_time)
     body = {
+        "sort": [
+            {sort: {"order": "desc"}},
+        ],
         "query": {
             "filtered": {
                 "query": {

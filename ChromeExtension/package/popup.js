@@ -7,6 +7,13 @@ var username;
 var password;
 var all_data;
 
+$(document).ready(function () {
+    $('body').on('click', 'a', function () {
+        chrome.tabs.create({url: $(this).attr('href')});
+        return false;
+    });
+});
+
 
 function check_login() {
     chrome.storage.local.get({
@@ -20,12 +27,21 @@ function check_login() {
         if (username.length > 0) {
             document.getElementById('check-login').style.display = 'none';
             document.getElementById('change-user').innerHTML = 'کاربر ' + username + ' وارد شده است.';
-            if(all_data.length>0){
+            if (all_data.length > 0) {
                 var results = '<h3>اخبار هم اکنون</h3>';
-                results+= "<div id='ajax-loader'><img src='ajax-loader.gif'/></div>"
+                results += "<div id='ajax-loader'><img src='ajax-loader.gif'/></div>"
                 results += '<ul id="news-wrapper">'
-                for(var i =0 ; i < all_data.length ; i++){
-                    results += "<li class='results-item'>"+ all_data[i]['title'] + "</li>"
+                all_data.sort(
+                    function (a, b) {
+                        return new Date(b['published_date']).getTime() - new Date(a['published_date']).getTime()
+                });
+                for (var i = 0; i < all_data.length; i++) {
+                    var date = new Date(all_data[i]['published_date']);
+                    var today = new Date();
+                    var diffMins = Math.round((today - date) / 60000); // minutes
+                    results += "<li class='results-item'>" +
+                        "<a href=" + all_data[i]['link'] + ">" + all_data[i]['title'] + '</a>' + "</li>"
+                    results += "<span>" + diffMins + "دقیقه‌ی گذشته" + "</span>"
                 }
                 results += '</ul>'
                 document.getElementById('results').innerHTML = results;
@@ -36,9 +52,11 @@ function check_login() {
 }
 
 
-function periodic_check_login(){
+function periodic_check_login() {
     check_login()
-    self.setInterval(function() { check_login() }, 5000);
+    self.setInterval(function () {
+        check_login()
+    }, 5000);
 }
 
 document.addEventListener('DOMContentLoaded', periodic_check_login);

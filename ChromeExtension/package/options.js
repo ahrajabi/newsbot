@@ -6,7 +6,8 @@ function save_options() {
   password = document.getElementById('password-form').value;
   chrome.storage.local.set({
     username: username,
-    password: password
+    password: password,
+    all_date: []
   }, function() {
     // Update status to let user know options were saved.
     var status = document.getElementById('status');

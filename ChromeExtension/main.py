@@ -23,7 +23,8 @@ def get_user_news(username):
     ent = get_user_entity(user)
     el_news = news_with_terms(terms_list=[item.name for item in ent],
                               size=NEWS_PER_PAGE,
-                              start_time='now-100m')
+                              start_time='now-1000m',
+                              sort='published_date')
     try:
         news_ent = [item['_id'] for item in el_news['hits']['hits']]
     except KeyError:
@@ -41,8 +42,8 @@ def get_user_news(username):
                 'summary': news.summary,
                 'title': news.base_news.title,
                 'published_date': timezone.localtime(news.base_news.published_date),
-                'link': news.base_news.url
+                'link': news.base_news.url,
+                'agency': news.base_news.news_agency.fa_name
                 }
         response.append(news)
-    response = sorted(response, key=lambda k: k['published_date'], reverse=True)
     return response
