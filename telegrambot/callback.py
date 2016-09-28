@@ -33,7 +33,7 @@ def handle(bot, msg):
     if hasattr(thismodule, func):
         getattr(thismodule, func)(bot, msg, user)
     else:
-        error_text(bot, msg, type='NoCommand')
+        error_text(bot, msg, user, type='NoCommand')
 
 
 def score_inline_command(bot, msg, user):
@@ -47,7 +47,7 @@ def score_inline_command(bot, msg, user):
         bot.answerCallbackQuery(msg.callback_query.id,
                                 text=TEXT)
     else:
-        error_text(bot, msg)
+        error_text(bot, msg, user)
 
 
 def news_inline_command(bot, msg, user):
@@ -124,7 +124,7 @@ def continue_inline_command(bot, msg, user):
 
         response = prepare_multiple_sample_news(news_id_list, NEWS_PER_PAGE)[0]
 
-        send_telegram_user(bot, user, response, keyboard, msg.callback_query.message.message_id)
+        send_telegram_user(bot, user, response, msg, keyboard, msg.callback_query.message.message_id)
     else:
         search_box_result(bot, msg, user, msg_id, query_text)
 
@@ -179,4 +179,4 @@ def entitynewslist_inline_command(bot, msg, user):
     unl.page= next_page
     unl.save()
 
-    send_telegram_user(bot, user, output, keyboard, unl.message_id)
+    send_telegram_user(bot, user, output, msg, keyboard, unl.message_id)

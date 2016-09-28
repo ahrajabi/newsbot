@@ -34,9 +34,11 @@ def verify_user(bot, msg):
         user = create_new_user_profile(bot, msg)
     return user, new_user
 
+
 def deactive_profile(up):
     up.activated = False
     up.save()
+
 
 def create_new_user_profile(bot, msg):
     user = User.objects.create_user(username=msg.message.from_user.username)
@@ -73,29 +75,29 @@ def add_command(bot, msg, user):
     entity_id = int(msg.message.text[5:])
     entity = tasks.get_entity(entity_id)
     if entity in tasks.get_user_entity(user):
-        error_text(bot, msg, type='PriorFollow')
+        error_text(bot, msg, user, type='PriorFollow')
         return
     if tasks.set_entity(user, entity_id, 1):
-        bot_template.change_entity(bot, msg, entity, type=1)
+        bot_template.change_entity(bot, msg, entity,user, type=1)
         entity.followers += 1
         entity.save()
     else:
-        error_text(bot, msg)
+        error_text(bot, msg, user)
 
 
 def remove_command(bot, msg, user):
     entity_id = int(msg.message.text[8:])
     entity = tasks.get_entity(entity_id)
     if entity not in tasks.get_user_entity(user):
-        error_text(bot, msg, type='NoFallow')
+        error_text(bot, msg, user, type='NoFallow')
         return
 
     if tasks.set_entity(user, entity_id, 0):
-        bot_template.change_entity(bot, msg, entity, type=0)
+        bot_template.change_entity(bot, msg, entity, user, type=0)
         entity.followers -= 1
         entity.save()
     else:
-        error_text(bot, msg)
+        error_text(bot, msg, user)
 
 
 def list_command(bot, msg, user):
@@ -114,11 +116,11 @@ def user_alert_handler(bot, job):
         item.save()
 
 
-def start_command(bot, msg, new_user):
+def start_command(bot, msg, new_user, user):
     if new_user:
-        bot_template.welcome_text(bot, msg)
+        bot_template.welcome_text(bot, msg, user)
     else:
-        error_text(bot, msg, type="RepetitiveStart")
+        error_text(bot, msg, user, type="RepetitiveStart")
 
 
 def news_command(bot, msg, user):
@@ -127,7 +129,7 @@ def news_command(bot, msg, user):
         news = News.objects.get(id=news_id)
         bot_template.publish_news(bot, news, user, page=1, message_id=None, user_entity=tasks.get_user_entity(user))
     except News.DoesNotExist:
-        return error_text(bot, msg, 'NoneNews')
+        return error_text(bot, msg, user, 'NoneNews')
 
 
 def command_separator(msg, command):
@@ -187,7 +189,7 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
                 no_one_gram_response, one_response = print_n_gram(one_gram)
                 if no_one_gram_response:
                     if not similar_news_id:
-                        error_text(bot, msg, 'InvalidEntity')
+                        error_text(bot, msg, user, 'InvalidEntity')
                         return
                 else:
                     response += pre_response + one_response
@@ -213,4 +215,20 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
     if len(hits) == SAMPLE_NEWS_COUNT:
         keyboard = None
 
-    send_telegram_user(bot, user, response, keyboard, final_destination)
+    send_telegram_user(bot, user, response, msg, keyboard, final_destination)
+
+
+def live_command(bot, msg, user):
+    user_settings = UserProfile.objects.get(user=user).user_settings
+    live_news_status = user_settings.live_news
+    if live_news_status:
+        user_settings.live_news = False
+        user_settings.save()
+        text = Emoji.CROSS_MARK + 'ارسال اخبار به صورت بر خط قطع شد'
+    else:
+        user_settings.live_news = True
+        user_settings.save()
+        text = Emoji.WHITE_HEAVY_CHECK_MARK + ''' ارسال اخبار به صورت بر خط فعال شد.\n
+   از این پس اخبار مرتبط با موضوع های مورد علاقه شما به صورت لحظه ای ارسال می شود'''
+
+    send_telegram_user(bot, user, text, msg)

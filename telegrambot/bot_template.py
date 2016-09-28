@@ -6,11 +6,11 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from entities import tasks
 from entities.models import Entity
 from newsbot.settings import PROJECT_EN_NAME
-from telegrambot.bot_send import send_telegram, send_telegram_user
+from telegrambot.bot_send import send_telegram_user
 from telegrambot.news_template import news_image_page, news_page
 
 
-def welcome_text(bot, msg):
+def welcome_text(bot, msg, user):
     keyboard = ReplyKeyboardMarkup(keyboard=[[
         '/HELP ⁉️ راهنمایی',
          ]], resize_keyboard=True)
@@ -30,7 +30,7 @@ def welcome_text(bot, msg):
 
         ''' % (msg.message.from_user.first_name, Emoji.RAISED_HAND, PROJECT_EN_NAME,
                Emoji.WHITE_DOWN_POINTING_BACKHAND_INDEX)
-    send_telegram(bot, msg, text, keyboard)
+    send_telegram_user(bot, user, text, msg, keyboard=keyboard)
 
 
 def show_entities(bot, msg, user, entities):
@@ -41,7 +41,7 @@ def show_entities(bot, msg, user, entities):
         text += tasks.get_link(user, item) + '\n'
         # button.append([InlineKeyboardButton(text=item.name, callback_data="data")])
     #keyboard = InlineKeyboardMarkup(inline_keyboard=button)
-    return send_telegram(bot, msg, text, keyboard)
+    return send_telegram_user(bot, user, text, msg, keyboard=keyboard)
 
 
 def show_user_entity(bot, msg, user, entities):
@@ -53,10 +53,10 @@ def show_user_entity(bot, msg, user, entities):
         text = ''' شما دسته ای را دنبال نمیکنید %s
         می توانید موضوعات مورد علاقه خود را(به عنوان مثال: تهران) از طریق کادر پایین ارسال کنید%s
         ''' % (Emoji.FACE_SCREAMING_IN_FEAR, Emoji.WHITE_DOWN_POINTING_BACKHAND_INDEX)
-    send_telegram(bot, msg, text, None)
+    send_telegram_user(bot, user, text, msg)
 
 
-def change_entity(bot, msg, entity, type=1):
+def change_entity(bot, msg, entity, user, type=1):
     buttons = [[
         InlineKeyboardButton(text='۱', callback_data='score-'+str(entity.id)+'-(-2)'),
         InlineKeyboardButton(text='۲', callback_data='score-'+str(entity.id)+'-(-1)'),
@@ -71,14 +71,14 @@ def change_entity(bot, msg, entity, type=1):
 برای حذف کردن بر روی لینک %s کلیک کنید.
         ''' % (entity.name, "/remove_"+str(entity.id))
         # return send_telegram(bot, msg, text, keyboard)
-        return send_telegram(bot, msg, text)
+        return send_telegram_user(bot, user, text, msg)
     else:
         text = '''
         دسته %s حذف شد.
         برای اضافه کردن مجدد بر روی لینک %s کلیک کنید.
         ''' % (entity.name, "/add_"+str(entity.id))
         # return send_telegram(bot, msg, text, keyboard)
-        return send_telegram(bot, msg, text)
+        return send_telegram_user(bot, user, text, msg)
 
 
 def bot_help(bot, msg, user):
@@ -90,7 +90,7 @@ def bot_help(bot, msg, user):
 
     for i in menu:
         text += i[0] + ' ' + i[1] + '\n'
-    send_telegram_user(bot, user, text, None)
+    send_telegram_user(bot, user, text, msg)
 
 
 def publish_news(bot, news, user, page=1, message_id=None, **kwargs):
@@ -103,7 +103,7 @@ def publish_news(bot, news, user, page=1, message_id=None, **kwargs):
 
 def after_user_add_entity(bot, msg, user, entity, entities):
     text = "دسته ' %s ' اضافه شد %s" % (entity, Emoji.PUSHPIN)
-    send_telegram(bot, msg, text)
+    send_telegram_user(bot, user, text, msg)
     show_user_entity(bot, msg, user, entities)
 
 
@@ -127,8 +127,8 @@ def show_related_entities(related_entities):
     return text
 
 
-def send_related_entities(bot, msg, user, related_entities):
-    send_telegram(bot, msg, user, show_related_entities(related_entities))
+# def send_related_entities(bot, msg, user, related_entities):
+#     send_telegram(bot, msg, user, show_related_entities(related_entities))
 
 
 def one_entity_recommendation(entity):

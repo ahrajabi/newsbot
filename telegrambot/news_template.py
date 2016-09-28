@@ -12,8 +12,8 @@ from entities.models import NewsEntity
 from rss.elastic import more_like_this
 from telegrambot.models import UserNews
 from rss.ml import normalize, sent_tokenize
+from telegrambot.bot_send import send_telegram_user
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegrambot.bot_send import send_telegram, send_telegram_user
 
 
 def georgian_to_jalali(datetime):
@@ -58,10 +58,10 @@ def prepare_multiple_sample_news(news_id_list, total_news):
     return text, news_count
 
 
-def publish_sample_news(bot, msg, news_id_list, total_news, keyboard=None):
-    text = "%s خبرهای مرتبط:\n" % Emoji.NEWSPAPER
-    text += prepare_multiple_sample_news(news_id_list, total_news)
-    send_telegram(bot, msg, text, keyboard=None)
+# def publish_sample_news(bot, msg, news_id_list, total_news, keyboard=None):
+#     text = "%s خبرهای مرتبط:\n" % Emoji.NEWSPAPER
+#     text += prepare_multiple_sample_news(news_id_list, total_news)
+#     send_telegram(bot, msg, text, keyboard=None)
 
 
 def news_image_page(bot, news, user, page=1, message_id=None):
@@ -145,5 +145,5 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
         text, notext = prepare_multiple_sample_news(related, 5)
     text += BOT_NAME
 
-    send_telegram_user(bot, user, text, keyboard, message_id)
+    send_telegram_user(bot, user, text, keyboard=keyboard, message_id=message_id)
     UserNews.objects.update_or_create(user=user, news=news, defaults={'page': page})

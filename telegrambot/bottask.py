@@ -57,11 +57,11 @@ def commands(bot, msg):
     func = p.findall(msg.message.text.lower())[0] + '_command'
     if hasattr(command_handler, func):
         if func == 'start_command':
-            getattr(command_handler, func)(bot, msg, new_user)
+            getattr(command_handler, func)(bot, msg, new_user, user)
         else:
             getattr(command_handler, func)(bot, msg, user)
     else:
-        error_text(bot, msg, type='NoCommand')
+        error_text(bot, msg, user, type='NoCommand')
 
 
 @run_async
