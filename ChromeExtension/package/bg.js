@@ -20,7 +20,6 @@ function connect() {
 
     var ss;
     $.get('http://django.soor.ir/chrome_extension/news/' + username + '?format=json', function (data, status) {
-        chrome.extension.getBackgroundPage().console.log(data)
         if (data == 0) {
             chrome.storage.local.set({
                 all_data: [],
@@ -46,7 +45,6 @@ function connect() {
             }
 
         }
-        chrome.extension.getBackgroundPage().console.log(all_data)
         chrome.storage.local.set({
             all_data: all_data,
         }, function () {

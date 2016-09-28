@@ -5,13 +5,16 @@ from django.utils import timezone
 import pytz
 from datetime import timedelta
 from rss.news import save_news
+import six
 
 
 def repair_datetime(input_datetime, rss_delay=False):
-    try:
-        input_datetime = dateutil.parser.parse(input_datetime)
-    except:
-        input_datetime = timezone.now()
+    if isinstance(input_datetime, six.string_types):
+        try:
+            input_datetime = dateutil.parser.parse(input_datetime)
+        except:
+            input_datetime = timezone.now()
+
     if not timezone.is_aware(input_datetime):
         input_datetime = input_datetime.replace(tzinfo=pytz.utc)
 

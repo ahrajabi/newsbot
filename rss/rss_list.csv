@@ -182,3 +182,5 @@ akhbarrasmi.com,akhbarrasmi,اخبار رسمی,تمام اخبار,True,All,D,h
 http://www.tasnimnews.com/,tasnim,تسنیم,تمام اخبار,True,All,D,http://www.tasnimnews.com/fa/rss/feed/0/7/0/%D8%A2%D8%AE%D8%B1%DB%8C%D9%86-%D8%AE%D8%A8%D8%B1%D9%87%D8%A7,".story, article.media .lead",.lead,".single-news > div figure img, .story img, .images img",False
 shana.ir,shana,شبکه اطلاع رسانی نفت و انرژ‌ی,تمام اخبار,True,All,D,http://www.shana.ir/Components/NewsAgency/Rss.aspx?imagesize=120&topcount=50&lang=fa&id=0,.newsBody,.lead,".image img, .newsBody img",False
 http://fararu.com/fa/rss/allnews,fararu,فرارو,تمام اخبار,True,All,D,,,,,
+http://codal.ir,codal,کدال,,,,,,,,,
+http://sena.ir,sena,سنا,تمام اخبار,True,All,D,http://sena.ir/RSS.ashx?ID=101,#ctl00_ContentPlaceHolder1_pNews p,.tdSumNews,"#slidelinks img, #ctl00_ContentPlaceHolder1_pNews p img",False

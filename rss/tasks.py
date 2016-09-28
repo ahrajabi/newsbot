@@ -10,12 +10,13 @@ from django.core.cache import cache
 from hashlib import md5
 import random
 from django.conf import settings
-LOCK_EXPIRE = 60*2
+from rss.codal import get_new_codal
+
+LOCK_EXPIRE = 60 * 2
 
 
 @shared_task
 def get_all_new_news():
-    bulk_save_to_elastic()
     THREAD_RSS_NUM = settings.CELERY_WORKER_NUM
     all_rss = RssFeeds.objects.all()
     all_rss = [item.id for item in all_rss]
@@ -26,13 +27,16 @@ def get_all_new_news():
         lock_id = '{0}-lock-{1}-{2}'.format('rss', str(j), str(THREAD_RSS_NUM))
         acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
         release_lock = lambda: cache.delete(lock_id)
+        get_new_rss_async.delay(rss_list)
 
-        if acquire_lock():
+        if acquire_lock() and False:
             try:
                 get_new_rss_async.delay(rss_list)
             finally:
                 release_lock()
 
+    get_new_codal()
+    bulk_save_to_elastic()
 
 
 @shared_task
@@ -50,7 +54,6 @@ def get_new_rss_async(rss_list):
     print('GET NEW RSS', datetime.datetime.now() - start_time)
 
 
-@shared_task
 def save_base_news_async(id):
     obj = BaseNews.objects.get(id=id)
     if obj.complete_news:
@@ -63,7 +66,6 @@ def save_base_news_async(id):
         pass
 
 
-@shared_task
 def bulk_save_to_elastic():
     start_time = datetime.datetime.now()
     sources = list()
@@ -85,3 +87,8 @@ def bulk_save_to_elastic():
         print("___ERROR IN ELASTIC BULK SAVE", ret)
     print('_ELASTIC_', datetime.datetime.now() - start_time)
 
+
+@shared_task
+def get_codal():
+    get_new_codal()
+    bulk_save_to_elastic()

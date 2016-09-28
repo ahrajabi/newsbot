@@ -29,6 +29,8 @@ class Command(BaseCommand):
                                                                                   'time_delay': (row[11] == 'True')})
                 obj_cat, created = CategoryCode.objects.update_or_create(name=row[5],
                                                                          defaults={'fa_name': row[3]})
+                if not row[7]:
+                    continue
                 obj, created = RssFeeds.objects.update_or_create(main_rss=row[7],
                                                                  defaults={'category': row[3],
                                                                            'activation': (row[4] == 'True'),

@@ -39,11 +39,12 @@ function check_login() {
                     var date = new Date(all_data[i]['published_date']);
                     var today = new Date();
                     var diffMins = Math.round((today - date) / 60000); // minutes
-                    results += "<li class='results-item'>" +
-                        "<a href=" + all_data[i]['link'] + ">" + all_data[i]['title'] + '</a>' + "</li>"
+                    results += "<li class='results-item'> <span>" + all_data[i]['agency'] +
+                        "</span> - <a href=" + all_data[i]['link'] + ">" + all_data[i]['title'] + '</a>' + "</li>"
                     results += "<span>" + diffMins + "دقیقه‌ی گذشته" + "</span>"
                 }
                 results += '</ul>'
+                results += '<button id="button-clear">پاکسازی</button>';
                 document.getElementById('results').innerHTML = results;
             }
 
@@ -51,12 +52,25 @@ function check_login() {
     });
 }
 
-
 function periodic_check_login() {
     check_login()
     self.setInterval(function () {
         check_login()
-    }, 5000);
+    }, 1000);
 }
 
 document.addEventListener('DOMContentLoaded', periodic_check_login);
+
+
+function clear() {
+    $.get('http://django.soor.ir/chrome_extension/news/' + username + '?format=json', function (data, status) {
+        chrome.storage.local.set({
+            all_data: data,
+        }, function () {
+        });
+    });
+}
+
+document.getElementById('button-clear').addEventListener('click',
+    clear);
+

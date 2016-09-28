@@ -23,7 +23,7 @@ def get_user_news(username):
     ent = get_user_entity(user)
     el_news = news_with_terms(terms_list=[item.name for item in ent],
                               size=NEWS_PER_PAGE,
-                              start_time='now-1000m',
+                              start_time='now-120m',
                               sort='published_date')
     try:
         news_ent = [item['_id'] for item in el_news['hits']['hits']]

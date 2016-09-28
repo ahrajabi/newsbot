@@ -47,9 +47,15 @@ class RssFeeds(models.Model):
 
 
 class BaseNews(models.Model):
+    SOURCE = (
+        (1, 'Website RSS'),
+        (2, 'Codal'),
+    )
+
     url = models.URLField('News url', max_length=600, blank=True)
     rss = models.ForeignKey(RssFeeds, verbose_name='related rss feed', null=True, blank=True, related_name='rss')
     news_agency = models.ForeignKey(NewsAgency, verbose_name='News Agency')
+    source_type = models.IntegerField(verbose_name='Type of source', default=1, choices=SOURCE)
     all_rss = models.ManyToManyField(RssFeeds, verbose_name='all rss feed', default=rss)
     title = models.TextField('Tittle', blank=True, null=True)
     published_date = models.DateTimeField('Published date ', blank=True, null=True)

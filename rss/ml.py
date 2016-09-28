@@ -73,3 +73,22 @@ def tri_gram(text):
     for item in tri_tokens:
         tri_words.append(item[0] + ' ' + item[1] + ' ' + item[2])
     return tri_words
+
+
+def per_to_eng(st):
+    trans = {
+        '۱': '1',
+        '۲': '2',
+        '۳': '3',
+        '۴': '4',
+        '۵': '5',
+        '۶': '6',
+        '۷': '7',
+        '۸': '8',
+        '۹': '9',
+        '۰': '0',
+    }
+    ret = ''
+    for i, item in enumerate(st):
+        ret += trans[item]
+    return ret
