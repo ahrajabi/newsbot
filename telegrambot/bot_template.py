@@ -142,6 +142,16 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
 
     keyboard = InlineKeyboardMarkup(buttons)
     text = ''
+
+    try:
+        source = news.base_news.news_agency.fa_name
+    except Exception:
+        try:
+            source = news.base_news.rss.news_agency.fa_name
+        except Exception:
+            source = ''
+
+
     if page == 1:
         summary = news.summary
         has_summary = True
@@ -156,7 +166,7 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
             if len(text) > 300 and not has_summary:
                 break
         try:
-            text += '\n' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + news.base_news.rss.news_agency.fa_name + '\n'
+            text += '\n' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n'
         except Exception:
             pass
 
@@ -216,11 +226,19 @@ def inline_news_page(news_id):
 
     text += news.get_summary()
 
+    try:
+        source = news.base_news.news_agency.fa_name
+    except Exception:
+        try:
+            source = news.base_news.rss.news_agency.fa_name
+        except Exception:
+            source = ''
+
     text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + \
             '<a href=' + '"https://telegram.me/' + settings.BOT_NAME[1:] + '?start=' + 'N' + str(
         news.id) + '">' + 'مشاهده‌ی سریع خبر' + '</a>\n'
     try:
-        text += '\n' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + news.base_news.rss.news_agency.fa_name + '\n'
+        text += '\n' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n'
     except Exception:
         pass
 

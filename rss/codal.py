@@ -57,7 +57,8 @@ def get_new_codal():
                                                          url=item['link'][
                                                              0:BaseNews._meta.get_field('url').max_length - 2],
                                                          defaults={'news_agency': codalagency,
-                                                                   'published_date': item['datetime'],})
+                                                                   'published_date': item['datetime'],
+                                                                   'source_type': 2})
 
         if created:
             news, is_created = News.objects.update_or_create(base_news=obj,

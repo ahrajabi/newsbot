@@ -21,9 +21,12 @@ def sample_news_page(news, inline=False):
     title = news.base_news.title
 
     try:
-        source = news.base_news.rss.news_agency.fa_name
+        source = news.base_news.news_agency.fa_name
     except Exception:
-        pass
+        try:
+            source = news.base_news.rss.news_agency.fa_name
+        except Exception:
+            pass
 
     text = ''
     if not inline:
