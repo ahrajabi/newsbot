@@ -39,16 +39,21 @@ def deactive_profile(up):
     up.save()
 
 def create_new_user_profile(bot, msg):
-    try:
-        username = msg.message.from_user.username
-    except Exception:
-        username = msg.message.from_user.id
+    if len(msg.message.chat.username) > 0:
+        username = msg.message.chat.username
+    else:
+        username = msg.message.chat.id
+
+
     user = User.objects.create_user(username=username)
-    user.userprofile_set.create(first_name=msg.message.from_user.first_name,
-                                last_name=msg.message.from_user.last_name,
-                                last_chat=timezone.now(),
-                                telegram_id=msg.message.from_user.id,
-                                )
+    try:
+        user.userprofile_set.create(first_name=msg.message.chat.first_name,
+                                    last_name=msg.message.chat.last_name,
+                                    last_chat=timezone.now(),
+                                    telegram_id=msg.message.chat.id)
+    except Exception:
+        user.userprofile_set.create(last_chat=timezone.now(),
+                                    telegram_id=msg.message.from_user.id)
     return user
 
 
