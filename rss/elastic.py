@@ -90,7 +90,7 @@ def similar_news_to_query(query, size, days, offset=0):
             "multi_match": {
                 "query": query,
                 "fields": ["title^2", "body"],
-                "fuzziness": "AUTO"
+                #                "fuzziness": "AUTO"
             }
         },
         "fields": ['published_date', '_uid', 'body'],

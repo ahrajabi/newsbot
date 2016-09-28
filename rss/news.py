@@ -17,7 +17,6 @@ def save_news(base_news):
 
     if page_soup:
         base_url = "{0.scheme}://{0.netloc}/".format(urlsplit(base_news.url))
-        print("base url", base_url)
 
         try:
             news_bodys = page_soup.select(base_news.rss.news_agency.selector)
@@ -47,7 +46,6 @@ def save_news(base_news):
                 imglink = img['src']
                 if not imglink.startswith('http'):
                     imglink = urljoin(base_url, imglink)
-                print(imglink)
                 ImageUrls.objects.create(img_url=imglink, news=news)
                 cnt += 1
             except Exception:
