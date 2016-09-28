@@ -4,6 +4,7 @@ from telegram.emoji import Emoji
 from django.utils import timezone
 from telegram import InlineKeyboardMarkup
 from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 from telegram.inlinekeyboardbutton import InlineKeyboardButton
 
 
@@ -11,13 +12,13 @@ from entities import tasks
 from rss.models import News
 from entities.models import Entity
 from telegrambot import bot_template
-from telegrambot.models import UserAlert, UserProfile, UserSettings
 from rss.ml import normalize, word_tokenize, bi_gram, tri_gram
 from telegrambot.bot_template import prepare_advice_entity_link
 from telegrambot.news_template import prepare_multiple_sample_news
+from telegrambot.models import UserAlert, UserProfile, UserSettings
 from rss.elastic import elastic_search_entity, similar_news_to_query
-from telegrambot.bot_send import send_telegram_user, error_text, send_telegram_all_user
 from newsbot.settings import SAMPLE_NEWS_COUNT, MIN_HITS_ENTITY_VALIDATION, DAYS_FOR_SEARCH_NEWS
+from telegrambot.bot_send import send_telegram_user, error_text, send_telegram_all_user, send_telegram_document
 thismodule = sys.modules[__name__]
 
 
@@ -151,10 +152,11 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
                                                                   SAMPLE_NEWS_COUNT)
         if len(hits) >= MIN_HITS_ENTITY_VALIDATION:
             entity = Entity.objects.get_or_create(name=text, wiki_name='')[0]
-            response += "%s خبرهای مرتبط با دسته فوق:\n" % Emoji.NEWSPAPER + h_response + '\n'
-            response += Emoji.HEAVY_MINUS_SIGN * 5 + '\n'+ Emoji.BOOKMARK + \
+            response += Emoji.BOOKMARK + \
                         "با انتخاب دسته زیر ، اخبار مرتبط به صورت بر خط برای شما ارسال خواهد شد." + \
                         '\n'+ prepare_advice_entity_link(entity)
+            response += '\n' + Emoji.HEAVY_MINUS_SIGN * 5 + '\n' + "%s خبرهای مرتبط با دسته فوق:\n" % Emoji.NEWSPAPER + h_response + '\n'
+
         else:
             no_response = True
 
@@ -162,7 +164,6 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
         elastic_query = '1'
         similar_news_id = similar_news_to_query(text, SAMPLE_NEWS_COUNT, DAYS_FOR_SEARCH_NEWS)
         similar_news = prepare_multiple_sample_news(similar_news_id, 2)[0]
-        response += Emoji.NEWSPAPER + "خبرهای مشابه \n" + similar_news + '\n'
 
         def print_n_gram(n_gram):
             gram_response = ""
@@ -175,8 +176,7 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
                     not_response = False
 
             return not_response, gram_response
-        pre_response = Emoji.HEAVY_MINUS_SIGN * 5 + '\n'+ \
-                       Emoji.WARNING_SIGN + "متن وارد شده یافت نشد.\n" + Emoji.BOOKMARK + \
+        pre_response = Emoji.WARNING_SIGN + "متن وارد شده یافت نشد.\n" + Emoji.BOOKMARK + \
                        "دسته های مشابه پیشنهادی:‌\n با انتخاب هر یک اخبار مرتبط به صورت بر خط برای شما ارسال خواهد شد.\n"
 
         three_gram = tri_gram(text)
@@ -197,6 +197,8 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
                 response += pre_response + two_response
         else:
             response += pre_response + three_response
+
+        response += '\n' + Emoji.HEAVY_MINUS_SIGN * 5 + '\n' + Emoji.NEWSPAPER + "خبرهای مشابه \n" + similar_news + '\n'
 
     final_destination = None
     call_back_id = None
@@ -232,3 +234,34 @@ def live_command(bot, msg, user):
    از این پس اخبار مرتبط با موضوع های مورد علاقه شما به صورت لحظه ای ارسال می شود'''
 
     send_telegram_user(bot, user, text, msg)
+
+
+def chrome_command(bot, msg, user):
+    commands = ['/extension', '/Token']
+    response = '''شما میتوانید با نصب افزونه خبرمن اخبار را از طریق مرورگر Google Chrome خود دریافت کنید
+    کافیست دو مرحله زیر را انجام دهید :
+    افزونه خبر من را دریافت و نصب کنید %s
+    نام کاربری و توکن خود را دریافت کنید %s
+    ''' % (commands[0], commands[1])
+    send_telegram_user(bot, user, response, msg)
+
+
+def extension_command(bot, msg, user):
+    file = ''
+    send_telegram_document(bot, user, msg, file)
+
+
+def token_command(bot, msg, user):
+    if not user.username:
+        response = '''جهت استفاده از افزونه باید برای حساب کاربری تلگرام خود نام کاربردی تعریف کنید
+        نام کاربری خود را از طریق تنظیمات تلگرام ایجاد کنید و برای دریافت توکن مجددا اقدام کنید.
+        '''
+    else:
+        user_token, is_new = Token.objects.get_or_create(user=user)
+        if is_new:
+            response = 'توکن با موفقیت ایجاد شد :)\n '
+        else:
+            response = 'شما قبلا توکن را ایجاد کرده بودید\n '
+        response += 'نام کاربری : %s \n توکن : %s ' % (user.username, user_token)
+    send_telegram_user(bot, user, response, msg)
+

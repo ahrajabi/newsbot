@@ -101,3 +101,10 @@ def error_text(bot, msg, user, type=None):
     return send_telegram_user(bot, user, text, msg, keyboard=None)
 
 
+def send_telegram_document(bot, user, msg, doc):
+    p_id = UserProfile.objects.get(user=user).telegram_id
+    bot.sendDocument(
+        chat_id=p_id,
+        document=doc,
+        parse_mode=telegram.ParseMode.HTML
+     )
