@@ -8,7 +8,7 @@ from entities import tasks
 from rss.models import News
 from rss.news import set_news_like
 from telegrambot import command_handler, news_template
-from telegrambot.command_handler import search_box_result
+from telegrambot.text_handler import search_box_result
 from telegrambot.bot_send import send_telegram_user, error_text
 from telegrambot.news_template import prepare_multiple_sample_news
 from telegrambot.models import UserNews, MessageFromUser, UserNewsList

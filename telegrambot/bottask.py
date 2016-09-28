@@ -9,7 +9,7 @@ from django.conf import settings
 from telegrambot.publish import publish_handler
 from telegrambot.bot_send import error_text
 from telegrambot.models import MessageFromUser
-from telegrambot import command_handler, news_template, callback, bot_send, inline
+from telegrambot import command_handler, news_template, callback, bot_send, inline, text_handler
 
 
 def error_callback(bot, update, error):
@@ -40,7 +40,7 @@ def handle(bot, msg):
                                    type=1,
                                    message=msg.message.text)
 
-    command_handler.handle(bot, msg, user)
+    text_handler.handle(bot, msg, user)
 
 
 @run_async
