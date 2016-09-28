@@ -39,7 +39,11 @@ def deactive_profile(up):
     up.save()
 
 def create_new_user_profile(bot, msg):
-    user = User.objects.create_user(username=msg.message.from_user.username)
+    try:
+        username = msg.message.from_user.username
+    except Exception:
+        username = msg.message.from_user.id
+    user = User.objects.create_user(username=username)
     user.userprofile_set.create(first_name=msg.message.from_user.first_name,
                                 last_name=msg.message.from_user.last_name,
                                 last_chat=timezone.now(),
