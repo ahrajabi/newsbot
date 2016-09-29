@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 from rss.models import News
 from rss.elastic import news_with_terms
@@ -9,6 +11,8 @@ from newsbot.settings import NEWS_PER_PAGE
 from django.utils import timezone
 
 @api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
 def chrome_extension_response(request, username):
     return Response(get_user_news(username))
 

@@ -5,26 +5,26 @@ from telegram import ReplyKeyboardMarkup
 from telegrambot.models import UserProfile, UserNews
 
 
-def send_telegram(bot, msg, text, keyboard=None):
-    keyboard = ReplyKeyboardMarkup(keyboard=[[
-    '/HELP ⁉️ راهنمایی',
-     ]], resize_keyboard=True)
+def send_telegram_user(bot, user, text, msg=None, keyboard=None, message_id=None, photo=None):
+    if keyboard is None:
+        if UserProfile.objects.get(user=user).user_settings.live_news:
+            live_button = '/Live توقف اخبار زنده'
+        else:
+            live_button = '/Live اخبار زنده'
+        keyboard = ReplyKeyboardMarkup(keyboard=[
+        [live_button],
+        ['/HELP ⁉️ راهنمایی']
+        ], resize_keyboard=True)
 
     if len(text) > 4096:
-        error_text(msg, type="LongMessage")
+        error_text(bot, msg, user, type="LongMessage")
         return False
-    return bot.sendMessage(chat_id=msg.message.chat_id,
-                           text=text,
-                           reply_markup=keyboard,
-                           parse_mode=telegram.ParseMode.HTML)
 
-
-def send_telegram_user(bot, user, text, keyboard=None, message_id=None, photo=None):
     profile = UserProfile.objects.get(user=user)
     p_id = profile.telegram_id
 
     if p_id:
-        if photo==None:
+        if photo is None:
             if not message_id:
                 return bot.sendMessage(chat_id=p_id,
                                        text=text,
@@ -63,7 +63,7 @@ def send_telegram_all_user(bot, text, keyboard=None, photo=None):
                                        parse_mode=telegram.ParseMode.HTML)
 
 
-def error_text(bot, msg, type=None):
+def error_text(bot, msg, user, type=None):
     text = 'ERROR'
     if type == 'NoEntity':
         text = '''        دسته مورد نظر موجود نمی‌باشد.'''
@@ -98,6 +98,13 @@ def error_text(bot, msg, type=None):
 
     elif type == 'NoneNews':
         text = "خبر مورد نظر موجود نمی باشد!"
-    return send_telegram(bot, msg, text, None)
+    return send_telegram_user(bot, user, text, msg, keyboard=None)
 
 
+def send_telegram_document(bot, user, msg, doc):
+    p_id = UserProfile.objects.get(user=user).telegram_id
+    bot.sendDocument(
+        chat_id=p_id,
+        document=doc,
+        parse_mode=telegram.ParseMode.HTML
+     )

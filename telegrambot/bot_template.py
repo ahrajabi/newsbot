@@ -4,19 +4,13 @@ from telegram import ReplyKeyboardMarkup
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from entities import tasks
-from rss.models import ImageUrls, News
-from rss.news import is_liked_news
-from rss.elastic import more_like_this
-from telegrambot.models import UserNews, UserProfile
-from rss.ml import normalize, sent_tokenize
-from entities.models import Entity, NewsEntity
-from newsbot.settings import BOT_NAME, PROJECT_EN_NAME
-from telegrambot.news_template import prepare_multiple_sample_news
-from telegrambot.bot_send import send_telegram, send_telegram_user
-from django.conf import settings
-from telegrambot import bot_info
+from entities.models import Entity
+from newsbot.settings import PROJECT_EN_NAME
+from telegrambot.bot_send import send_telegram_user
+from telegrambot.news_template import news_image_page, news_page
 
-def welcome_text(bot, msg):
+
+def welcome_text(bot, msg, user):
     keyboard = ReplyKeyboardMarkup(keyboard=[[
         '/HELP ⁉️ راهنمایی',
          ]], resize_keyboard=True)
@@ -36,7 +30,7 @@ def welcome_text(bot, msg):
 
         ''' % (msg.message.from_user.first_name, Emoji.RAISED_HAND, PROJECT_EN_NAME,
                Emoji.WHITE_DOWN_POINTING_BACKHAND_INDEX)
-    send_telegram(bot, msg, text, keyboard)
+    send_telegram_user(bot, user, text, msg, keyboard=keyboard)
 
 
 def show_entities(bot, msg, user, entities):
@@ -47,7 +41,7 @@ def show_entities(bot, msg, user, entities):
         text += tasks.get_link(user, item) + '\n'
         # button.append([InlineKeyboardButton(text=item.name, callback_data="data")])
     #keyboard = InlineKeyboardMarkup(inline_keyboard=button)
-    return send_telegram(bot, msg, text, keyboard)
+    return send_telegram_user(bot, user, text, msg, keyboard=keyboard)
 
 
 def show_user_entity(bot, msg, user, entities):
@@ -59,10 +53,10 @@ def show_user_entity(bot, msg, user, entities):
         text = ''' شما دسته ای را دنبال نمیکنید %s
         می توانید موضوعات مورد علاقه خود را(به عنوان مثال: تهران) از طریق کادر پایین ارسال کنید%s
         ''' % (Emoji.FACE_SCREAMING_IN_FEAR, Emoji.WHITE_DOWN_POINTING_BACKHAND_INDEX)
-    send_telegram(bot, msg, text, None)
+    send_telegram_user(bot, user, text, msg)
 
 
-def change_entity(bot, msg, entity, type=1):
+def change_entity(bot, msg, entity, user, type=1):
     buttons = [[
         InlineKeyboardButton(text='۱', callback_data='score-'+str(entity.id)+'-(-2)'),
         InlineKeyboardButton(text='۲', callback_data='score-'+str(entity.id)+'-(-1)'),
@@ -77,20 +71,21 @@ def change_entity(bot, msg, entity, type=1):
 برای حذف کردن بر روی لینک %s کلیک کنید.
         ''' % (entity.name, "/remove_"+str(entity.id))
         # return send_telegram(bot, msg, text, keyboard)
-        return send_telegram(bot, msg, text)
+        return send_telegram_user(bot, user, text, msg)
     else:
         text = '''
         دسته %s حذف شد.
         برای اضافه کردن مجدد بر روی لینک %s کلیک کنید.
         ''' % (entity.name, "/add_"+str(entity.id))
         # return send_telegram(bot, msg, text, keyboard)
-        return send_telegram(bot, msg, text)
+        return send_telegram_user(bot, user, text, msg)
 
 
 def bot_help(bot, msg, user):
     menu = [
         ('/list', 'تمام دسته هایی که عضو شده اید.'),
         ('/help', 'صفحه‌ی راهنمایی'),
+        ('/chrome', 'افزونه گوگل کروم')
     ]
     up = UserProfile.objects.get(user=user)
     if up:
@@ -103,148 +98,7 @@ def bot_help(bot, msg, user):
 
     for i in menu:
         text += i[0] + ' ' + i[1] + '\n'
-    send_telegram_user(bot, user, text, None)
-
-
-def news_image_page(bot, news, user, page=1, message_id=None):
-    keyboard = None
-    image_url = ImageUrls.objects.filter(news=news)
-    if image_url:
-        image_url = image_url[0].img_url
-    else:
-        image_url = settings.TELEGRAM_LOGO
-
-
-    UserNews.objects.update_or_create(user=user, news=news, defaults={'image_page': page})
-    text = news.base_news.title
-    send_telegram_user(bot, user, text, keyboard, message_id, photo=image_url)
-    print(image_url)
-
-
-def news_page(bot, news, user, page=1, message_id=None, **kwargs):
-    like = InlineKeyboardButton(text=Emoji.THUMBS_UP_SIGN + "(" + normalize(str(news.like_count)) + ")",
-                                callback_data='news-' + str(news.id) + '-like')
-
-    if is_liked_news(news=news, user=user):
-        like = InlineKeyboardButton(text=Emoji.THUMBS_DOWN_SIGN + "(" + normalize(str(news.like_count)) + ")",
-                                    callback_data='news-' + str(news.id) + '-unlike')
-
-    buttons = [
-        [
-            InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(news.id) + '-overview'),
-            InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(news.id) + '-full'),
-         ],
-        [
-            InlineKeyboardButton(text='اخبار مرتبط', callback_data='news-' + str(news.id) + '-stat'),
-            like,
-            InlineKeyboardButton(text='لینک خبر', url=str(news.base_news.url)),
-        ], ]
-
-    keyboard = InlineKeyboardMarkup(buttons)
-    text = ''
-
-    try:
-        source = news.base_news.news_agency.fa_name
-    except Exception:
-        try:
-            source = news.base_news.rss.news_agency.fa_name
-        except Exception:
-            source = ''
-
-
-    if page == 1:
-        summary = news.summary
-        has_summary = True
-
-        if not summary:
-            summary = news.body[:500]
-            has_summary = False
-
-
-        for sentence in sent_tokenize(summary):
-            text += Emoji.SMALL_BLUE_DIAMOND + sentence + '\n'
-            if len(text) > 300 and not has_summary:
-                break
-        try:
-            text += '\n' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n'
-        except Exception:
-            pass
-
-        if 'user_entity' in kwargs:
-            news_user_entity = NewsEntity.objects.filter(news=news, entity__in=kwargs['user_entity'])
-            if news_user_entity:
-                text += '\n' + Emoji.BOOKMARK + ' دسته های مشترک با علاقه مندی شما:\n'
-                for en in news_user_entity:
-                    text += en.entity.name + ', '
-                text += '\n'
-
-    elif page == 2:
-        try:
-            text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n    '
-        except Exception:
-            pass
-
-        if len(news.body) < 3500:
-            text += news.body + '\n'
-        else:
-            text += news.body[:3500].rsplit(' ', 1)[0]
-            text += '\n' + 'ادامه دارد...' + '\n'
-    elif page == 3:
-        related = more_like_this(news.base_news.title, 5)
-        text, notext = prepare_multiple_sample_news(related, 5)
-    text += BOT_NAME
-
-    send_telegram_user(bot, user, text, keyboard, message_id)
-    UserNews.objects.update_or_create(user=user, news=news, defaults={'page': page})
-
-
-def inline_news_page(news_id):
-    news = News.objects.get(id=news_id)
-    if not news:
-        return None
-
-    like = InlineKeyboardButton(text=Emoji.THUMBS_UP_SIGN + "(" + normalize(str(news.like_count)) + ")",
-                                callback_data='news-' + str(news.id) + '-like')
-
-    if False:
-        like = InlineKeyboardButton(text=Emoji.THUMBS_DOWN_SIGN + "(" + normalize(str(news.like_count)) + ")",
-                                    callback_data='news-' + str(news.id) + '-unlike')
-
-    buttons = [
-        [
-            InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(news.id) + '-overview'),
-            InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(news.id) + '-full'),
-         ],
-        [
-            InlineKeyboardButton(text='اخبار مرتبط', callback_data='news-' + str(news.id) + '-stat'),
-            like,
-            InlineKeyboardButton(text='لینک خبر', url=str(news.base_news.url)),
-        ], ]
-
-    keyboard = InlineKeyboardMarkup(buttons)
-    text = ''
-
-    text += news.get_summary()
-
-    try:
-        source = news.base_news.news_agency.fa_name
-    except Exception:
-        try:
-            source = news.base_news.rss.news_agency.fa_name
-        except Exception:
-            source = ''
-
-    text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + \
-            '<a href=' + '"https://telegram.me/' + settings.BOT_NAME[1:] + '?start=' + 'N' + str(
-        news.id) + '">' + 'مشاهده‌ی سریع خبر' + '</a>\n'
-    try:
-        text += '\n' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n'
-    except Exception:
-        pass
-
-    text += bot_info.botpromote
-
-    return text, keyboard
+    send_telegram_user(bot, user, text, msg)
 
 
 def publish_news(bot, news, user, page=1, message_id=None, **kwargs):
@@ -257,7 +111,7 @@ def publish_news(bot, news, user, page=1, message_id=None, **kwargs):
 
 def after_user_add_entity(bot, msg, user, entity, entities):
     text = "دسته ' %s ' اضافه شد %s" % (entity, Emoji.PUSHPIN)
-    send_telegram(bot, msg, text)
+    send_telegram_user(bot, user, text, msg)
     show_user_entity(bot, msg, user, entities)
 
 
@@ -281,8 +135,8 @@ def show_related_entities(related_entities):
     return text
 
 
-def send_related_entities(bot, msg, user, related_entities):
-    send_telegram(bot, msg, user, show_related_entities(related_entities))
+# def send_related_entities(bot, msg, user, related_entities):
+#     send_telegram(bot, msg, user, show_related_entities(related_entities))
 
 
 def one_entity_recommendation(entity):

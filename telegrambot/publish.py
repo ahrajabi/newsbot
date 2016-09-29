@@ -12,6 +12,7 @@ from telegram.inlinekeyboardbutton import InlineKeyboardButton
 from telegram import InlineKeyboardMarkup
 from telegram.error import Unauthorized
 
+
 def publish_handler(bot, job):
     try:
         cache.incr('publish_handler_counter')
@@ -90,8 +91,6 @@ def periodic_publish_news(bot, job):
                 unl.save()
             except Unauthorized:
                 command_handler.deactive_profile(up)
-
-
 
 
 def live_publish_news(bot, job):
