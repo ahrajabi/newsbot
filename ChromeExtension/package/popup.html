@@ -1,22 +1,50 @@
 <!doctype html>
 <html>
-  <head>
+<head>
     <title>KhabareMan Live2!</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <meta charset="utf-8">
-      <link href="popup.css" rel="stylesheet">
-      <script src="jquery-3.1.1.min.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+
+
+    <script src="jquery-3.1.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="semantic/semantic.min.css">
+    <script src="semantic/semantic.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="semantic/accordion.min.css">
+    <script src="semantic/accordion.min.js"></script>
+    <link href="semantic/icon.min.css" rel="stylesheet">
     <script src="popup.js"></script>
-  </head>
-  <body id="popup-page">
-    <h3>خبر زنده‌ی من</h3>
-    <div id="check-login">
-        لطفا در قسمت تنظیمات اطلاعات کاربری خود را وارد نمایید.
-    </div>
-    <div id="change-user"> </div>
-    <a href="options.html">تنظیمات</a>
+    <link href="popup.css" rel="stylesheet">
+</head>
+<body id="popup-page">
+<h3 class="ui block header">خبر زنده‌ی من</h3>
+<div id="check-login">
+    لطفا در قسمت تنظیمات اطلاعات کاربری خود را وارد نمایید.
+</div>
+<div id="change-user"></div>
 
-  <div id="results"></div>
+<div id="list-control" class="ui labeled icon buttons">
+    <button class="ui button">
+        <i class="play icon"></i>
+        دریافت خبر
+    </button>
+    <button class="ui button">
+        <i class="pause icon"></i>
+        توقف دریافت
+    </button>
+    <button class="ui button">
+        <i class="remove icon"></i>
+        حذف تاریخچه
+    </button>
+    <button class="ui button">
+        <i class="setting icon"></i>
+        تنظیمات
+    </button>
+</div>
+<div>
+    <i class="notched circle icon loading"></i>
+</div>
+<div id="results"></div>
 
-  </body>
+</body>
 </html>
 

@@ -1,13 +1,8 @@
 import locale
-from telegram.emoji import Emoji
-import jdatetime
-from rss.models import News
-from telegrambot.bot_send import send_telegram
 from telegrambot import bot_info
 import jdatetime
 from telegram.emoji import Emoji
 from django.utils import timezone
-from rss.ml import normalize
 from django.conf import settings
 
 from rss.models import News

@@ -1,27 +1,36 @@
 <head>
     <meta charset="UTF-8">
     <title>Khabare Man</title>
-    <link href="popup.css" rel="stylesheet">
+
     <script src="jquery-3.1.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="semantic/semantic.min.css">
+    <script src="semantic/semantic.min.js"></script>
+    <link href="popup.css" rel="stylesheet">
 </head>
 <body id="options-page">
-    <h1>خبرزنده‌ی من</h1>
-    <div id="login-block">
+<h1>خبرزنده‌ی من</h1>
+<div id="login-block">
     <form action="javascript:handleIt()">
-          نام کاربری:<br>
-          <input type="text" name="username" id="username-form">
-          <br>
-          رمز عبور:<br>
-          <input type="text" name="password" id="password-form">
-          <br><br>
-          <button id="submit">Save</button>
-    </form>
-<div id="status"></div>
-</div>
-        <div id="return-popup">
+        <div class="ui form">
+            <div class="inline field">
+                <label>نام کاربری</label>
+                <input type="text" name="username" id="username-form" placeholder="نام کاربری">
+            </div>
+            <div class="inline field">
+                <label>عبارت توکن</label>
+                <input type="text" name="password" id="password-form" placeholder="توکن">
+            </div>
 
-        <a href="popup.html">صفحه اخبار زنده</a>
-    </div>
-        <script src="options.js"></script>
+
+            <button id="submit" class="ui button">Save</button>
+        </div>
+    </form>
+    <div id="status"></div>
+</div>
+<div id="return-popup">
+
+    <a href="popup.html">صفحه اخبار زنده</a>
+</div>
+<script src="options.js"></script>
 </body>
 </html>

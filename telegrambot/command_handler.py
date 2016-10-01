@@ -177,7 +177,7 @@ def live_command(bot, msg, user):
 
 
 def chrome_command(bot, msg, user):
-    commands = ['/extension', '/Token']
+    commands = ['/extension', '/token']
     response = '''شما میتوانید با نصب افزونه خبرمن اخبار را از طریق مرورگر Google Chrome خود دریافت کنید
     کافیست دو مرحله زیر را انجام دهید :
     افزونه خبر من را دریافت و نصب کنید %s

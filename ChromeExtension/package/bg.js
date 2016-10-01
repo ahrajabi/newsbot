@@ -24,7 +24,7 @@ function connect() {
             chrome.storage.local.set({
                 all_data: [],
             }, function () {
-                document.getElementById('results').innerHTML = '';
+                doument.getElementById('results').innerHTML = ' ';
             });
             return 0;
         }

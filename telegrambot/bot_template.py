@@ -2,7 +2,7 @@
 from telegram.emoji import Emoji
 from telegram import ReplyKeyboardMarkup
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-
+from telegrambot.models import UserProfile
 from entities import tasks
 from entities.models import Entity
 from newsbot.settings import PROJECT_EN_NAME
