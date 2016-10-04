@@ -9,10 +9,23 @@ from telegrambot.news_template import prepare_multiple_sample_news
 from rss.elastic import elastic_search_entity, similar_news_to_query
 from newsbot.settings import SAMPLE_NEWS_COUNT, MIN_HITS_ENTITY_VALIDATION, DAYS_FOR_SEARCH_NEWS
 from telegrambot.bot_send import send_telegram_user, error_text
-
+from newsbot.settings import MAIN_BUTTONS
+from telegrambot import command_handler
 
 def handle(bot, msg, user):
     # TODO set len hits
+    text = msg.message.text
+    if text == MAIN_BUTTONS[0][0]:
+        getattr(command_handler, MAIN_BUTTONS[0][1])(bot, msg, user)
+    elif text == MAIN_BUTTONS[1][0]:
+        getattr(command_handler, MAIN_BUTTONS[1][1])(bot, msg, user)
+    elif text == MAIN_BUTTONS[2][0]:
+        getattr(command_handler, MAIN_BUTTONS[2][1])(bot, msg, user)
+    elif text == MAIN_BUTTONS[3][0]:
+        getattr(command_handler, MAIN_BUTTONS[3][1])(bot, msg, user)
+    elif text == MAIN_BUTTONS[4][0]:
+        getattr(command_handler, MAIN_BUTTONS[4][1])(bot, msg, user)
+    else:
         search_box_result(bot, msg, user)
 
 

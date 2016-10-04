@@ -38,8 +38,8 @@ def sample_news_page(news, inline=False):
 
     text = ''
     if not inline:
-        text = Emoji.SMALL_BLUE_DIAMOND + title + '\n'
-    text += '    ' + news.get_summary() + '\n'
+        text = Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + title + '\n'
+    text += '    ' + Emoji.SMALL_BLUE_DIAMOND + news.get_summary() + '\n'
     text += '    ' + Emoji.CALENDAR + ' ' + georgian_to_jalali(news.base_news.published_date) + '\n'
     try:
         text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n'
