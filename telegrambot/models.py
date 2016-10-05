@@ -18,7 +18,7 @@ class UserNewsList(models.Model):
 
 class UserSettings(models.Model):
     live_news = models.BooleanField(default=False)
-    interval_news_list = models.PositiveSmallIntegerField(default=180)
+    interval_news_list = models.PositiveSmallIntegerField(default=1440)
     last_news_list = models.OneToOneField(UserNewsList, verbose_name='Last News List', null=True)
 
 

@@ -142,7 +142,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = "/tmp/"
 
 ELASTIC_URL = 'http://130.185.76.171:9200'
-ELASTIC_NEWS = 'news'
+
 
 BOT_NAME = '@KhabareManbot'
 PROJECT_FA_NAME = 'خبرمن'
@@ -195,8 +195,8 @@ REST_FRAMEWORK = {
 }
 
 try:
-    from .local_settings import *
     from .global_settings import *
+    from .local_settings import *
 except ImportError:
     pass
 

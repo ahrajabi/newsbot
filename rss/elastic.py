@@ -16,7 +16,8 @@ def save_to_elastic_search(obj):
             'published_date': obj.base_news.published_date
 
         }
-        es.index(index=settings.ELASTIC_NEWS, doc_type='new', id=obj.id, body=body, request_timeout=50)
+        es.index(index=settings.ELASTIC_NEWS['index'], doc_type=settings.ELASTIC_NEWS['doc_type'], id=obj.id, body=body,
+                 request_timeout=50)
         return True
     except Exception:
         return False
@@ -58,7 +59,7 @@ def elastic_search_entity(query, size, offset=0):
         "from": offset,
         "size": size
     }
-    r = es.search(index=settings.ELASTIC_NEWS, body=body, request_timeout=20)
+    r = es.search(index=settings.ELASTIC_NEWS['index'], body=body, request_timeout=20)
     return r['hits']['hits']
 
 
@@ -75,7 +76,7 @@ def more_like_this(query, number):
         'size': number,
     }
 
-    r = es.search(index=settings.ELASTIC_NEWS, body=body)
+    r = es.search(index=settings.ELASTIC_NEWS['index'], body=body)
     news_id = [item['_id'] for item in r['hits']['hits']]
     return news_id
 
@@ -107,7 +108,7 @@ def similar_news_to_query(query, size, days, offset=0):
         }
     }
 
-    r = es.search(index=settings.ELASTIC_NEWS, body=body, request_timeout=20)
+    r = es.search(index=settings.ELASTIC_NEWS['index'], body=body, request_timeout=20)
     return [hit['_id'] for hit in r['hits']['hits']]
 
 
@@ -144,7 +145,7 @@ def news_with_terms(terms_list, size=10, start_time='now-3h', end_time='now', of
         "from": offset
     }
     print(size, offset, start_time, end_time, terms_list)
-    r = es.search(index=settings.ELASTIC_NEWS, body=body, request_timeout=20)
+    r = es.search(index=settings.ELASTIC_NEWS['index'], body=body, request_timeout=20)
     return r
 
 
@@ -152,9 +153,9 @@ def list_missed_elastic(li):
     if len(li) == 0:
         return list()
     body = {
-            "docs": [{"_id": str(item), "_source": "false"} for item in li]
-        }
-    ret = es.mget(index=settings.ELASTIC_NEWS, doc_type='new', body=body)
+        "docs": [{"_id": str(item), "_source": "false"} for item in li]
+    }
+    ret = es.mget(index=settings.ELASTIC_NEWS['index'], doc_type=settings.ELASTIC_NEWS['doc_type'], body=body)
 
     missed = []
     for item in ret['docs']:
@@ -193,37 +194,61 @@ def repair_missed_elastic():
     print('Repair', datetime.datetime.now() - start_time)
 
 
+def news_elastic_setup():
+    index = settings.ELASTIC_NEWS['index']
 
-# {
-# 	"query":{
-#     	"filtered" :{
-# 	    	"query":{
-#     	    	"match_all" :{}
-#         	},
-# 	    	"filter": {
-#     	    	"range" :{
-#         	    	"published_date" :{
-#             	    	"gt": "now-100h"
-#                 	}
-# 	            }
-#     	    }
-#     	}
-#     },
-# 	"aggs": {
-#     	"trend_tags" :{
-#         	"date_histogram": {
-#             	"field": "published_date",
-#                 "interval": "1h",
-#                 "format": "yyyy-MM-dd hh-mm",
-#                 "min_doc_count":0
-#             },
-#             "aggs":{
-#         		"items_items": {
-#             		"significant_terms":{
-#                 		"field":"title"
-#                 	}
-# 				}
-#             }
-#         }
-#     }
-# }
+    body = {
+        "settings": settings.NEWS_SETTING,
+        "mappings": settings.NEWS_MAPPING
+    }
+
+    if not es.indices.exists(index):
+        es.indices.create(index, body=body)
+        return True
+
+    es.indices.close(index)
+    es.indices.put_mapping(index=index, doc_type=settings.ELASTIC_NEWS['doc_type'], body=settings.NEWS_MAPPING)
+    es.indices.put_settings(index=index, body=settings.NEWS_SETTING['index'])
+    es.indices.open(index)
+    es.indices.put_settings(index=index, body={'index': settings.ELASTIC_NEWS['settings']})
+
+
+
+
+
+
+
+
+    # {
+    # 	"query":{
+    #     	"filtered" :{
+    # 	    	"query":{
+    #     	    	"match_all" :{}
+    #         	},
+    # 	    	"filter": {
+    #     	    	"range" :{
+    #         	    	"published_date" :{
+    #             	    	"gt": "now-100h"
+    #                 	}
+    # 	            }
+    #     	    }
+    #     	}
+    #     },
+    # 	"aggs": {
+    #     	"trend_tags" :{
+    #         	"date_histogram": {
+    #             	"field": "published_date",
+    #                 "interval": "1h",
+    #                 "format": "yyyy-MM-dd hh-mm",
+    #                 "min_doc_count":0
+    #             },
+    #             "aggs":{
+    #         		"items_items": {
+    #             		"significant_terms":{
+    #                 		"field":"title"
+    #                 	}
+    # 				}
+    #             }
+    #         }
+    #     }
+    # }
