@@ -10,6 +10,8 @@ def handler(bot, msg):
     query = msg.inline_query.query
     if not query:
         return
+    if query.startswith('N'):
+        return inline_news_id(bot, msg)
 
     el_news = elastic.news_with_terms(terms_list=[query],
                                       size=5,
@@ -35,16 +37,40 @@ def handler(bot, msg):
     )
     print(el_news)
     for item in el_news['hits']['hits']:
-        news_themed = bot_template.inline_news_page(item['_id'])
-        if not news_themed:
+        news = News.objects.get(id=item['_id'])
+        if not news:
+            continue
+        text, keyboard = news_template.inline_news_page(bot, news)
+        if not text:
             continue
         results.append(
             InlineQueryResultArticle(
                 id=item['_id'],
                 title=item['_source']['title'],
-                input_message_content=InputTextMessageContent(news_themed[0], parse_mode=ParseMode.HTML),
-        #        reply_markup=news_themed[1]
+                input_message_content=InputTextMessageContent(text, parse_mode=ParseMode.HTML)
             )
         )
+
+    ret = bot.answerInlineQuery(msg.inline_query.id, results, switch_pm_text="خبرِمن")
+
+
+def inline_news_id(bot, msg):
+    query = msg.inline_query.query
+    results = list()
+    news = News.objects.filter(id=int(query[1:]))
+    if not news:
+        return False
+    news = news[0]
+    text, keyboard = news_template.inline_news_page(bot, news)
+    if not text:
+        return False
+
+    results.append(
+        InlineQueryResultArticle(
+            id=news.id,
+            title=news.base_news.title,
+            input_message_content=InputTextMessageContent(message_text=text, parse_mode=ParseMode.HTML)
+        )
+    )
 
     ret = bot.answerInlineQuery(msg.inline_query.id, results, switch_pm_text="خبرِمن")

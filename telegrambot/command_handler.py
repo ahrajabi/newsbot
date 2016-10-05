@@ -36,6 +36,7 @@ def create_new_user_profile(bot, msg):
 
 
     user = User.objects.create_user(username=username)
+
     try:
         user.userprofile_set.create(first_name=msg.message.chat.first_name,
                                     last_name=msg.message.chat.last_name,
@@ -44,6 +45,8 @@ def create_new_user_profile(bot, msg):
     except Exception:
         user.userprofile_set.create(last_chat=timezone.now(),
                                     telegram_id=msg.message.from_user.id)
+
+    get_user(msg.message.from_user.id)
     return user
 
 
@@ -108,7 +111,12 @@ def help_command(bot, msg, user):
 def user_alert_handler(bot, job):
     bulk = UserAlert.objects.filter(is_sent=False)
     for item in bulk:
-        send_telegram_all_user(bot, item.text)
+        all_profile = UserProfile.objects.all()
+        for profile in all_profile:
+            id = profile.telegram_id
+            if id:
+                send_telegram_user(bot, profile.user, item.text)
+
         item.is_sent = True
         item.save()
 
@@ -214,9 +222,11 @@ def newslist_command(bot, msg, user):
 
 def special_command(bot, msg, user):
     delta = timezone.now() - timedelta(hours=20)
-    exl = ['irna', 'mehrnews', 'fars', 'tasnim', 'codal', 'isna']
-    news = News.objects.filter(base_news__published_date__range=(delta, timezone.now())).exclude(
-        base_news__news_agency__name__in=exl).order_by('?')
+    exl = ['irna', 'mehrnews', 'fars', 'tasnim', 'codal', 'isna', 'shana']
+    news = News.objects.filter(base_news__published_date__range=(delta, timezone.now())) \
+        .exclude(base_news__news_agency__name__in=exl) \
+        .order_by('?')
+
     if not news:
         return error_text(bot, msg, user, 'NoneNews')
     news = news[0]

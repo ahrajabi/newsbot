@@ -22,7 +22,7 @@ def publish_handler(bot, job):
         cache.set('publish_handler_counter', 1)
     cnt = cache.get('publish_handler_counter')
 
-    if cnt*job.interval % 30 == 0:
+    if cnt * job.interval % 200 == 0:
         periodic_publish_news(bot, job)
         print('periodic', cnt)
     else:
@@ -123,7 +123,6 @@ def live_publish_news(bot, job):
 
         news_ent2 = NewsEntity.objects.filter(news__base_news__published_date__range=(start, end))
         print(news_ent2.count())
-
         print(user.username, news_ent.count())
         if news_ent.count() > 0:
             news_list = list(set([item.news_id for item in news_ent]))
