@@ -177,7 +177,7 @@ def live_command(bot, msg, user):
 
 def chrome_command(bot, msg, user):
     commands = ['/extension', '/token']
-    response = '''شما میتوانید با نصب افزونه خبرمن اخبار را از طریق مرورگر Google Chrome خود دریافت کنید
+    response = Emoji.SMALL_BLUE_DIAMOND + '''شما میتوانید با نصب افزونه خبرمن اخبار را از طریق مرورگر Google Chrome خود دریافت کنید.
     کافیست دو مرحله زیر را انجام دهید :
     افزونه خبر من را دریافت و نصب کنید %s
     نام کاربری و توکن خود را دریافت کنید %s
@@ -186,9 +186,10 @@ def chrome_command(bot, msg, user):
 
 
 def extension_command(bot, msg, user):
-    file = ''
-    send_telegram_document(bot, user, msg, file)
-
+    # file = ''
+    # send_telegram_document(bot, user, msg, file)
+    text = 'افزونه خبر من به زودی اضافه میشود.'
+    send_telegram_user(bot, user, text, msg)
 
 def token_command(bot, msg, user):
     if not user.username:
@@ -198,9 +199,9 @@ def token_command(bot, msg, user):
     else:
         user_token, is_new = Token.objects.get_or_create(user=user)
         if is_new:
-            response = 'توکن با موفقیت ایجاد شد :)\n '
+            response =Emoji.THUMBS_UP_SIGN + 'توکن با موفقیت ایجاد شد :)\n '
         else:
-            response = 'شما قبلا توکن را ایجاد کرده بودید\n '
+            response = 'شما قبلا توکن را ایجاد کرده بودید ، اطلاعات شما:\n'
         response += 'نام کاربری : %s \n توکن : %s ' % (user.username, user_token)
     send_telegram_user(bot, user, response, msg)
 
@@ -239,3 +240,8 @@ def stoplive_command(bot, msg, user):
         text = 'ارسال اخبار به صورت بر خط غیرفعال است.'
     send_telegram_user(bot, user, text, msg)
 
+
+def contact_command(bot, msg, user):
+    text = 'با ما در تماس باشید:\n'
+    text += Emoji.MEMO + '@KhabareMan'
+    send_telegram_user(bot, user, text, msg)

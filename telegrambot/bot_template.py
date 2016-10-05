@@ -85,7 +85,8 @@ def bot_help(bot, msg, user):
     menu = [
         ('/list', 'تمام دسته هایی که عضو شده اید.'),
         ('/help', 'صفحه‌ی راهنمایی'),
-        ('/chrome', 'افزونه گوگل کروم')
+        ('/chrome', 'افزونه گوگل کروم'),
+        ('/contact', 'تماس با ما')
     ]
     up = UserProfile.objects.get(user=user)
     if up:

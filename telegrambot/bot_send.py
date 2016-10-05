@@ -4,7 +4,7 @@ from telegram import ReplyKeyboardMarkup
 
 from telegrambot.models import UserProfile, UserNews
 from newsbot.settings import MAIN_BUTTONS
-
+from telegrambot import bot_info
 
 def send_telegram_user(bot, user, text, msg=None, keyboard=None, message_id=None, photo=None):
     if keyboard is None:
@@ -22,7 +22,7 @@ def send_telegram_user(bot, user, text, msg=None, keyboard=None, message_id=None
           MAIN_BUTTONS[0][0]
          ]
         ], resize_keyboard=True)
-
+    text += '\n\n' + bot_info.botpromote
     if len(text) > 4096:
         error_text(bot, msg, user, type="LongMessage")
         return False

@@ -52,7 +52,7 @@ def sample_news_page(news, inline=False):
         text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER +\
                 '<a href=' +'"https://telegram.me/'+settings.BOT_NAME[1:]+'?start=' +'N' + str(news.id) +'">' + 'مشاهده‌ی سریع خبر' + '</a>\n'
 
-    return text +'\n'
+    return text
 
 
 def prepare_multiple_sample_news(news_id_list, total_news, inline=False):
@@ -68,8 +68,6 @@ def prepare_multiple_sample_news(news_id_list, total_news, inline=False):
         except News.DoesNotExist:
             continue
 
-    text += '\n'
-    text += bot_info.botpromote
     return text, news_count
 
 
@@ -80,6 +78,7 @@ def prepare_multiple_sample_news(news_id_list, total_news, inline=False):
 
 
 def news_image_page(bot, news, user, page=1, message_id=None, picture_number=0):
+    # TODO fix not found image urls
     image_url = ImageUrls.objects.filter(news=news)
     if image_url:
         image_url = image_url[picture_number].img_url
@@ -126,6 +125,11 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
     keyboard = InlineKeyboardMarkup(buttons)
     text = ''
     if page == 1:
+        try:
+            text += news_image_page(bot, news, user, page=1, message_id=message_id, picture_number=picture_number)
+        except Exception:
+            print(Exception)
+
         summary = news.summary
         has_summary = True
 
@@ -153,10 +157,6 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
                 for en in news_user_entity:
                     text += en.entity.name + ', '
                 text += '\n'
-        try:
-            text += news_image_page(bot, news, user, page=1, message_id=message_id, picture_number=picture_number)
-        except Exception:
-            print(Exception)
 
     elif page == 2:
         try:
@@ -172,7 +172,6 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
     elif page == 3:
         related = more_like_this(news.base_news.title, 5)
         text, notext = prepare_multiple_sample_news(related, 5)
-    text += BOT_NAME
 
     send_telegram_user(bot, user, text, keyboard=keyboard, message_id=message_id)
     UserNews.objects.update_or_create(user=user, news=news, defaults={'page': page})
