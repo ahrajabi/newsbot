@@ -102,17 +102,16 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
 
     buttons = [
         [
-            InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(news.id) + '-overview-' + str(picture_number)),
             InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(news.id) + '-full-' +
                                                                     str(picture_number)),
-         ],
+            InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(news.id) + '-overview-' + str(picture_number)),
+                     ],
         [
             InlineKeyboardButton(text='اخبار مرتبط', callback_data='news-' + str(news.id) + '-stat-' +
                                                                    str(picture_number)),
             like,
-            InlineKeyboardButton(text='لینک خبر', url=str(news.base_news.url)),
         ], ]
-    if news.pic_number > 1:
+    if news.pic_number > 1 and page == 1:
         if picture_number < news.pic_number - 1:
             buttons[0].append(
                 InlineKeyboardButton(text='عکس بعدی', callback_data='news-' + str(news.id) + '-img-' +
@@ -137,11 +136,13 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
         text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n'
 
         for sentence in sent_tokenize(summary):
-            text += Emoji.SMALL_BLUE_DIAMOND + sentence + '\n'
+            text += '    ' + Emoji.SMALL_BLUE_DIAMOND + sentence + '\n'
             if len(text) > 300 and not has_summary:
                 break
         try:
-            text += '\n' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + news.base_news.rss.news_agency.fa_name + '\n'
+            text += '    ' + Emoji.CALENDAR + ' ' + georgian_to_jalali(news.base_news.published_date) + '\n'
+            text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ '
+            text += "<a href= '%s'> %s \n</a>" % (news.base_news.url, news.base_news.rss.news_agency.fa_name)
         except Exception:
             pass
 
