@@ -147,6 +147,7 @@ def stop_command(bot, msg, user):
         '''
         send_telegram_user(bot, user, text)
 
+
 def news_command(bot, msg, user):
     news_id = command_separator(msg, 'add')
     try:
@@ -163,16 +164,13 @@ def command_separator(msg, command):
 def live_command(bot, msg, user):
     user_settings = UserProfile.objects.get(user=user).user_settings
     live_news_status = user_settings.live_news
-    if live_news_status:
-        user_settings.live_news = False
-        user_settings.save()
-        text = Emoji.CROSS_MARK + 'ارسال اخبار به صورت بر خط قطع شد'
-    else:
+    if not live_news_status:
         user_settings.live_news = True
         user_settings.save()
         text = Emoji.WHITE_HEAVY_CHECK_MARK + ''' ارسال اخبار به صورت بر خط فعال شد.\n
-   از این پس اخبار مرتبط با موضوع های مورد علاقه شما به صورت لحظه ای ارسال می شود'''
-
+   از این پس اخبار مرتبط با موضوع های مورد علاقه شما به صورت لحظه ای ارسال می شود.'''
+    else:
+        text = 'ارسال اخبار به صورت بر خط فعال است.'
     send_telegram_user(bot, user, text, msg)
 
 
@@ -204,4 +202,27 @@ def token_command(bot, msg, user):
             response = 'شما قبلا توکن را ایجاد کرده بودید\n '
         response += 'نام کاربری : %s \n توکن : %s ' % (user.username, user_token)
     send_telegram_user(bot, user, response, msg)
+
+
+def newslist_command(bot, msg, user):
+    from telegrambot.publish import prepare_periodic_publish_news
+    up = UserProfile.objects.get(user=user)
+    prepare_periodic_publish_news(bot, 0, up)
+
+
+def special_command(bot, msg, user):
+    print('special_command')
+
+
+def stoplive_command(bot, msg, user):
+    user_settings = UserProfile.objects.get(user=user).user_settings
+    live_news_status = user_settings.live_news
+    if live_news_status:
+        user_settings.live_news = False
+        user_settings.save()
+        text = Emoji.CROSS_MARK + 'ارسال اخبار به صورت بر خط قطع شد'
+    else:
+
+        text = 'ارسال اخبار به صورت بر خط غیرفعال است.'
+    send_telegram_user(bot, user, text, msg)
 
