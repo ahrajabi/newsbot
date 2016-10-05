@@ -90,14 +90,14 @@ def bot_help(bot, msg, user):
     up = UserProfile.objects.get(user=user)
     if up:
         if not up.stopped:
-            menu.append( ('/stop', 'توقف دریافت پیام از بات') )
+            menu.append(('/stop', 'توقف دریافت پیام از بات'))
         else:
-            menu.append( ('/start', 'شما دریافت پیام از بات را متوقف کرده اید. توسط این گزینه می توانید این محدودیت را بردارید.') )
+            menu.append(('/start', 'شما دریافت پیام از بات را متوقف کرده اید. توسط این گزینه می توانید این محدودیت را بردارید.'))
 
-    text = 'راهنما'+'\n'
+    text = Emoji.LEFT_POINTING_MAGNIFYING_GLASS + 'راهنما'+'\n'
 
     for i in menu:
-        text += i[0] + ' ' + i[1] + '\n'
+        text += Emoji.WHITE_RIGHT_POINTING_BACKHAND_INDEX + i[0] + ' ' + i[1] + '\n\n'
     send_telegram_user(bot, user, text, msg)
 
 
