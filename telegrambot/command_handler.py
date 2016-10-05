@@ -115,7 +115,10 @@ def user_alert_handler(bot, job):
         for profile in all_profile:
             id = profile.telegram_id
             if id:
-                send_telegram_user(bot, profile.user, item.text)
+                try:
+                    send_telegram_user(bot, profile.user, item.text)
+                except Exception:
+                    pass
 
         item.is_sent = True
         item.save()
