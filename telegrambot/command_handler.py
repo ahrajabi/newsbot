@@ -222,7 +222,7 @@ def newslist_command(bot, msg, user):
 
 def special_command(bot, msg, user):
     delta = timezone.now() - timedelta(hours=20)
-    exl = ['irna', 'mehrnews', 'fars', 'tasnim', 'codal', 'isna', 'shana']
+    exl = ['irna', 'mehrnews', 'fars', 'tasnim', 'codal', 'isna', 'shana', 'akhbarrasmi', 'sena', 'boursenews', 'naftema']
     news = News.objects.filter(base_news__published_date__range=(delta, timezone.now())) \
         .exclude(base_news__news_agency__name__in=exl) \
         .order_by('?')
