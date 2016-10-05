@@ -17,6 +17,7 @@ class Command(BaseCommand):
             %s افزودن دکمه لیست خبرها که ‌با زدن آن لیستی از خلاصه خبرهای مرتبط با دسته های شما ارسال میشود
             %s افزودن قابلیت دریافت چندین عکس در یک خبر
             %s افزودن منابع خبری بیشتر
+            %s افزودن inline bot که به شما توانایی استفاده از ربات را درون گروه ها، کانالها و پیامهای فردی میدهد.
 
         %s منتظر نظرات شما هستیم /contact
                                 ''' % (
@@ -28,6 +29,7 @@ class Command(BaseCommand):
             Emoji.DIGIT_THREE_PLUS_COMBINING_ENCLOSING_KEYCAP,
             Emoji.DIGIT_FOUR_PLUS_COMBINING_ENCLOSING_KEYCAP,
             Emoji.DIGIT_FIVE_PLUS_COMBINING_ENCLOSING_KEYCAP,
+            Emoji.DIGIT_SIX_PLUS_COMBINING_ENCLOSING_KEYCAP,
             Emoji.WINKING_FACE
         )
         UserAlert.objects.create(text=text)

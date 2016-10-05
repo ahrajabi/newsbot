@@ -164,8 +164,8 @@ def entitynewslist_inline_command(bot, msg, user):
     print(math.ceil(unl.number_of_news/settings.NEWS_PER_PAGE))
     if next_page > 1 and next_page < math.ceil(unl.number_of_news/settings.NEWS_PER_PAGE):
         buttons = [[
-            InlineKeyboardButton(text='صفحه بعد', callback_data='entitynewslist-next'),
             InlineKeyboardButton(text='صفحه قبل', callback_data='entitynewslist-previous'),
+            InlineKeyboardButton(text='صفحه بعد', callback_data='entitynewslist-next'),
         ], ]
     elif next_page == 1:
         buttons = [[
