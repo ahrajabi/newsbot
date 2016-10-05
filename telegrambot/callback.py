@@ -51,11 +51,13 @@ def score_inline_command(bot, msg, user):
 
 
 def news_inline_command(bot, msg, user):
-    news_id = re.compile(r'\d+').findall(msg.callback_query.data.lower())[0]
+    d = re.compile(r'\d+').findall(msg.callback_query.data.lower())
+    news_id = d[0]
     news = News.objects.get(id=news_id)
     p = re.compile(r'[a-z]+')
     title = p.findall(msg.callback_query.data.lower())[1]
     page = UserNews.objects.filter(news=news, user=user)[0].page
+    picture_n = int(d[1])
 
     if title == 'like':
         set_news_like(user, news, mark='Like')
@@ -72,10 +74,16 @@ def news_inline_command(bot, msg, user):
     elif title == 'stat':
         page = 3
         ttt = 'اخبار مرتبط'
-
+    elif title == 'img':
+        ttt = 'عکس بعدی'
+        picture_n += 1
+        if picture_n > news.pic_number - 1:
+            picture_n = 0
+            ttt = 'عکس اول'
     news_template.news_page(bot, news, user,
-                           page=page, message_id=msg.callback_query.message.message_id,
-                           user_entity=tasks.get_user_entity(user))
+                            page=page, message_id=msg.callback_query.message.message_id,
+                            picture_number=picture_n,
+                            user_entity=tasks.get_user_entity(user))
 
     bot.answerCallbackQuery(msg.callback_query.id, text=ttt)
 

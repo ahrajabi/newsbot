@@ -79,10 +79,10 @@ def prepare_multiple_sample_news(news_id_list, total_news, inline=False):
 #     send_telegram(bot, msg, text, keyboard=None)
 
 
-def news_image_page(bot, news, user, page=1, message_id=None):
+def news_image_page(bot, news, user, page=1, message_id=None, picture_number=0):
     image_url = ImageUrls.objects.filter(news=news)
     if image_url:
-        image_url = image_url[0].img_url
+        image_url = image_url[picture_number].img_url
     else:
         image_url = settings.TELEGRAM_LOGO
 
@@ -92,24 +92,37 @@ def news_image_page(bot, news, user, page=1, message_id=None):
     return text
 
 
-def news_page(bot, news, user, page=1, message_id=None, **kwargs):
+def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwargs):
     like = InlineKeyboardButton(text=Emoji.THUMBS_UP_SIGN + "(" + normalize(str(news.like_count)) + ")",
-                                callback_data='news-' + str(news.id) + '-like')
+                                callback_data='news-' + str(news.id) + '-like-' + str(picture_number))
 
     if is_liked_news(news=news, user=user):
         like = InlineKeyboardButton(text=Emoji.THUMBS_DOWN_SIGN + "(" + normalize(str(news.like_count)) + ")",
-                                    callback_data='news-' + str(news.id) + '-unlike')
+                                    callback_data='news-' + str(news.id) + '-unlike-' + str(picture_number))
 
     buttons = [
         [
-            InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(news.id) + '-overview'),
-            InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(news.id) + '-full'),
+            InlineKeyboardButton(text='خلاصه', callback_data='news-' + str(news.id) + '-overview-' + str(picture_number)),
+            InlineKeyboardButton(text='متن کامل خبر', callback_data='news-' + str(news.id) + '-full-' +
+                                                                    str(picture_number)),
          ],
         [
-            InlineKeyboardButton(text='اخبار مرتبط', callback_data='news-' + str(news.id) + '-stat'),
+            InlineKeyboardButton(text='اخبار مرتبط', callback_data='news-' + str(news.id) + '-stat-' +
+                                                                   str(picture_number)),
             like,
             InlineKeyboardButton(text='لینک خبر', url=str(news.base_news.url)),
         ], ]
+    if news.pic_number > 1:
+        if picture_number < news.pic_number - 1:
+            buttons[0].append(
+                InlineKeyboardButton(text='عکس بعدی', callback_data='news-' + str(news.id) + '-img-' +
+                                                                    str(picture_number)),
+            )
+        elif picture_number == news.pic_number - 1:
+            buttons[0].append(
+                InlineKeyboardButton(text='عکس اول', callback_data='news-' + str(news.id) + '-img' +
+                                     str(picture_number)),
+            )
 
     keyboard = InlineKeyboardMarkup(buttons)
     text = ''
@@ -140,7 +153,7 @@ def news_page(bot, news, user, page=1, message_id=None, **kwargs):
                     text += en.entity.name + ', '
                 text += '\n'
         try:
-            text += news_image_page(bot, news, user, page=1, message_id=message_id)
+            text += news_image_page(bot, news, user, page=1, message_id=message_id, picture_number=picture_number)
         except Exception:
             print(Exception)
 
