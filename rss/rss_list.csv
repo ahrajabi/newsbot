@@ -180,7 +180,15 @@ naftema.com,naftema,نفت ما,تمام اخبار,True,All,D,http://naftema.co
 http://www.ilna.ir,ilna,خبرگزاری کار ایران,تمام اخبار,True,All,D,http://www.ilna.ir/feeds/,".article_body p:not(.news_lead), .child p:not(.mp_lead)",".news_lead, .mp_lead",".article_body img, .gallery_thumb img",False
 akhbarrasmi.com,akhbarrasmi,اخبار رسمی,تمام اخبار,True,All,D,http://news.akhbarrasmi.com/rss.xml,.news-article-content,.lead,.fig-lead img,True
 http://www.tasnimnews.com/,tasnim,تسنیم,تمام اخبار,True,All,D,http://www.tasnimnews.com/fa/rss/feed/0/7/0/%D8%A2%D8%AE%D8%B1%DB%8C%D9%86-%D8%AE%D8%A8%D8%B1%D9%87%D8%A7,".story, article.media .lead",.lead,".single-news > div figure img, .story img, .images img",False
-shana.ir,shana,شبکه اطلاع رسانی نفت و انرژ‌ی,تمام اخبار,True,All,D,http://www.shana.ir/Components/NewsAgency/Rss.aspx?imagesize=120&topcount=50&lang=fa&id=0,.newsBody,.lead,".image img, .newsBody img",False
+shana.ir,shana,شبکه اطلاع رسانی نفت و انرژ‌ی,تمام اخبار,False,All,D,http://www.shana.ir/Components/NewsAgency/Rss.aspx?imagesize=120&topcount=50&lang=fa&id=0,.newsBody,.lead,".image img, .newsBody img",False
 http://fararu.com/fa/rss/allnews,fararu,فرارو,تمام اخبار,True,All,D,,,,,
 http://codal.ir,codal,کدال,,,,,,,,,
 http://sena.ir,sena,سنا,تمام اخبار,True,All,D,http://sena.ir/RSS.ashx?ID=101,#ctl00_ContentPlaceHolder1_pNews p,.tdSumNews,"#slidelinks img, #ctl00_ContentPlaceHolder1_pNews p img",False
+https://mag.digikala.com/,digikala,دیجی‌کالا مگ,تمام اخبار,True,All,D,https://mag.digikala.com/feed/,.post-body,,".post-body div.post-attachment > img , .post-body p > img",False
+http://www.zoomit.ir/,zoomit,زومیت,تمام اخبار,True,All,D,http://www.zoomit.ir/feed/,.article-section,.article-summery,"img.cover, .article-section img",False
+http://digiato.com/,digiato,دیجیاتو,تمام اخبار,True,All,D,http://digiato.com/feed/,.article-content,,".hero-article figure img, .article-content img",False
+http://shanbemag.ir,shanbemag,شنبه مگ,تمام اخبار,True,All,D,http://shanbemag.ir/rss.xml,.views-field-body-1,.views-field-body,".view-display-id-block_5 .views-field-field-image img, .views-field-body-1 img",
+http://www.irstartup.com,irstartup,ایران استارت آپ,تمام اخبار,True,All,D,http://www.irstartup.com/feed/,.entry,,".single-post-thumb img, .entry img",False
+http://techera.ir/,techera,تکرا,تمام اخبار,True,All,D,http://techera.ir/feed/,.entry,,.entry img,False
+http://www.musicema.com,musicema,موسیقی ما,تمام اخبار,True,All,D,http://www.musicema.com/rss,.field-name-body,,.field-type-image img,False
+http://www.fardanama.com,fardanama,فردانما,تمام اخبار,True,All,D,http://www.fardanama.com/feed/,.post_content p,,".post_content img.sp-image, .post_content img.size-full",

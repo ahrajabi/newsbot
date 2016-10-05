@@ -75,7 +75,8 @@ def bulk_save_to_elastic():
         source = dict(zip(fields_keys, fields_values))
         sources.append((obj, source))
 
-    k = ({'_index': settings.ELASTIC_NEWS, '_type': 'new', '_id': ret[0].id, "_source": ret[1]}
+    k = ({'_index': settings.ELASTIC_NEWS['index'], '_type': settings.ELASTIC_NEWS['doc_type'], '_id': ret[0].id,
+          "_source": ret[1]}
          for ret in sources)
     ret = helpers.bulk(es, k, chunk_size=500, max_chunk_bytes=200 * 1024 * 1024)
 

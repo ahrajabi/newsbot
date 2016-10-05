@@ -4,6 +4,7 @@ from telegram.emoji import Emoji
 from django.utils import timezone
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from datetime import timedelta
 
 from entities import tasks
 from rss.models import News
@@ -211,6 +212,18 @@ def newslist_command(bot, msg, user):
 
 
 def special_command(bot, msg, user):
+    delta = timezone.now() - timedelta(hours=20)
+    exl = ['irna', 'mehrnews', 'fars', 'tasnim', 'codal', 'isna']
+    news = News.objects.filter(base_news__published_date__range=(delta, timezone.now())).exclude(
+        base_news__news_agency__name__in=exl).order_by('?')
+    if not news:
+        return error_text(bot, msg, user, 'NoneNews')
+    news = news[0]
+    try:
+        bot_template.publish_news(bot, news, user, page=1, message_id=None)
+    except News.DoesNotExist:
+        return error_text(bot, msg, user, 'NoneNews')
+
     print('special_command')
 
 

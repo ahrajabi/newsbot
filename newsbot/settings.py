@@ -147,7 +147,7 @@ ELASTIC_URL = 'http://130.185.76.171:9200'
 BOT_NAME = '@KhabareManbot'
 PROJECT_FA_NAME = 'خبرمن'
 PROJECT_EN_NAME = 'Khabare Man'
-TELEGRAM_LOGO = 'http://soor.ir/logo-1.png'
+TELEGRAM_LOGO = 'http://soor.ir/logo-preview.png'
 GLOBAL_SETTINGS = {
     'SAMPLE_NEWS_COUNT': 3,
     'MIN_HITS_ENTITY_VALIDATION': 3
