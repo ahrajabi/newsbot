@@ -11,10 +11,6 @@ from telegrambot.news_template import news_image_page, news_page
 
 
 def welcome_text(bot, msg, user):
-    keyboard = ReplyKeyboardMarkup(keyboard=[[
-        '/HELP ⁉️ راهنمایی',
-         ]], resize_keyboard=True)
-    # TODO insert bot name in below text
     text = '''
         سلام  %s %s
         به بات خبری %s خوش آمدید.
@@ -30,7 +26,7 @@ def welcome_text(bot, msg, user):
 
         ''' % (msg.message.from_user.first_name, Emoji.RAISED_HAND, PROJECT_EN_NAME,
                Emoji.WHITE_DOWN_POINTING_BACKHAND_INDEX)
-    send_telegram_user(bot, user, text, msg, keyboard=keyboard)
+    send_telegram_user(bot, user, text, msg)
 
 
 def show_entities(bot, msg, user, entities):

@@ -47,7 +47,7 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
             response += Emoji.BOOKMARK + \
                         "با انتخاب دسته زیر ، اخبار مرتبط به صورت بر خط برای شما ارسال خواهد شد." + \
                         '\n' + prepare_advice_entity_link(entity) + '\n' + Emoji.HEAVY_MINUS_SIGN * 5 + '\n'
-            response += "%s خبرهای مرتبط با دسته فوق:\n" % Emoji.NEWSPAPER + h_response + '\n'
+            response += "%s خبرهای مرتبط با دسته فوق:\n" % Emoji.LARGE_RED_CIRCLE + '\n' + h_response
 
         else:
             no_response = True

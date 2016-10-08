@@ -46,13 +46,13 @@ def sample_news_page(news, inline=False):
     except Exception:
         pass
     if not inline:
-        text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + 'مشاهده خبر:' + '/News_' + str(news.id) + '\n'
+        text += '    ' + Emoji.NEWSPAPER + 'مشاهده خبر:' + '/News_' + str(news.id) + '\n'
     else:
         #https://telegram.me/chvotebot?start=f9830f23b29d139df0377496211a599b9eddeb5e2eb75ce71e12
-        text += '    ' + Emoji.PUBLIC_ADDRESS_LOUDSPEAKER +\
+        text += '    ' + Emoji.NEWSPAPER+\
                 '<a href=' +'"https://telegram.me/'+settings.BOT_NAME[1:]+'?start=' +'N' + str(news.id) +'">' + 'مشاهده‌ی سریع خبر' + '</a>\n'
 
-    return text
+    return text + '\n'
 
 
 def prepare_multiple_sample_news(news_id_list, total_news, inline=False):
@@ -125,6 +125,7 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
     keyboard = InlineKeyboardMarkup(buttons)
     text = ''
     if page == 1:
+        del buttons[0][1]
         try:
             text += news_image_page(bot, news, user, page=1, message_id=message_id, picture_number=picture_number)
         except Exception:
@@ -159,6 +160,7 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
                 text += '\n'
 
     elif page == 2:
+        del buttons[0][0]
         try:
             text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n    '
         except Exception:
