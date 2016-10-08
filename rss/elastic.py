@@ -45,7 +45,26 @@ def source_generator():
         yield obj.id, source
 
 
+def entity_validation_search(query, size=settings.MIN_HITS_ENTITY_VALIDATION):
+    body = {
+        "query": {
+            "multi_match": {
+                "query": query,
+                "type": "phrase",
+                "fields": ["title", "body", "summary"]
+            }
+        },
+        "fields": ['published_date', '_uid', 'body'],
+        "size": size
+    }
+    r = es.search(index=settings.ELASTIC_NEWS['index'], body=body, request_timeout=20)
+    print(r['hits']['hits'])
+    return r['hits']['hits']
+
+
 def elastic_search_entity(query, size, offset=0):
+    today = datetime.datetime.now()
+    last_weak = today - datetime.timedelta(days=7)
     body = {
         "query": {
             "multi_match": {
@@ -55,11 +74,21 @@ def elastic_search_entity(query, size, offset=0):
             }
         },
         "fields": ['published_date', '_uid', 'body'],
-        "sort": [{"published_date": {"order": "desc"}}],
+        # "sort": [{"published_date": {"order": "desc"}}],
         "from": offset,
-        "size": size
+        "size": size,
+        "filter": {
+            "range": {
+                "published_date": {
+                    "gte": last_weak,
+                    "lte": today
+                }
+            }
+        }
+
     }
     r = es.search(index=settings.ELASTIC_NEWS['index'], body=body, request_timeout=20)
+    for x in r['hits']['hits']: print(x['_score'], x['_id'])
     return r['hits']['hits']
 
 
@@ -109,6 +138,7 @@ def similar_news_to_query(query, size, days, offset=0):
     }
 
     r = es.search(index=settings.ELASTIC_NEWS['index'], body=body, request_timeout=20)
+    print(r['hits']['hits'])
     return [hit['_id'] for hit in r['hits']['hits']]
 
 
