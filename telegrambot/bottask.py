@@ -15,7 +15,7 @@ import traceback
 from django.http import HttpResponse
 
 import logging
-
+from telegrambot.wizard import CONV_WIZARD
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -58,6 +58,12 @@ def commands(bot, msg):
     if hasattr(command_handler, func):
         if func == 'start_command':
             getattr(command_handler, func)(bot, msg, new_user, user)
+            if new_user:
+                x = msg.message.text
+                msg.message.text = '/categories'
+                if CONV_WIZARD.check_update(msg):
+                    CONV_WIZARD.handle_update(msg, dispatcher)
+                msg.message.text = x
         else:
             getattr(command_handler, func)(bot, msg, user)
     else:

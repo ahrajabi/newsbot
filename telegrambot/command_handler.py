@@ -5,8 +5,6 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from datetime import timedelta
-from telegrambot import bottask
-from telegrambot.wizard import CONV_WIZARD
 from entities import tasks
 from rss.models import News, CategoryCode
 from telegrambot import bot_template
@@ -131,11 +129,6 @@ def start_command(bot, msg, new_user, user):
     inp = msg.message.text.split(' ')
     if new_user:
         bot_template.welcome_text(bot, msg, user)
-        x = msg.message.text
-        msg.message.text = '/categories'
-        if CONV_WIZARD.check_update(msg):
-            CONV_WIZARD.handle_update(msg, bottask.dispatcher)
-        msg.message.text = x
 
     else:
         up = UserProfile.objects.get(user=user)
