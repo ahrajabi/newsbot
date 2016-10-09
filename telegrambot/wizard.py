@@ -1,5 +1,5 @@
 from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters
-from telegrambot import command_handler, bot_send
+from telegrambot import bot_send
 from rss.models import CategoryCode
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegrambot.models import UserProfile
@@ -46,7 +46,7 @@ def category_page(bot, msg, user, level=1):
 
 
 def choose_category(bot, msg):
-    user, new_user = command_handler.verify_user(bot, msg)
+    user = UserProfile.objects.get(telegram_id=msg.message.chat.id).user
     up = UserProfile.objects.get(user=user)
 
     try:
@@ -65,8 +65,8 @@ def choose_category(bot, msg):
 
 
 def categories_list(bot, msg):
-    user, new_user = command_handler.verify_user(bot, msg)
-    up = UserProfile.objects.get(user=user)
+    up = UserProfile.objects.get(telegram_id=msg.message.chat.id)
+    user = up.user
     cache.delete('w' + str(up.telegram_id))
     if up.interest_categories.all().count() == 0:
         bot_send.send_telegram_user(bot, user, 'هیچ دسته بندی برای شما ثبت نشده است.')
