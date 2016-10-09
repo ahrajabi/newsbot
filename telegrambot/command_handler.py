@@ -34,14 +34,14 @@ def create_new_user_profile(bot, msg):
     else:
         username = msg.message.chat.id
 
-
     user = User.objects.create_user(username=username)
-
+    user_setting = UserSettings.objects.create()
     try:
         user.userprofile_set.create(first_name=msg.message.chat.first_name,
                                     last_name=msg.message.chat.last_name,
                                     last_chat=timezone.now(),
-                                    telegram_id=msg.message.chat.id)
+                                    telegram_id=msg.message.chat.id,
+                                    user_settings=user_setting)
     except Exception:
         user.userprofile_set.create(last_chat=timezone.now(),
                                     telegram_id=msg.message.from_user.id)
