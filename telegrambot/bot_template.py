@@ -16,7 +16,7 @@ def welcome_text(bot, msg, user):
         به سرویس هوشمند %s خوش آمدید.
         ''' % (msg.message.from_user.first_name, Emoji.RAISED_HAND, PROJECT_FA_NAME)
 
-    send_telegram_user(bot, user, text, msg, keyboard=keyboard, ps=False)
+    send_telegram_user(bot, user, text, msg, ps=False)
 
 
 def show_entities(bot, msg, user, entities):
