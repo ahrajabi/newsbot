@@ -1,4 +1,5 @@
 from django.contrib import admin
+from mptt.admin import MPTTModelAdmin
 
 from .models import RssFeeds, News, BaseNews, ImageUrls, NewsLike, CategoryCode, NewsAgency
 
@@ -37,9 +38,13 @@ class NewsLikeAdmin(admin.ModelAdmin):
     list_display = [x.name for x in NewsLike._meta.local_fields]
 
 
-@admin.register(CategoryCode)
-class CategoryCodeAdmin(admin.ModelAdmin):
+class CategoryCodeAdmin(MPTTModelAdmin):
+    # specify pixel amount for this ModelAdmin only:
     list_display = [x.name for x in CategoryCode._meta.local_fields]
+    mptt_level_indent = 20
+
+
+admin.site.register(CategoryCode, CategoryCodeAdmin)
 
 
 @admin.register(NewsAgency)

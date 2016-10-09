@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 
-from rss.models import News
+from rss.models import News, CategoryCode
 import pytz
 from datetime import datetime
 
@@ -31,9 +31,20 @@ class UserProfile(models.Model):
     last_chat = models.DateTimeField()
     telegram_id = models.PositiveIntegerField()
     user_settings = models.OneToOneField(UserSettings, verbose_name='User Settings', null=True)
+    interest_categories = models.ManyToManyField(CategoryCode, verbose_name="Interest user categories", blank=True)
 
     def __unicode__(self):
         return u'Profile of user: %s' % self.user.username
+
+    def toggle_interest_categories(self, cat):
+        print("HELLOss")
+        if cat in self.interest_categories.all():
+            self.interest_categories.remove(cat)
+            for item in cat.get_children():
+                if item in self.interest_categories.all():
+                    self.interest_categories.remove(item)
+        else:
+            self.interest_categories.add(cat)
 
 
 class UserAlert(models.Model):
@@ -66,3 +77,9 @@ class MessageFromUser(models.Model):
     def save(self, *args, **kwargs):
         self.date = timezone.now()
         return super(MessageFromUser, self).save(*args, **kwargs)
+
+
+class UserLiveNews(models.Model):
+    user = models.ForeignKey(User)
+    news = models.ForeignKey(News)
+    is_sent = models.BooleanField(default=False)

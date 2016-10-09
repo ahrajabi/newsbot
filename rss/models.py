@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 import pytz
 from rss import ml
+from mptt.models import MPTTModel, TreeForeignKey
 
 
 class NewsAgency(models.Model):
@@ -18,9 +19,14 @@ class NewsAgency(models.Model):
         return self.name
 
 
-class CategoryCode(models.Model):
+class CategoryCode(MPTTModel):
     name = models.CharField('site Name', max_length=50)
     fa_name = models.CharField('Persian Name', max_length=50)
+    activation = models.BooleanField('Activation', default=True)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True)
+
+    class MPTTMeta:
+        order_insertion_by = ['name']
 
     def __str__(self):
         return self.fa_name
@@ -37,13 +43,13 @@ class RssFeeds(models.Model):
     news_agency = models.ForeignKey(NewsAgency)
     category = models.CharField('Category', max_length=50, blank=True)
     activation = models.BooleanField('Activation', default=True)
-    category_ref = models.ForeignKey(CategoryCode, blank=True, null=True)
+    category_ref = models.ForeignKey(CategoryCode, on_delete=models.SET_NULL, blank=True, null=True)
     order = models.CharField('RSS Order', max_length=50, blank=True, choices=RSS_ORDER)
     main_rss = models.URLField('Web site RSS', max_length=300, blank=True)
     last_modified = models.DateTimeField(blank=True, default=datetime(2001, 8, 15, 8, 15, 12, 0, pytz.UTC))
 
     def __str__(self):
-        return self.news_agency.fa_name +" " + self.category
+        return self.news_agency.fa_name + " " + self.category
 
 
 class BaseNews(models.Model):

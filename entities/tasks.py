@@ -1,6 +1,10 @@
 import wikipedia
+from telegram import user
+
+from telegrambot.models import UserProfile, UserLiveNews
 
 from .models import UserEntity, Entity, NewsEntity
+from telegrambot.models import UserLiveNews
 wikipedia.set_lang('fa')
 
 
@@ -72,31 +76,48 @@ def set_score_entity(user, entity_id, score=0):
         item.save()
     return True
 
-#َWe can use of yield for get running function!
-def get_entity_news(news_list):
-    ent = Entity.objects.filter(status__in=['N', 'P', 'A'])
-    ret = []
-    for news in news_list:
-        news_ent = []
-        for entity in ent:
-            score = 0
-            if entity.name in news.base_news.title:
-                score = 3
-                news_ent.append({'id': entity.id, 'score': score})
-            elif entity.name in news.summary:
-                score = 2
-                news_ent.append({'id': entity.id, 'score': score})
-            elif entity.name in news.body:
-                score = 1
-                news_ent.append({'id': entity.id, 'score': score})
-            if score > 0:
-                NewsEntity.objects.create(news=news, entity=entity, score=score)
-                entity.news_count += 1
-                entity.latest_news = news
-                entity.save()
-        ret.append((news.id, news_ent))
 
-    return ret
+#َWe can use of yield for get running function!
+def get_entity_news(news):
+    ent = Entity.objects.filter(status__in=['N', 'P', 'A'])
+
+    news_ent = []
+    for entity in ent:
+        score = 0
+        if entity.name in news.base_news.title:
+            score = 3
+            news_ent.append({'entity': entity, 'score': score})
+        elif entity.name in news.summary:
+            score = 2
+            news_ent.append({'entity': entity, 'score': score})
+        elif entity.name in news.body:
+            score = 1
+            news_ent.append({'entity': entity, 'score': score})
+        if score > 0:
+            NewsEntity.objects.create(news=news, entity=entity, score=score)
+            entity.news_count += 1
+            entity.latest_news = news
+            entity.save()
+
+    return news_ent
+
+
+def live_entity_news(news, news_ent):
+    ent = [item['entity'] for item in news_ent]
+    ue = UserEntity.objects.filter(entity__in=ent, status=True)
+    users = list(set([item.user for item in ue]))
+    ups = UserProfile.objects.filter(user_settings__live_news=True,
+                                     stopped=False,
+                                     activated=True)
+    us = [item.user for item in ups]
+
+    for u in users:
+        if u in us:
+            UserLiveNews.objects.create(user=u, news=news)
+
+
+
+
 
 
 def get_entity_text(input_text):

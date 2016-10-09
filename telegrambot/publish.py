@@ -6,11 +6,12 @@ from telegram.error import Unauthorized
 from telegram import InlineKeyboardMarkup
 from telegram.inlinekeyboardbutton import InlineKeyboardButton
 
+
 from rss import elastic
 from entities.models import NewsEntity
 from entities.tasks import get_user_entity
 from telegrambot import news_template, bot_send
-from telegrambot.models import UserNewsList, UserProfile
+from telegrambot.models import UserNewsList, UserProfile, UserLiveNews
 from telegrambot.command_handler import deactive_profile
 from telegram.emoji import Emoji
 
@@ -96,7 +97,10 @@ def periodic_publish_news(bot, job):
         interval = up.user_settings.interval_news_list
         delta = timezone.now() - timedelta(minutes=interval)
 
-        if not up.activated or up.stopped:
+        if not get_user_entity(up.user):
+            continue
+
+        if not up.activated or up.stopped or len(get_user_entity(up.user)) == 0:
             continue
 
         if up.user_settings.last_news_list and up.user_settings.last_news_list.datetime_publish >= delta:
@@ -105,32 +109,20 @@ def periodic_publish_news(bot, job):
 
 
 def live_publish_news(bot, job):
-    if not cache.get('last_live_publish'):
-        cache.set('last_live_publish', timezone.now())
-    start = cache.get('last_live_publish')
-    end = timezone.now()
-    cache.set('last_live_publish', timezone.now())
+    for up in UserProfile.objects.filter(user_settings__live_news=True, activated=True, stopped=False):
+        news_ent = UserLiveNews.objects.filter(user=up.user, is_sent=False)
 
-    for up in UserProfile.objects.filter(user_settings__live_news=True, activated=True):
-        user = up.user
-        ent = get_user_entity(user)
-
-        if not up.activated or up.stopped:
-            continue
-
-        news_ent = NewsEntity.objects.filter(entity__in=ent,
-                                             news__base_news__published_date__range=(start, end))
-
-        news_ent2 = NewsEntity.objects.filter(news__base_news__published_date__range=(start, end))
-        print(news_ent2.count())
-        print(user.username, news_ent.count())
         if news_ent.count() > 0:
-            news_list = list(set([item.news_id for item in news_ent]))
-            output = 'اخبار زنده دسته‌های شما'
+            for item in news_ent:
+                item.is_sent = True
+                item.save()
+
+            news_list = list(set([item.news.id for item in news_ent]))
+            output = 'اخبار زنده نشان‌های شما'
             output += '\n'
             output += news_template.prepare_multiple_sample_news(news_list, 20)[0]
             try:
-                bot_send.send_telegram_user(bot, user, output)
+                bot_send.send_telegram_user(bot, up.user, output)
             except Unauthorized:
                 deactive_profile(up)
 

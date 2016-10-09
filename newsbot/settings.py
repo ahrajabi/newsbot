@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'entities',
     'search',
     'django_extensions',
+    'mptt',
+    'raven.contrib.django.raven_compat',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -145,7 +147,7 @@ ELASTIC_URL = 'http://130.185.76.171:9200'
 
 
 BOT_NAME = '@KhabareManbot'
-PROJECT_FA_NAME = 'خبرمن'
+PROJECT_FA_NAME = 'خبرِمن'
 PROJECT_EN_NAME = 'Khabare Man'
 TELEGRAM_LOGO = 'http://soor.ir/logo-preview.png'
 GLOBAL_SETTINGS = {
@@ -172,19 +174,46 @@ DEBUG = False
 
 LOGGING = {
     'version': 1,
-    'disable_existing_logger': False,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s '
+                      '%(process)d %(thread)d %(message)s'
+        },
+    },
     'handlers': {
+        'sentry': {
+            'level': 'ERROR',  # To capture more than ERROR, change to WARNING, INFO, etc.
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+            'tags': {'custom-tag': 'x'},
+        },
         'console': {
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'stream': sys.stdout,
+            'formatter': 'verbose'
         }
     },
     'loggers': {
-        'telegrambot': {
+        'root': {
+            'level': 'WARNING',
+            'handlers': ['sentry'],
+        },
+        'django.db.backends': {
+            'level': 'ERROR',
             'handlers': ['console'],
             'propagate': False,
-        }
-    }
+        },
+        'raven': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'sentry.errors': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+    },
 }
 
 REST_FRAMEWORK = {

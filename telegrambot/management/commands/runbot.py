@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 import logging
 from django.conf import settings
-from telegrambot import bottask
+
 
 # Custom logger class with multiple destinations
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
@@ -62,7 +62,7 @@ class ColoredLogger(logging.Logger):
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        logging.config.dictConfig(settings.LOGGING)
-        logging.setLoggerClass(ColoredLogger)
+        # logging.config.dictConfig(settings.LOGGING)
+        # logging.setLoggerClass(ColoredLogger)
 
-        bottask.setup()
+        from telegrambot import bottask

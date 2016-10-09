@@ -49,4 +49,4 @@ class NewsEntity(models.Model):
     score = models.SmallIntegerField(default=0)
 
     def __str__(self):
-        return self.news_id + " has " + self.entity.name
+        return str(self.news_id) + " has " + self.entity.name

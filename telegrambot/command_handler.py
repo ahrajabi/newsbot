@@ -5,9 +5,9 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from datetime import timedelta
-
+from telegrambot import bottask, wizard
 from entities import tasks
-from rss.models import News
+from rss.models import News, CategoryCode
 from telegrambot import bot_template
 from telegrambot.models import UserAlert, UserProfile, UserSettings
 from telegrambot.bot_send import send_telegram_user, error_text, send_telegram_all_user, send_telegram_document
@@ -16,10 +16,12 @@ thismodule = sys.modules[__name__]
 
 def verify_user(bot, msg):
     new_user = 0
-    user = get_user(msg.message.from_user.id)
+    user = get_user(msg.message.chat.id)
+
     if not user:
         new_user = 1
         user = create_new_user_profile(bot, msg)
+
     return user, new_user
 
 
@@ -66,7 +68,7 @@ def get_user(telegram_id):
         if not up.user_settings:
             up.user_settings = UserSettings.objects.create()
 
-    up.save()
+        up.save()
     ##
     return user
 
@@ -126,9 +128,14 @@ def user_alert_handler(bot, job):
 
 def start_command(bot, msg, new_user, user):
     inp = msg.message.text.split(' ')
-
     if new_user:
         bot_template.welcome_text(bot, msg, user)
+        x = msg.message.text
+        msg.message.text = '/categories'
+        if wizard.CONV_WIZARD.check_update(msg):
+            wizard.CONV_WIZARD.handle_update(msg, bottask.dispatcher)
+        msg.message.text = x
+
     else:
         up = UserProfile.objects.get(user=user)
         if up and up.stopped:
@@ -174,15 +181,17 @@ def command_separator(msg, command):
 
 
 def live_command(bot, msg, user):
+    if not tasks.get_user_entity(user):
+        return error_text(bot, msg, user, 'NoneEntity')
     user_settings = UserProfile.objects.get(user=user).user_settings
     live_news_status = user_settings.live_news
     if not live_news_status:
         user_settings.live_news = True
         user_settings.save()
-        text = Emoji.WHITE_HEAVY_CHECK_MARK + ''' ارسال اخبار به صورت بر خط فعال شد.\n
-   از این پس اخبار مرتبط با موضوع های مورد علاقه شما به صورت لحظه ای ارسال می شود.'''
+        text = Emoji.WHITE_HEAVY_CHECK_MARK + ''' ارسال اخبار نشان‌ها به صورت بر خط فعال شد.\n
+   از این پس اخبار نشان‌ها به صورت لحظه ای ارسال می شود.'''
     else:
-        text = 'ارسال اخبار به صورت بر خط فعال است.'
+        text = 'ارسال اخبار نشان‌ها به صورت بر خط فعال است.'
     send_telegram_user(bot, user, text, msg)
 
 
@@ -202,6 +211,7 @@ def extension_command(bot, msg, user):
     text = 'افزونه خبر من به زودی اضافه میشود.'
     send_telegram_user(bot, user, text, msg)
 
+
 def token_command(bot, msg, user):
     if not user.username:
         response = '''جهت استفاده از افزونه باید برای حساب کاربری تلگرام خود نام کاربردی تعریف کنید
@@ -218,6 +228,8 @@ def token_command(bot, msg, user):
 
 
 def newslist_command(bot, msg, user):
+    if not tasks.get_user_entity(user):
+        return error_text(bot, msg, user, 'NoneEntity')
     from telegrambot.publish import prepare_periodic_publish_news
     up = UserProfile.objects.get(user=user)
     prepare_periodic_publish_news(bot, 0, up)
@@ -225,20 +237,25 @@ def newslist_command(bot, msg, user):
 
 def special_command(bot, msg, user):
     delta = timezone.now() - timedelta(hours=20)
-    exl = ['irna', 'mehrnews', 'fars', 'tasnim', 'codal', 'isna', 'shana', 'akhbarrasmi', 'sena', 'boursenews', 'naftema']
-    news = News.objects.filter(base_news__published_date__range=(delta, timezone.now())) \
+    #    exl = ['irna', 'mehrnews', 'fars', 'tasnim', 'codal', 'isna', 'shana', 'akhbarrasmi', 'sena', 'boursenews', 'naftema']
+    exl = []
+    up = UserProfile.objects.get(user=user)
+
+    if up.interest_categories.all().count() == 0:
+        return error_text(bot, msg, user, 'NoCategory')
+
+    news = News.objects.filter(base_news__published_date__range=(delta, timezone.now()),
+                               base_news__all_rss__category_ref__in=up.interest_categories.all()) \
         .exclude(base_news__news_agency__name__in=exl) \
         .order_by('?')
 
     if not news:
-        return error_text(bot, msg, user, 'NoneNews')
+        return error_text(bot, msg, user, 'NoNews')
     news = news[0]
     try:
         bot_template.publish_news(bot, news, user, page=1, message_id=None)
     except News.DoesNotExist:
         return error_text(bot, msg, user, 'NoneNews')
-
-    print('special_command')
 
 
 def stoplive_command(bot, msg, user):

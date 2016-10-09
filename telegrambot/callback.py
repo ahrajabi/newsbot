@@ -1,4 +1,3 @@
-
 import re
 import sys
 from telegram import InlineKeyboardMarkup
@@ -17,6 +16,9 @@ from newsbot.global_settings import NEWS_PER_PAGE, DAYS_FOR_SEARCH_NEWS, SAMPLE_
 from django.conf import settings
 from rss import elastic
 from entities.tasks import get_user_entity
+from rss.models import CategoryCode
+from telegrambot.models import UserProfile
+from telegrambot.wizard import category_page
 thismodule = sys.modules[__name__]
 
 
@@ -43,7 +45,6 @@ def score_inline_command(bot, msg, user):
         TEXT = '''
 علاقه شما به اخبار  %s با مقدار %d تنظیم شد.
         ''' % (tasks.get_entity(entity_id).name, int(score)+3)
-        print(msg)
         bot.answerCallbackQuery(msg.callback_query.id,
                                 text=TEXT)
     else:
@@ -150,7 +151,6 @@ def entitynewslist_inline_command(bot, msg, user):
     elif func == 'previous':
         next_page = unl.page-1
 
-    print(func, next_page)
 
     ent = get_user_entity(user)
     el_news = elastic.news_with_terms(terms_list=[item.name for item in ent],
@@ -159,9 +159,7 @@ def entitynewslist_inline_command(bot, msg, user):
                                       end_time=unl.datetime_publish,
                                       offset=(next_page-1)*settings.NEWS_PER_PAGE
                                       )
-    print(el_news)
     # start_time=up.user_settings.last_news_list.datetime_publish)
-    print(math.ceil(unl.number_of_news/settings.NEWS_PER_PAGE))
     if next_page > 1 and next_page < math.ceil(unl.number_of_news/settings.NEWS_PER_PAGE):
         buttons = [[
             InlineKeyboardButton(text='صفحه قبل', callback_data='entitynewslist-previous'),
@@ -181,10 +179,19 @@ def entitynewslist_inline_command(bot, msg, user):
     news_list = list(set([item for item in news_ent]))
     output = 'اخبار مرتبط با دسته‌های شما'
     output += '\n'
-    print(news_list)
     output += prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
 
     unl.page= next_page
     unl.save()
 
     send_telegram_user(bot, user, output, msg, keyboard, unl.message_id)
+
+
+def category_inline_command(bot, msg, user):
+    profile = UserProfile.objects.get(user=user)
+    task = msg.callback_query.data.split('-')
+    cat_id = int(task[1])
+    cat = CategoryCode.objects.get(id=cat_id)
+    profile.toggle_interest_categories(cat)
+    text, keyboard = category_page(bot, msg, user, level=task[2])
+    send_telegram_user(bot, user, text, msg, keyboard, message_id=msg.callback_query.message.message_id, ps=False)

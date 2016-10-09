@@ -1,0 +1,36 @@
+Category code,Farsi Name,Activation,Parent Code
+all,همه‌ی گروه‌ها,True,
+politic,سیاسی,True,all
+economic,اقتصادی,True,all
+currency,ارز,False,economic
+coin,مسکوکات,False,economic
+oil,نفت,False,economic
+gas,گاز,False,economic
+preciousmetals,فلزات گران‌بها,False,economic
+metal,فلزات,False,economic
+food,مواد غذایی,False,economic
+paper,کاغذ و مقوا,False,economic
+solvent,حلال‌ها,False,economic
+chemical,شیمیایی,False,economic
+rubber,کائوچو,False,economic
+buildingmaterials,مصالح ساختمانی,False,economic
+polymer,پلیمر,False,economic
+weaver,نساجی,False,economic
+petrochemical,پتروشیمی,False,economic
+sport,ورزشی,True,all
+iranfootball,فوتبال ایران,True,sport
+internationalfootball,فوتبال خارجی,True,sport
+otherfootball,ورزشی غیر از فوتبال,True,sport
+social,اجتماعی,True,all
+culture,فرهنگ,True,all
+art,هنر,True,all
+music,موسیقی,True,art
+cinema,سینما، تئاتر و تلویزیون,True,art
+otherart,سایر موضوعات هنری,True,art
+tech-startup,تکنولوژی و کارآفرینی,True,all
+entrepreneurship,کارآفرینی و شرکت‌های نوپا,True,tech-startup
+technology,تکنولوژی‌,True,tech-startup
+science,علمی,True,all
+multimedia,عکس و فیلم,True,all
+health,سلامت,True,all
+othernews,سایر,True,all

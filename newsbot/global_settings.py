@@ -3,11 +3,11 @@ MIN_HITS_ENTITY_VALIDATION = 3
 NEWS_PER_PAGE = 5
 DAYS_FOR_SEARCH_NEWS = 40
 MAIN_BUTTONS = [
-    ('📢 لیست خبرها', 'newslist_command', ),
-    ('▶️ اخبار زنده', 'live_command'),
+    ('📢 خبرهای نشان شده', 'newslist_command',),
+    ('▶️ اخبار زنده‌', 'live_command'),
     ('⏹ توقف اخبار زنده', 'stoplive_command'),
     ('🌟 خبر ویژه', 'special_command'),
-    ('🔍 راهنمایی', 'help_command'),
+    ('🔍 راهنما', 'help_command'),
 ]
 ELASTIC_NEWS = {
     'index': "newnew",

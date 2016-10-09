@@ -9,25 +9,23 @@ from django.conf import settings
 from telegrambot.publish import publish_handler
 from telegrambot.bot_send import error_text
 from telegrambot.models import MessageFromUser
-from telegrambot import command_handler, news_template, callback, bot_send, inline, text_handler
+from telegrambot import command_handler, news_template, callback, bot_send, inline, text_handler, wizard
+
+import traceback
+from django.http import HttpResponse
+
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def error_callback(bot, update, error):
-    print(":D:D:D::D:D:D::D:D:D::D:D:D")
     try:
         raise error
-    except Unauthorized:
-        print(update)
-    except BadRequest:
-        print("# handle malformed requests - read more below!")
-    except TimedOut:
-        print("# handle slow connection problems")
-    except NetworkError:
-        print(error)
-    except TelegramError:
-        print("# handle all other telegram related errors")
-        print(error)
-        raise error
+    except:
+        tb = traceback.format_exc()
+        return HttpResponse(tb)
 
 
 @run_async
@@ -75,27 +73,28 @@ def user_alert_handler(bot, job):
     command_handler.user_alert_handler(bot, job)
 
 
-def setup():
-    updater = Updater(token=settings.TELEGRAM_TOKEN)
-    dispatcher = updater.dispatcher
+updater = Updater(token=settings.TELEGRAM_TOKEN)
+dispatcher = updater.dispatcher
 
-    dispatcher.add_handler(MessageHandler([Filters.command], commands))
-    dispatcher.add_handler(MessageHandler([Filters.text], handle))
-    dispatcher.add_handler(CallbackQueryHandler(callback_query))
-    dispatcher.add_handler(InlineQueryHandler(inline.handler))
-    dispatcher.add_error_handler(error_callback)
+dispatcher.add_handler(wizard.CONV_WIZARD)
+dispatcher.add_handler(MessageHandler([Filters.command], commands))
+dispatcher.add_handler(MessageHandler([Filters.text], handle))
+dispatcher.add_handler(CallbackQueryHandler(callback_query))
+dispatcher.add_handler(InlineQueryHandler(inline.handler))
 
-    q_bot = updater.job_queue
-    q_bot.put(Job(publish_handler, 20, repeat=True))
-    q_bot.put(Job(user_alert_handler, 100, repeat=True))
-    if settings.DEBUG or True:
-        updater.start_polling(bootstrap_retries=2)
-    else:
-        updater.start_webhook(listen='130.185.76.171',
-                              port='8443',
-                              url_path=settings.TELEGRAM_TOKEN,
-                              key='/etc/letsencrypt/live/soor.ir/privkey.pem',
-                              cert='/etc/letsencrypt/live/soor.ir/fullchain.pem',
-                              webhook_url='https://soor.ir:8443/'+settings.TELEGRAM_TOKEN)
+#    dispatcher.add_error_handler(error_callback)
 
-    print('Listening ...')
+q_bot = updater.job_queue
+q_bot.put(Job(publish_handler, 20, repeat=True))
+q_bot.put(Job(user_alert_handler, 100, repeat=True))
+if settings.DEBUG or True:
+    updater.start_polling(bootstrap_retries=2)
+else:
+    updater.start_webhook(listen='130.185.76.171',
+                          port='8443',
+                          url_path=settings.TELEGRAM_TOKEN,
+                          key='/etc/letsencrypt/live/soor.ir/privkey.pem',
+                          cert='/etc/letsencrypt/live/soor.ir/fullchain.pem',
+                          webhook_url='https://soor.ir:8443/' + settings.TELEGRAM_TOKEN)
+
+print('Listening ...')

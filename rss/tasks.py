@@ -11,12 +11,19 @@ from hashlib import md5
 import random
 from django.conf import settings
 from rss.codal import get_new_codal
+from django.utils import timezone
 
 LOCK_EXPIRE = 60 * 2
 
 
 @shared_task
 def get_all_new_news():
+    HOUR_NOW = timezone.localtime(timezone.now()).hour
+    # Reject get news in 24:00 - 06:00
+
+    if 0 < HOUR_NOW < 6:
+        return False
+
     THREAD_RSS_NUM = settings.CELERY_WORKER_NUM
     all_rss = RssFeeds.objects.all()
     all_rss = [item.id for item in all_rss]

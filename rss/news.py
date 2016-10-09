@@ -3,7 +3,7 @@ import random
 import requests
 from bs4 import BeautifulSoup as bs
 from rss.ml import *
-from entities.tasks import get_entity_news
+from entities.tasks import get_entity_news, live_entity_news
 from rss.models import BaseNews, News, ImageUrls, NewsLike
 from django.contrib.auth.models import User
 from urllib.parse import urljoin, urlsplit
@@ -56,9 +56,10 @@ def save_news(base_news):
         r = random.uniform(0, 10)
         news.like_count = random.choice([r, 0, 0, 0, 1, 2, 3])
 
+        ent_news = get_entity_news(news)
+        live_entity_news(news, ent_news)
 
 
-        get_entity_news([news])
         news.save()
     return True
 

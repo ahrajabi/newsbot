@@ -6,7 +6,8 @@ from telegrambot.models import UserProfile, UserNews
 from newsbot.settings import MAIN_BUTTONS
 from telegrambot import bot_info
 
-def send_telegram_user(bot, user, text, msg=None, keyboard=None, message_id=None, photo=None):
+
+def send_telegram_user(bot, user, text, msg=None, keyboard=None, message_id=None, photo=None, ps=True):
     if keyboard is None:
         if UserProfile.objects.get(user=user).user_settings.live_news:
             live_button = MAIN_BUTTONS[2][0]
@@ -22,7 +23,9 @@ def send_telegram_user(bot, user, text, msg=None, keyboard=None, message_id=None
           MAIN_BUTTONS[0][0]
          ]
         ], resize_keyboard=True)
-    text += '\n\n' + bot_info.botpromote
+
+    if ps:
+        text += '\n\n' + bot_info.botpromote
     if len(text) > 4096:
         error_text(bot, msg, user, type="LongMessage")
         return False
@@ -105,6 +108,19 @@ def error_text(bot, msg, user, type=None):
 
     elif type == 'NoneNews':
         text = "خبر مورد نظر موجود نمی باشد!"
+
+    elif type == 'NoNews':
+        text = '''
+خبری برای شما موجود نمی‌باشد.
+        '''
+    elif type == 'NoCategory':
+        text = '''
+شما هیچ دسته‌بندی انتخاب نکرده اید. برای این کار /categories را لمس نمایید.
+            '''
+    elif type == 'NoneEntity':
+        text = ''' شما هیچ نشانی را دنبال نمیکنید %s و فعال سازی اخبار زنده امکان پذیر نمی‌باشد.
+        می توانید موضوعات مورد علاقه خود (مثل پتروشیمی، محسن چاوشی، دیابت، تراکتورسازی تبریز و ...) را تایپ کنید %s و با افزودن آن‌ها به لیست، دنبال نمایید.
+        ''' % (Emoji.FACE_SCREAMING_IN_FEAR, Emoji.WHITE_DOWN_POINTING_BACKHAND_INDEX)
     return send_telegram_user(bot, user, text, msg, keyboard=None)
 
 

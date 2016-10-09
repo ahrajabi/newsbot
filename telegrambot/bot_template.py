@@ -5,7 +5,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegrambot.models import UserProfile
 from entities import tasks
 from entities.models import Entity
-from newsbot.settings import PROJECT_EN_NAME
+from newsbot.settings import PROJECT_EN_NAME, PROJECT_FA_NAME
 from telegrambot.bot_send import send_telegram_user
 from telegrambot.news_template import news_image_page, news_page
 
@@ -13,23 +13,10 @@ from telegrambot.news_template import news_image_page, news_page
 def welcome_text(bot, msg, user):
     text = '''
         سلام  %s %s
-        به بات خبری %s خوش آمدید.
-🕴         اگر میخواهید اخبار مرتبط با شغل خود را ببیند (مثلا بورس)
-🎻 یا خبرهای خواننده یا ورزشکار مورد علاقه خود را دنبال کنید (مثلا محسن چاوشی )
-🏅 یا از اخبار پیرامون حادثه ای خاص مطلع شوید (مثلا المپیک)
- یا هر خبر دیگری
+        به سرویس هوشمند %s خوش آمدید.
+        ''' % (msg.message.from_user.first_name, Emoji.RAISED_HAND, PROJECT_FA_NAME)
 
-کلمه دلخواهتان را بنویسیدتا اخبار مرتبط با آن را ببینید و
-اگر به موضوع علاقه مند هستید دسته های پیشنهادی را انتخاب کرده و به لیست خود اضافه کنید تا انطور که میخواهید انها را دریافت کنید.
-▶ اگر دکمه اخبار زنده را بزنید این امکان برای شما فعال می شود که اخبار مربوط به دسته های خود را به صورت بر خط دریافت کنید
-⏹ و هر زمان که بخواهید با فشردن دکمه توقف اخبار زنده میتوانید دریافت لحظه ای اخبار را متوقف کنید.
-📢 با زدن دکمه لیست خبرها ، لیستی از عناوین خبر های مرتبط با دسته های خود که انها را هنوز مطالعه نکرده اید دریافت میکنید.
-🌟 با فشردن دکمه خبر ويژه یک خبر از از خبرهای روز برای شما ارسال میشود و اگر تمایل داشته باشید با استفاده از تنظیماتی که برایتان ارسال میشود میتوانید اخبار حوزه خبری خاص را برای ارسال انتخاب کنید.
-پس شروع کنید ... %s
-
-        ''' % (msg.message.from_user.first_name, Emoji.RAISED_HAND, PROJECT_EN_NAME,
-               Emoji.WHITE_DOWN_POINTING_BACKHAND_INDEX)
-    send_telegram_user(bot, user, text, msg)
+    send_telegram_user(bot, user, text, msg, keyboard=keyboard, ps=False)
 
 
 def show_entities(bot, msg, user, entities):
@@ -45,12 +32,12 @@ def show_entities(bot, msg, user, entities):
 
 def show_user_entity(bot, msg, user, entities):
     if entities:
-        text = 'دسته هایی که آن ها را دنبال میکنید:\n'
+        text = 'نشان‌هایی که دنبال می‌کنید:\n'
         for i in entities:
             text += tasks.get_link(user, i) + '\n'
     else:
-        text = ''' شما دسته ای را دنبال نمیکنید %s
-        می توانید موضوعات مورد علاقه خود را(به عنوان مثال: تهران) از طریق کادر پایین ارسال کنید%s
+        text = ''' شما هیچ نشانی را دنبال نمی‌کنید %s
+        می‌توانید موضوعات مورد علاقه خود (مثل پتروشیمی) را تایپ %s و سپس با افزودن آن به لیست نشان‌ها، دنبال نمایید.
         ''' % (Emoji.FACE_SCREAMING_IN_FEAR, Emoji.WHITE_DOWN_POINTING_BACKHAND_INDEX)
     send_telegram_user(bot, user, text, msg)
 
@@ -82,8 +69,8 @@ def change_entity(bot, msg, entity, user, type=1):
 
 def bot_help(bot, msg, user):
     menu = [
-        ('/list', 'تمام دسته هایی که عضو شده اید.'),
-        ('/help', 'صفحه‌ی راهنمایی'),
+        ('/categories', 'دسته‌بندی‌های خبری‌ شما'),
+        ('/list', 'لیست نشان‌ها'),
         ('/chrome', 'افزونه گوگل کروم'),
         ('/contact', 'تماس با ما')
     ]
@@ -127,8 +114,8 @@ def show_related_entities(related_entities):
     text = Emoji.HEAVY_MINUS_SIGN * 6 + Emoji.WHITE_LEFT_POINTING_BACKHAND_INDEX + " دسته های مرتبط " +\
            Emoji.WHITE_RIGHT_POINTING_BACKHAND_INDEX + Emoji.HEAVY_MINUS_SIGN * 6
     text += '''
-     %s دسته های مرتبط با متن وارد شده در زیر آمده است.
-    با انتخاب هرکدام، اخبار مرتبط با آن به صورت بر خط  برای شما ارسال خواهد شد.\n''' % Emoji.BOOKMARK
+     %s نشان‌های مرتبط با متن وارد شده در زیر آمده است.
+    با انتخاب هرکدام، می‌توانید اخبار مرتبط با آن را به صورت بر خط دنبال نمایید.\n''' % Emoji.BOOKMARK
     # for entity in (related_entities.sort(key=lambda e: e.followers, reverse=True)):
     for entity in related_entities:
         text += prepare_advice_entity_link(entity) + '\n'
