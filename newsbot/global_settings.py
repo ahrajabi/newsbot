@@ -10,7 +10,7 @@ MAIN_BUTTONS = [
     ('🔍 راهنما', 'help_command'),
 ]
 ELASTIC_NEWS = {
-    'index': "newnew",
+    'index': "news",
     'doc_type': "new",
     'settings': {
         "number_of_replicas": 0,
