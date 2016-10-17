@@ -201,7 +201,7 @@ def miss_elastic():
     for item in News.objects.filter(base_news__complete_news=True):
         cnt += 1
         li.append(item.id)
-        if cnt % 5000 == 0:
+        if cnt % 500 == 0:
             print("YES", cnt)
             all_missed.extend(list_missed_elastic(li))
             li = []
