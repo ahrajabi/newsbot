@@ -122,7 +122,10 @@ def highlights_news(query):
     for item in r['hits']['hits']:
         if item['_score'] > 0.5:
             news = News.objects.get(id=item['_id'])
-            news.importance += item['_score']
+            if news.importance:
+                news.importance += item['_score']
+            else:
+                news.importance = item['_score']
             news.save()
     return r
 
