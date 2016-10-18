@@ -7,6 +7,7 @@ from entities.tasks import get_entity_news, live_entity_news
 from rss.models import BaseNews, News, ImageUrls, NewsLike
 from django.contrib.auth.models import User
 from urllib.parse import urljoin, urlsplit
+from rss.elastic import highlights_news
 
 
 def save_news(base_news):
@@ -53,12 +54,14 @@ def save_news(base_news):
         news.pic_number = cnt
 
         # fake random like count
-        r = random.uniform(0, 10)
-        news.like_count = random.choice([r, 0, 0, 0, 1, 2, 3])
+        news.like_count = random.choice([0, 0, 0, 1, 2, 3])
 
+        if news_summary != '':
+            highlights_news(query=news_summary)
+        else:
+            highlights_news(query=base_news.title)
         ent_news = get_entity_news(news)
         live_entity_news(news, ent_news)
-
 
         news.save()
     return True

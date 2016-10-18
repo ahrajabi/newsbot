@@ -92,6 +92,41 @@ def elastic_search_entity(query, size, offset=0):
     return r['hits']['hits']
 
 
+def highlights_news(query):
+    number = 10
+    body = {
+        "query": {
+            "filtered": {
+                "query": {
+                    "more_like_this": {
+                        "fields": ["summary", "title"],
+                        "like": query,
+                        "min_term_freq": 1,
+                        "max_query_terms": 12
+                    }
+                },
+                "filter": {
+                    "range": {
+                        "published_date": {
+                            "gte": "now-20h"
+                        }
+                    }
+                }
+            }
+        },
+        'size': number,
+        'fields': ['title'],
+    }
+
+    r = es.search(index=settings.ELASTIC_NEWS['index'], body=body)
+    for item in r['hits']['hits']:
+        if item['_score'] > 0.5:
+            news = News.objects.get(id=item['_id'])
+            news.importance += item['_score']
+            news.save()
+    return r
+
+
 def more_like_this(query, number):
     body = {
         "query": {
@@ -248,7 +283,7 @@ def news_elastic_setup():
 
 
 
-
+    #
     # {
     # 	"query":{
     #     	"filtered" :{

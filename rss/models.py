@@ -73,6 +73,7 @@ class BaseNews(models.Model):
 
 
 class News(models.Model):
+    importance = models.FloatField('Importance of News', blank=True, null=True)
     body = models.TextField('News', blank=True, null=True)
     summary = models.TextField('summary', blank=True, null=True)
     base_news = models.OneToOneField(BaseNews, verbose_name='Related base news', null=True, blank=True)
