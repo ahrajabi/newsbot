@@ -16,6 +16,7 @@ class RssAdmin(admin.ModelAdmin):
 @admin.register(News)
 class NewsAdmin(admin.ModelAdmin):
     list_display = [x.name for x in News._meta.local_fields]
+    list_display.remove('body')
 
 
 @admin.register(BaseNews)
