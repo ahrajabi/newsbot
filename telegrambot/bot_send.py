@@ -9,14 +9,14 @@ from telegrambot import bot_info
 
 def send_telegram_user(bot, user, text, msg=None, keyboard=None, message_id=None, photo=None, ps=True):
     if keyboard is None:
-        if UserProfile.objects.get(user=user).user_settings.live_news:
-            live_button = MAIN_BUTTONS[2][0]
-        else:
-            live_button = MAIN_BUTTONS[1][0]
+        # if UserProfile.objects.get(user=user).user_settings.live_news:
+        #     live_button = MAIN_BUTTONS[2][0]
+        # else:
+        #     live_button = MAIN_BUTTONS[1][0]
         keyboard = ReplyKeyboardMarkup(keyboard=[
          [
-          live_button,
-          MAIN_BUTTONS[3][0]
+          # live_button,
+          # MAIN_BUTTONS[3][0]
          ],
          [
           MAIN_BUTTONS[4][0],

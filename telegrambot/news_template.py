@@ -1,9 +1,10 @@
 import locale
-from telegrambot import bot_info
 import jdatetime
+from datetime import datetime
 from telegram.emoji import Emoji
-from django.utils import timezone
 from django.conf import settings
+from django.utils import timezone
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from rss.models import News
 from rss.models import ImageUrls
@@ -14,7 +15,6 @@ from rss.elastic import more_like_this
 from telegrambot.models import UserNews
 from rss.ml import normalize, sent_tokenize
 from telegrambot.bot_send import send_telegram_user
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 def georgian_to_jalali(datetime):
@@ -23,6 +23,48 @@ def georgian_to_jalali(datetime):
     ret = jdatetime.datetime(jal.jyear, jal.jmonth, jal.jday).strftime("%a, %d %b") + ' ' + \
           timezone.localtime(datetime).strftime("%M:%-H")
     return normalize(ret)
+
+
+def to_iran_date_time(date_time):
+    jal_date = jdatetime.GregorianToJalali(date_time.year, date_time.month, date_time.day)
+    local_time = timezone.localtime(date_time)
+    return datetime(jal_date.jyear, jal_date.jmonth, jal_date.jday, local_time.hour, local_time.minute, local_time.second)
+
+
+def now_time_difference(date_time):
+    now = to_iran_date_time(timezone.now())
+    local_date_time = to_iran_date_time(date_time)
+
+    diff = now - local_date_time
+
+    if diff.days >= 7:
+        return date_time, 'dt'
+    elif 0 < diff.days < 7:
+        if local_date_time.time() > now.time():
+            return diff.days + 1, 'd'
+        else:
+            return diff.days, 'd'
+    else:
+        if diff.seconds < 60:
+            return diff.seconds, 's'
+        elif 60 <= diff.seconds < 3600:
+            return int(diff.seconds / 60), 'm'
+        else:
+            return int(diff.seconds / 3600), 'h'
+
+
+def prepare_time(date_time):
+    diff, diff_type = now_time_difference(date_time)
+    if diff_type == 'dt':
+        return georgian_to_jalali(date_time)
+    elif diff_type == 'd':
+        return str(diff) + 'روز پیش'
+    elif diff_type == 'h':
+        return str(diff) + 'ساعت پیش'
+    elif diff_type == 'm':
+        return str(diff) + 'دقیقه پیش'
+    elif diff_type == 's':
+        return str(diff) + 'ثانیه پیش'
 
 
 def sample_news_page(news, inline=False):
@@ -36,15 +78,17 @@ def sample_news_page(news, inline=False):
         except Exception:
             pass
 
+
     text = ''
     if not inline:
-        text = Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + title + '\n'
-    text += '    ' + Emoji.SMALL_BLUE_DIAMOND + news.get_summary() + '\n'
-    text += '    ' + Emoji.CALENDAR + ' ' + georgian_to_jalali(news.base_news.published_date) + '\n'
+        text = Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + title
+    # text += '    ' + Emoji.SMALL_BLUE_DIAMOND + news.get_summary() + '\n'
     try:
-        text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n'
+        # text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ ' + source + '\n'
+        text += ' (%s) \n' %source
     except Exception:
         pass
+    text += '    ' + Emoji.CALENDAR + ' ' + prepare_time(news.base_news.published_date) + '\n'
     if not inline:
         text += '    ' + Emoji.NEWSPAPER + 'مشاهده خبر:' + '/News_' + str(news.id) + '\n'
     else:

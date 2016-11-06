@@ -68,13 +68,20 @@ def change_entity(bot, msg, entity, user, type=1):
 
 
 def bot_help(bot, msg, user):
+    up = UserProfile.objects.get(user=user)
+    if up.user_settings.live_news:
+        live_news = ('/stoplive', 'توقف اخبار زنده')
+    else:
+        live_news = ('/Live', 'اخبار زنده')
+
     menu = [
-        ('/categories', 'دسته‌بندی‌های خبری‌ شما'),
+        # ('/categories', 'دسته‌بندی‌های خبری‌ شما'),
         ('/list', 'لیست نشان‌ها'),
+        live_news,
         ('/chrome', 'افزونه گوگل کروم'),
         ('/contact', 'تماس با ما')
     ]
-    up = UserProfile.objects.get(user=user)
+
     if up:
         if not up.stopped:
             menu.append(('/stop', 'توقف دریافت پیام از بات'))
