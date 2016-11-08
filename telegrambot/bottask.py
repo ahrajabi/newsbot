@@ -83,6 +83,7 @@ updater = Updater(token=settings.TELEGRAM_TOKEN)
 dispatcher = updater.dispatcher
 
 dispatcher.add_handler(wizard.CONV_WIZARD)
+dispatcher.add_handler(wizard.SYMBOL_WIZARD)
 dispatcher.add_handler(MessageHandler([Filters.command], commands))
 dispatcher.add_handler(MessageHandler([Filters.text], handle))
 dispatcher.add_handler(CallbackQueryHandler(callback_query))

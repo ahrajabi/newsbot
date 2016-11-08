@@ -19,12 +19,24 @@ make_rejected.short_description = "Mark selected entities as Rejected"
 
 
 class EntitiesListAdmin(admin.ModelAdmin):
+    def get_all_synonym(self, obj):
+        return "\n".join([p.name for p in obj.synonym.all()])
+
+    def get_all_related(self, obj):
+        return "\n".join([p.name for p in obj.related.all()])
+
+    def get_all_negative(self, obj):
+        return "\n".join([p.name for p in obj.negative.all()])
+
     list_display = [x.name for x in Entity._meta.local_fields]
-    actions = [make_activated,make_pending,make_rejected]
+    list_display.extend(['get_all_synonym', 'get_all_related', 'get_all_negative'])
+    actions = [make_activated, make_pending, make_rejected]
     list_filter = (
         ('status'),
     )
-admin.site.register(Entity,EntitiesListAdmin)
+
+
+admin.site.register(Entity, EntitiesListAdmin)
 
 
 class UserEntitiesListAdmin(admin.ModelAdmin):
@@ -32,7 +44,9 @@ class UserEntitiesListAdmin(admin.ModelAdmin):
     list_filter = (
         ('status'),
     )
-admin.site.register(UserEntity,UserEntitiesListAdmin)
+
+
+admin.site.register(UserEntity, UserEntitiesListAdmin)
 
 
 @admin.register(NewsEntity)

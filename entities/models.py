@@ -14,6 +14,10 @@ class Entity(models.Model):
     )
 
     name = models.CharField(max_length=70)
+    for_search = models.CharField(max_length=70)
+    synonym = models.ManyToManyField("self", verbose_name='Synonym to Entity')
+    negative = models.ManyToManyField("self", verbose_name='Negative to Entity')
+    related = models.ManyToManyField("self", verbose_name='Related to Entity')
     wiki_name = models.CharField(max_length=70, null=True)
     status = models.CharField(max_length=1, default='N', choices=STATUS)
     followers = models.IntegerField(default=0)

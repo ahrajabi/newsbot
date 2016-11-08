@@ -2,10 +2,14 @@ from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Fi
 from telegrambot import bot_send
 from rss.models import CategoryCode
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, KeyboardButton
 from telegrambot.models import UserProfile
 from telegram.emoji import Emoji
 from django.core.cache import cache
-
+from entities.models import Entity, UserEntity
+from rss.ml import normalize
+from entities.tasks import set_entity
+from django.conf import settings
 X1, X2, E = range(3)
 
 
@@ -94,4 +98,89 @@ CONV_WIZARD = ConversationHandler(
              CommandHandler('next', choose_category)],
     },
     fallbacks=[CommandHandler('exit', categories_list)]
+)
+
+
+def keyboard_namad():
+    symlist = ['آسیا', 'آپ', 'بفجر', 'ثاژن', 'حتوکا', 'خبهمن', 'خریخت', 'خزامیا', 'خودرو', 'خودرو2', 'خوساز', 'خپارس',
+               'خگستر', 'دانا', 'شبندر', 'شتران', 'شپنا', 'غالبر', 'غشاذر', 'فاذر', 'فاراک', 'فاسمین', 'فخوز', 'فلوله',
+               'فملی', 'فملی2', 'فولاد', 'فولاد2', 'فولاژ', 'قزوین', 'همراه', 'واتی', 'وبانک', 'وبانک2', 'ورنا',
+               'وساپا', 'کاما', 'کسرا', 'کطبس', 'کچاد', 'کگل']
+
+    key = Entity.objects.filter(for_search__in=symlist).order_by('for_search').values('for_search')
+    buttons = [KeyboardButton(text=item['for_search']) for item in key]
+    but = list()
+    for nu, item in enumerate(buttons[::2]):
+        but.append(buttons[2 * nu:2 * nu + 2])
+    print(but)
+    return ReplyKeyboardMarkup(but)
+
+
+def choose_namad(bot, msg):
+    comm = '/next'
+    # if level==1:
+    #     comm = '/next'
+    # else:
+    #     comm = '/exit'
+
+    up = UserProfile.objects.get(telegram_id=msg.message.chat.id)
+    user = up.user
+    print(msg)
+    print(msg.message.text)
+    text = ''
+
+    if msg.message.text == '/symbols':
+        text += '''
+        برای شروع نیاز هست که حداقل سه نماد بورسی را به لیست خود اضافه نمایید.
+        برای این کار می‌توانید نام آن را تایپ کنید یا از منو انتخاب نمایید.
+        '''
+        bot_send.send_telegram_user(bot, user, text, keyboard=keyboard_namad(), ps=False)
+        return X1
+
+    ue = UserEntity.objects.filter(user=user, status=True)
+    if ue.count() >= settings.REQUIRED_ENTITY:
+        # categories_list(bot, msg)
+        print("FINISHED")
+        return ConversationHandler.END
+
+    try:
+        ee = Entity.objects.get(for_search__exact=normalize(msg.message.text))
+        set_entity(user, ee.id, mark=True)
+        text += 'نماد #' + ee.for_search + ' برای شما ثبت شد.'
+        text += '\n'
+        if ue.count() >= settings.REQUIRED_ENTITY:
+            text += '''
+هر سه نماد به درستی به لیست شما اضافه شد.
+
+امکانات روبات به شرح زیر برای شما فعال شده است:
+✳️ جست و جوی اخبار - کافیست متن مورد نظر خود را تایپ نمایید تا اخبار مرتبط را دریافت کنید.
+
+✳️ مدیریت نمادها - با دستور /list می‌توانید نمادهای خود را مشاهده و مدیریت نمایید. برای اضافه کردن نماد جدید کافیست نام آن را تایپ نمایید.
+
+✳️ دریافت اخبار - اخبار مرتبط با نماد شما به صورت اتوماتیک ارسال می‌شود اما برای مشاهده‌ی دستی کافیست خبرهای نشان‌شده را لمس نمایید.
+
+✳ افزونه گوگل - از طریق افزونه گوگل می‌توانید اخبار را هرچه سریع‌تر دریافت نمایید.
+
+✳️ برای استفاده از امکانات بیشتر روبات، راهنما را لمس نمایید.
+            '''
+            bot_send.send_telegram_user(bot, user, text)
+            return ConversationHandler.END
+        else:
+            text += '''
+%s نماد ثبت شده است. %s نماد دیگر نیاز است که وارد نمایید.
+برای این کار می‌توانید نام آن را تایپ کنید یا از منو انتخاب نمایید.
+            ''' % (ue.count(), settings.REQUIRED_ENTITY - ue.count())
+    except:
+        text += 'برای مورد تایپ شده نمادی پیدا نشده است. لطفا مجددا با دقت وارد نمایید.'
+    bot_send.send_telegram_user(bot, user, normalize(text), keyboard=keyboard_namad(), ps=False)
+    return X1
+
+
+SYMBOL_WIZARD = ConversationHandler(
+    entry_points=[CommandHandler('symbols', choose_namad)],
+    states={
+        X1: [MessageHandler([Filters.text], choose_namad),
+             CommandHandler('next', choose_namad)],
+    },
+    fallbacks=[CommandHandler('exit', choose_namad)]
 )

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'mptt',
     'raven.contrib.django.raven_compat',
+    'shortenersite',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -222,6 +223,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
     'PAGE_SIZE': 10
 }
+
+SITE_URL = 'http://localhost:8000'
 
 try:
     from .global_settings import *

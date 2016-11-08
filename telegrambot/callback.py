@@ -38,17 +38,17 @@ def handle(bot, msg):
         error_text(bot, msg, user, type='NoCommand')
 
 
-def score_inline_command(bot, msg, user):
-    entity_id = re.compile(r'\d+').findall(msg.callback_query.data.lower())[0]
-    score = re.compile(r'\(((-|)\d*?)\)').findall(msg.callback_query.data.lower())[0][0]
-    if tasks.set_score_entity(user, entity_id, int(score)):
-        TEXT = '''
-علاقه شما به اخبار  %s با مقدار %d تنظیم شد.
-        ''' % (tasks.get_entity(entity_id).name, int(score)+3)
-        bot.answerCallbackQuery(msg.callback_query.id,
-                                text=TEXT)
-    else:
-        error_text(bot, msg, user)
+# def score_inline_command(bot, msg, user):
+#     entity_id = re.compile(r'\d+').findall(msg.callback_query.data.lower())[0]
+#     score = re.compile(r'\(((-|)\d*?)\)').findall(msg.callback_query.data.lower())[0][0]
+#     if tasks.set_score_entity(user, entity_id, int(score)):
+#         TEXT = '''
+# علاقه شما به اخبار  %s با مقدار %d تنظیم شد.
+#         ''' % (tasks.get_entity(entity_id).name, int(score)+3)
+#         bot.answerCallbackQuery(msg.callback_query.id,
+#                                 text=TEXT)
+#     else:
+#         error_text(bot, msg, user)
 
 
 def news_inline_command(bot, msg, user):

@@ -32,8 +32,8 @@ About = '''
 '''
 
 botpromote = Emoji.VICTORY_HAND
-botpromote += 'دستیار هوشمند خبری شما   '
-botpromote += '\n'
+# botpromote += 'دستیار هوشمند خبری شما   '
+# botpromote += '\n'
 botpromote += settings.BOT_NAME
 
 help = '''

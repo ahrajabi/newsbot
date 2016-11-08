@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from datetime import timedelta
 from entities import tasks
+from entities.models import Entity
 from rss.models import News, CategoryCode
 from telegrambot import bot_template
 from telegrambot.models import UserAlert, UserProfile, UserSettings
@@ -74,7 +75,11 @@ def get_user(telegram_id):
 
 def add_command(bot, msg, user):
     entity_id = int(msg.message.text[5:])
-    entity = tasks.get_entity(entity_id)
+    try:
+        entity = Entity.objects.get(id=entity_id)
+    except Entity.DoesNotExist:
+        entity = None
+
     if entity in tasks.get_user_entity(user):
         error_text(bot, msg, user, type='PriorFollow')
         return
@@ -88,7 +93,12 @@ def add_command(bot, msg, user):
 
 def remove_command(bot, msg, user):
     entity_id = int(msg.message.text[8:])
-    entity = tasks.get_entity(entity_id)
+
+    try:
+        entity = Entity.objects.get(id=entity_id)
+    except Entity.DoesNotExist:
+        entity = None
+
     if entity not in tasks.get_user_entity(user):
         error_text(bot, msg, user, type='NoFallow')
         return

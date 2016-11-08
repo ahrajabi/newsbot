@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^grappelli/', include('grappelli.urls')), # grappelli URLS
     url(r'^admin/', admin.site.urls),
     url(r'^api/', include('ChromeExtension.urls')),
+    url(r'^r/', include('shortenersite.urls', namespace='shortenersite')),
 ]
 
 if settings.DEBUG:

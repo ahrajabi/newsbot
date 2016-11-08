@@ -5,37 +5,39 @@ from telegrambot.models import UserProfile, UserLiveNews
 
 from .models import UserEntity, Entity, NewsEntity
 from telegrambot.models import UserLiveNews
-wikipedia.set_lang('fa')
 
 
-def get_entity_contain(name):
-    wik = wikipedia.search(name, results=3, suggestion=True)
-    ret = list()
-    print(wik[0])
-    for item in wik[0]:
-        ent = Entity.objects.filter(wiki_name=item)
-        if not ent:
-            try:
-                wiki_page = wikipedia.page(item, redirect=True, auto_suggest=True)
-                ent = Entity.objects.create(name=item, wiki_name=item, status='P',
-                                            summary=wiki_page.summary)
-                ret.append(ent)
-            except wikipedia.exceptions.DisambiguationError as e:
-                wiki_page = wikipedia.page(e.options, redirect=True, auto_suggest=True)
-                ent = Entity.objects.create(name=e.options, wiki_name=e.options, status='P',
-                                            summary=wiki_page.summary)
-                ret.append(ent)
+# wikipedia.set_lang('fa')
 
-        else:
-            ret.extend(ent)
-    return ret
+#
+# def get_entity_contain(name):
+#     wik = wikipedia.search(name, results=3, suggestion=True)
+#     ret = list()
+#     print(wik[0])
+#     for item in wik[0]:
+#         ent = Entity.objects.filter(wiki_name=item)
+#         if not ent:
+#             try:
+#                 wiki_page = wikipedia.page(item, redirect=True, auto_suggest=True)
+#                 ent = Entity.objects.create(name=item, wiki_name=item, status='P',
+#                                             summary=wiki_page.summary)
+#                 ret.append(ent)
+#             except wikipedia.exceptions.DisambiguationError as e:
+#                 wiki_page = wikipedia.page(e.options, redirect=True, auto_suggest=True)
+#                 ent = Entity.objects.create(name=e.options, wiki_name=e.options, status='P',
+#                                             summary=wiki_page.summary)
+#                 ret.append(ent)
+#
+#         else:
+#             ret.extend(ent)
+#     return ret
 
 
-def get_entity(e_id):
-    s = Entity.objects.filter(id=e_id)
-    if not s:
-        return None
-    return s[0]
+# def get_entity(e_id):
+#     s = Entity.objects.filter(id=e_id)
+#     if not s:
+#         return None
+#     return s[0]
 
 
 def get_user_entity(user):
@@ -49,7 +51,7 @@ def get_link(user, entity):
         return "/add_"+str(entity.id)+" " + entity.name + ""
 
 
-def set_entity(user, entity_id, mark='Follow'):
+def set_entity(user, entity_id, mark=True):
     ent = Entity.objects.get(pk=entity_id)
     if not ent:
         return False
@@ -57,7 +59,7 @@ def set_entity(user, entity_id, mark='Follow'):
     ue = UserEntity.objects.filter(entity=ent, user=user)
 
     if not ue:
-        user.userentity_set.create(entity=ent, status=(mark == 1)).save()
+        user.userentity_set.create(entity=ent, status=(mark == True)).save()
         return True
     else:
         for i in ue:
@@ -66,15 +68,16 @@ def set_entity(user, entity_id, mark='Follow'):
         return True
 
 
-def set_score_entity(user, entity_id, score=0):
-    ent = Entity.objects.get(pk=entity_id)
-    ue = UserEntity.objects.filter(entity=ent, user=user)
-    if not ent or not ue:
-        return False
-    for item in ue:
-        item.score = score
-        item.save()
-    return True
+#
+# def set_score_entity(user, entity_id, score=0):
+#     ent = Entity.objects.get(pk=entity_id)
+#     ue = UserEntity.objects.filter(entity=ent, user=user)
+#     if not ent or not ue:
+#         return False
+#     for item in ue:
+#         item.score = score
+#         item.save()
+#     return True
 
 
 #َWe can use of yield for get running function!
@@ -114,10 +117,6 @@ def live_entity_news(news, news_ent):
     for u in users:
         if u in us:
             UserLiveNews.objects.create(user=u, news=news)
-
-
-
-
 
 
 def get_entity_text(input_text):
