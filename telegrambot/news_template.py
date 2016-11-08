@@ -15,7 +15,7 @@ from rss.elastic import more_like_this
 from telegrambot.models import UserNews
 from rss.ml import normalize, sent_tokenize
 from telegrambot.bot_send import send_telegram_user
-
+from shortenersite.views import shorten
 
 def georgian_to_jalali(datetime):
     jal = jdatetime.GregorianToJalali(datetime.year, datetime.month, datetime.day)
@@ -192,7 +192,7 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
         try:
             text += '    ' + Emoji.CALENDAR + ' ' + georgian_to_jalali(news.base_news.published_date) + '\n'
             text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ '
-            text += "<a href= '%s'> %s \n</a>" % (news.base_news.url, news.base_news.rss.news_agency.fa_name)
+            text += "<a href= '%s'> %s \n</a>" % (shorten(news.base_news.url), news.base_news.rss.news_agency.fa_name)
         except Exception:
             pass
 

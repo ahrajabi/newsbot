@@ -9,6 +9,8 @@ from rss.elastic import news_with_terms
 from entities.tasks import get_user_entity
 from newsbot.settings import NEWS_PER_PAGE
 from django.utils import timezone
+from shortenersite.views import shorten
+
 
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
@@ -46,7 +48,7 @@ def get_user_news(username):
                 'summary': news.summary,
                 'title': news.base_news.title,
                 'published_date': timezone.localtime(news.base_news.published_date),
-                'link': news.base_news.url,
+                'link': shorten(news.base_news.url),
                 'agency': news.base_news.news_agency.fa_name
                 }
         response.append(news)
