@@ -35,9 +35,12 @@ def shorten_url(request):
 
 def shorten(url):
     if not (url == ''):
-        short_id = get_short_code()
-        b = Urls(httpurl=url, short_id=short_id)
-        b.save()
+        try:
+            short_id = Urls.objects.get(httpurl=url).short_id
+        except Urls.DoesNotExist:
+            short_id = get_short_code()
+            b = Urls(httpurl=url, short_id=short_id)
+            b.save()
         return settings.SITE_URL + "/r/" + short_id
     return 0
 
