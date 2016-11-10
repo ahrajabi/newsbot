@@ -29,7 +29,7 @@ def shorten_url(request):
         response_data = {}
         response_data['url'] = settings.SITE_URL + "/r/" + short_id
         return HttpResponse(json.dumps(response_data), content_type="application/json")
-    return HttpResponse(json.dumps({"error": "error occurs"}),
+    return HttpResponse(js.dumps({"error": "error occurs"}),
                         content_type="application/json")
 
 

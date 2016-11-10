@@ -56,6 +56,7 @@ class BaseNews(models.Model):
     SOURCE = (
         (1, 'Website RSS'),
         (2, 'Codal'),
+        (3, 'Telegram')
     )
 
     url = models.URLField('News url', max_length=600, blank=True)
@@ -79,6 +80,8 @@ class News(models.Model):
     base_news = models.OneToOneField(BaseNews, verbose_name='Related base news', null=True, blank=True)
     pic_number = models.PositiveSmallIntegerField('Number of Pictures')
     like_count = models.PositiveIntegerField('Number of Likes', default=0)
+    photo = models.ImageField(upload_to='telegram/%Y/%m/%d/', null=True, blank=True)
+    file = models.FileField(upload_to='telegram/%Y/%m/%d/', null=True, blank=True)
 
     def get_summary(self):
         if len(self.summary) > 5:

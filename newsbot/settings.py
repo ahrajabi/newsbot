@@ -144,6 +144,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = "/tmp/"
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 ELASTIC_URL = 'http://130.185.76.171:9200'
 
 
