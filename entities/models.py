@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from rss.models import News
+
+
 # Create your models here.
 
 
@@ -15,9 +17,12 @@ class Entity(models.Model):
 
     name = models.CharField(max_length=70)
     for_search = models.CharField(max_length=70)
-    synonym = models.ManyToManyField("self", verbose_name='Synonym to Entity')
-    negative = models.ManyToManyField("self", verbose_name='Negative to Entity')
-    related = models.ManyToManyField("self", verbose_name='Related to Entity')
+    synonym = models.ManyToManyField("self", verbose_name='Synonym to Entity', symmetrical=False,
+                                     related_name='combined+')
+    negative = models.ManyToManyField("self", verbose_name='Negative to Entity', symmetrical=False,
+                                      related_name='combined+')
+    related = models.ManyToManyField("self", verbose_name='Related to Entity', symmetrical=False,
+                                     related_name='combined+')
     wiki_name = models.CharField(max_length=70, null=True)
     status = models.CharField(max_length=1, default='N', choices=STATUS)
     followers = models.IntegerField(default=0)
@@ -41,7 +46,6 @@ class UserEntity(models.Model):
     score = models.SmallIntegerField(default=0)
     last_news = models.DateTimeField(null=True, blank=True)
     news_count = models.IntegerField(default=0)
-
 
     def __str__(self):
         return self.user.username + " has " + self.entity.name
