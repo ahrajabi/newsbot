@@ -70,28 +70,32 @@ def change_entity(bot, msg, entity, user, type=1):
 def bot_help(bot, msg, user):
     up = UserProfile.objects.get(user=user)
     if up.user_settings.live_news:
-        live_news = ('/stoplive', 'توقف اخبار زنده')
+        live_news = ('/stoplive', 'توقف اخبار زنده',
+                     'در حال حاضر اخبار مرتبط با نشان‌ها برای شما بلافاصله ارسال می‌شود. برای دریافت دوره‌ای اخبار این گزینه را لمس نمایید.')
     else:
-        live_news = ('/Live', 'اخبار زنده')
+        live_news = (
+            '/live', 'اخبار زنده', 'از این طریق می‌توانید تمام خبرهای مرتبط با نشان‌های خود را بلافاصله دریافت نمایید.')
 
     menu = [
         # ('/categories', 'دسته‌بندی‌های خبری‌ شما'),
-        ('/list', 'لیست نشان‌ها'),
+        ('/list', 'لیست نشان‌ها', 'با استفاده از این گزینه، می‌توانید نشان‌های خود را مشاهده و حذف نمایید.'),
         live_news,
-        ('/chrome', 'افزونه گوگل کروم'),
-        ('/contact', 'تماس با ما')
+        ('/browser', 'افزونه‌ی مرورگر',
+         'این گزینه نحوه‌ی استفاده از افزونه‌ی مرورگر را توضیح می‌دهد. برای دریافت توکن و نام کاربری این گزینه را لمس نمایید.'),
+        ('/contact', 'تماس با ما', 'راه‌های ارتباطی تیم خبرِمن')
     ]
 
     if up:
         if not up.stopped:
-            menu.append(('/stop', 'توقف دریافت پیام از بات'))
+            menu.append(('/stop', 'توقف', 'توقف دریافت پیام از روبات'))
         else:
-            menu.append(('/start', 'شما دریافت پیام از بات را متوقف کرده اید. توسط این گزینه می توانید این محدودیت را بردارید.'))
+            menu.append(('/start',
+                         'شما دریافت پیام از روبات را متوقف کرده اید. توسط این گزینه می توانید این محدودیت را بردارید.'))
 
-    text = Emoji.LEFT_POINTING_MAGNIFYING_GLASS + 'راهنما'+'\n'
+    text = Emoji.LEFT_POINTING_MAGNIFYING_GLASS + 'راهنما' + '\n\n'
 
     for i in menu:
-        text += Emoji.WHITE_RIGHT_POINTING_BACKHAND_INDEX + i[0] + ' ' + i[1] + '\n\n'
+        text += Emoji.WHITE_RIGHT_POINTING_BACKHAND_INDEX + i[0] + ' ' + i[1] + '\n❔' + i[2] + '\n\n'
     send_telegram_user(bot, user, text, msg)
 
 

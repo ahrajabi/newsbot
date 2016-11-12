@@ -167,6 +167,7 @@ def stop_command(bot, msg, user):
         up.save()
         text = '''
         حساب شما متوقف شد.
+        برای فعال سازی مجدد حساب خود /start را لمس نمایید.
         '''
         send_telegram_user(bot, user, text)
 
@@ -199,14 +200,17 @@ def live_command(bot, msg, user):
     send_telegram_user(bot, user, text, msg)
 
 
-def chrome_command(bot, msg, user):
+def browser_command(bot, msg, user):
     commands = ['/extension', '/token']
-    response = Emoji.SMALL_BLUE_DIAMOND + '''شما میتوانید با نصب افزونه خبرمن اخبار را از طریق مرورگر Google Chrome خود دریافت کنید.
+    response = Emoji.SMALL_BLUE_DIAMOND + '''شما میتوانید با نصب <b>افزونه‌ی خبرمن</b>، اخبار را از طریق مرورگر گوگل کروم خود دریافت نمایید.
+
     کافیست دو مرحله زیر را انجام دهید :
-    افزونه خبر من را دریافت و نصب کنید %s
-    نام کاربری و توکن خود را دریافت کنید %s
-    ''' % (commands[0], commands[1])
-    send_telegram_user(bot, user, response, msg)
+1⃣ افزونه خبر من را از طریق <a href='https://chrome.google.com/webstore/detail/khabare-man/lbjgcnoliaijdlncdjcpgbnjagjbbcld'>این لینک</a> با مرورگر گوگل کروم دریافت و نصب کنید.
+
+2⃣ نام کاربری و توکن خود را با لمس بر روی %s دریافت نمایید.
+
+    ''' % commands[1]
+    send_telegram_user(bot, user, response, msg, ps=False)
 
 
 def extension_command(bot, msg, user):

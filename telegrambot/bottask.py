@@ -15,7 +15,7 @@ import traceback
 from django.http import HttpResponse
 
 import logging
-from telegrambot.wizard import CONV_WIZARD
+from telegrambot.wizard import SYMBOL_WIZARD
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -61,8 +61,8 @@ def commands(bot, msg):
             if new_user:
                 x = msg.message.text
                 msg.message.text = '/categories'
-                if CONV_WIZARD.check_update(msg):
-                    CONV_WIZARD.handle_update(msg, dispatcher)
+                if SYMBOL_WIZARD.check_update(msg):
+                    SYMBOL_WIZARD.handle_update(msg, dispatcher)
                 msg.message.text = x
         else:
             getattr(command_handler, func)(bot, msg, user)
@@ -97,11 +97,11 @@ q_bot.put(Job(user_alert_handler, 100, repeat=True))
 if settings.DEBUG or True:
     updater.start_polling(bootstrap_retries=2)
 else:
-    updater.start_webhook(listen='130.185.76.171',
+    updater.start_webhook(listen='146.185.154.208',
                           port='8443',
                           url_path=settings.TELEGRAM_TOKEN,
-                          key='/etc/letsencrypt/live/soor.ir/privkey.pem',
-                          cert='/etc/letsencrypt/live/soor.ir/fullchain.pem',
-                          webhook_url='https://soor.ir:8443/' + settings.TELEGRAM_TOKEN)
+                          key='/etc/letsencrypt/live/khabareman.com/privkey.pem',
+                          cert='/etc/letsencrypt/live/khabareman.com/fullchain.pem',
+                          webhook_url='https://khabareman.com:8443/' + settings.TELEGRAM_TOKEN)
 
 print('Listening ...')
