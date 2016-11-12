@@ -151,9 +151,12 @@ def entitynewslist_inline_command(bot, msg, user):
     elif func == 'previous':
         next_page = unl.page-1
 
-
     ent = get_user_entity(user)
-    el_news = elastic.news_with_terms(terms_list=[item.name for item in ent],
+    query_terms=[]
+    for entity in ent:
+        query_terms = set().union(query_terms, entity.get_synonym(), entity.get_related())
+
+    el_news = elastic.news_with_terms(terms_list=query_terms,
                                       size=settings.NEWS_PER_PAGE,
                                       start_time=unl.datetime_start,
                                       end_time=unl.datetime_publish,

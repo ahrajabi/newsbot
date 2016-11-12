@@ -44,11 +44,13 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
 
         h_response, h_response_len = prepare_multiple_sample_news(list(map(int, [hit['_id'] for hit in hits])),
                                                                   SAMPLE_NEWS_COUNT)
-        entity = Entity.objects.get_or_create(name=text, wiki_name='')[0]
-        response += Emoji.BOOKMARK + \
-                    "با انتخاب دسته زیر ، اخبار مرتبط به صورت بر خط برای شما ارسال خواهد شد." + \
-                    '\n' + prepare_advice_entity_link(entity) + '\n' + Emoji.HEAVY_MINUS_SIGN * 5 + '\n'
-        response += "%s خبرهای مرتبط با دسته فوق:\n" % Emoji.LARGE_RED_CIRCLE + '\n' + h_response
+        # entity = Entity.objects.get_or_create(name=text, wiki_name='')[0]
+        entity = Entity.objects.filter(name=text, wiki_name='', status ='A')
+        if entity:
+            response += Emoji.BOOKMARK + \
+                        "با انتخاب دسته زیر ، اخبار مرتبط به صورت بر خط برای شما ارسال خواهد شد." + \
+                        '\n' + prepare_advice_entity_link(entity[0]) + '\n' + Emoji.HEAVY_MINUS_SIGN * 5 + '\n'
+        response += '\n' + h_response
     else:
         no_response = True
 
@@ -68,29 +70,31 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
                     not_response = False
 
             return not_response, gram_response
-        pre_response = Emoji.WARNING_SIGN + "متن وارد شده یافت نشد.\n" + Emoji.BOOKMARK + \
-                       "دسته های مشابه پیشنهادی:‌\n با انتخاب هر یک اخبار مرتبط به صورت بر خط برای شما ارسال خواهد شد.\n"
+        # pre_response = Emoji.WARNING_SIGN + "متن وارد شده یافت نشد.\n" + Emoji.BOOKMARK + \
+        #                "دسته های مشابه پیشنهادی:‌\n با انتخاب هر یک اخبار مرتبط به صورت بر خط برای شما ارسال خواهد شد.\n"
+        #
+        # three_gram = tri_gram(text)
+        # no_three_gram_response, three_response = print_n_gram(three_gram)
+        # if no_three_gram_response:
+        #     two_gram = bi_gram(text)
+        #     no_two_gram_response, two_response = print_n_gram(two_gram)
+        #     if no_two_gram_response:
+        #         one_gram = word_tokenize(text)
+        #         no_one_gram_response, one_response = print_n_gram(one_gram)
+        #         if no_one_gram_response:
+        #             if not similar_news_id:
+        #                 error_text(bot, msg, user, 'InvalidEntity')
+        #                 return
+        #         else:
+        #             response += pre_response + one_response
+        #     else:
+        #         response += pre_response + two_response
+        # else:
+        #     response += pre_response + three_response
 
-        three_gram = tri_gram(text)
-        no_three_gram_response, three_response = print_n_gram(three_gram)
-        if no_three_gram_response:
-            two_gram = bi_gram(text)
-            no_two_gram_response, two_response = print_n_gram(two_gram)
-            if no_two_gram_response:
-                one_gram = word_tokenize(text)
-                no_one_gram_response, one_response = print_n_gram(one_gram)
-                if no_one_gram_response:
-                    if not similar_news_id:
-                        error_text(bot, msg, user, 'InvalidEntity')
-                        return
-                else:
-                    response += pre_response + one_response
-            else:
-                response += pre_response + two_response
-        else:
-            response += pre_response + three_response
-
-        response += Emoji.HEAVY_MINUS_SIGN * 5 + '\n' + Emoji.NEWSPAPER + "خبرهای مشابه \n" + similar_news + '\n'
+        if not similar_news_id:
+            error_text(bot, msg, user, 'InvalidEntity')
+            return
 
     final_destination = None
     call_back_id = None

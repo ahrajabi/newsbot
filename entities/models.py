@@ -33,6 +33,15 @@ class Entity(models.Model):
     def __str__(self):
         return self.name
 
+    def get_synonym(self):
+        return [item.name for item in self.synonym.all()]
+
+    def get_negative(self):
+        return [item.name for item in self.negative.all()]
+
+    def get_related(self):
+        return [item.name for item in self.related.all()]
+
 
 class UserEntity(models.Model):
     STATUS = (

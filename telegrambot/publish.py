@@ -43,7 +43,11 @@ def prepare_periodic_publish_news(bot, job, up):
     else:
         start_time = delta
 
-    el_news = elastic.news_with_terms(terms_list=[item.name for item in ent],
+    query_terms = []
+    for entity in ent:
+        query_terms = set().union(query_terms, entity.get_synonym(), entity.get_related())
+
+    el_news = elastic.news_with_terms(terms_list=query_terms,
                                       size=settings.NEWS_PER_PAGE,
                                       start_time=start_time)
 

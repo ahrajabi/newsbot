@@ -27,7 +27,11 @@ def get_user_news(username):
         return 0
 
     ent = get_user_entity(user)
-    el_news = news_with_terms(terms_list=[item.name for item in ent],
+    query_terms = []
+    for entity in ent:
+        query_terms = set().union(query_terms, entity.get_synonym(), entity.get_related())
+
+    el_news = news_with_terms(terms_list=query_terms,
                               size=NEWS_PER_PAGE,
                               start_time='now-120m',
                               sort='published_date')
