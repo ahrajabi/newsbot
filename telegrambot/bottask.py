@@ -56,11 +56,13 @@ def commands(bot, msg):
     p = re.compile(r'[a-z]+')
     func = p.findall(msg.message.text.lower())[0] + '_command'
     if hasattr(command_handler, func):
+        print(func, new_user)
         if func == 'start_command':
             getattr(command_handler, func)(bot, msg, new_user, user)
             if new_user:
+                print("YESS")
                 x = msg.message.text
-                msg.message.text = '/categories'
+                msg.message.text = '/symbols'
                 if SYMBOL_WIZARD.check_update(msg):
                     SYMBOL_WIZARD.handle_update(msg, dispatcher)
                 msg.message.text = x
@@ -105,3 +107,4 @@ else:
                           webhook_url='https://khabareman.com:8443/' + settings.TELEGRAM_TOKEN)
 
 print('Listening ...')
+

@@ -107,12 +107,11 @@ def keyboard_namad():
                'فملی', 'فملی2', 'فولاد', 'فولاد2', 'فولاژ', 'قزوین', 'همراه', 'واتی', 'وبانک', 'وبانک2', 'ورنا',
                'وساپا', 'کاما', 'کسرا', 'کطبس', 'کچاد', 'کگل']
 
-    key = Entity.objects.filter(for_search__in=symlist).order_by('for_search').values('for_search')
-    buttons = [KeyboardButton(text=item['for_search']) for item in key]
+    key = Entity.objects.filter(synonym__name__in=symlist).order_by('synonym__name').values('synonym__name')
+    buttons = [KeyboardButton(text=item['synonym__name']) for item in key]
     but = list()
     for nu, item in enumerate(buttons[::2]):
         but.append(buttons[2 * nu:2 * nu + 2])
-    print(but)
     return ReplyKeyboardMarkup(but)
 
 
@@ -128,7 +127,6 @@ def choose_namad(bot, msg):
     print(msg)
     print(msg.message.text)
     text = ''
-
     if msg.message.text == '/symbols':
         text += '''
         برای شروع نیاز هست که حداقل سه نماد بورسی را به لیست نشان‌های خود اضافه نمایید.
@@ -144,9 +142,9 @@ def choose_namad(bot, msg):
         return ConversationHandler.END
 
     try:
-        ee = Entity.objects.get(for_search__exact=normalize(msg.message.text))
+        ee = Entity.objects.get(synonym__name__in=[normalize(msg.message.text)])
         set_entity(user, ee.id, mark=True)
-        text += 'نماد #' + ee.for_search + ' برای شما ثبت شد.'
+        text += 'نماد #' + ee.synonym.all()[0].name + ' برای شما ثبت شد.'
         text += '\n'
         if ue.count() >= settings.REQUIRED_ENTITY:
             text += '''

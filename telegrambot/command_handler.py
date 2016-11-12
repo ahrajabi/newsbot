@@ -15,11 +15,11 @@ thismodule = sys.modules[__name__]
 
 
 def verify_user(bot, msg):
-    new_user = 0
+    new_user = False
     user = get_user(msg.message.chat.id)
 
     if not user:
-        new_user = 1
+        new_user = True
         user = create_new_user_profile(bot, msg)
 
     return user, new_user
@@ -55,7 +55,7 @@ def create_new_user_profile(bot, msg):
 def get_user(telegram_id):
     profiles = UserProfile.objects.filter(telegram_id=telegram_id)
     if not profiles:
-        return False
+        return None
     user = [i.user for i in profiles][0]
     if not user:
         return None
@@ -149,15 +149,15 @@ def start_command(bot, msg, new_user, user):
         حساب شما مجددا فعال شد.
         '''
         send_telegram_user(bot, user, text, msg)
-    if inp[1]:
-        arg = inp[1]
-
-        if arg.startswith('N'):
-            try:
-                news = News.objects.get(id=arg[1:])
-                bot_template.publish_news(bot, news, user, page=1)
-            except News.DoesNotExist:
-                return error_text(bot, msg, 'NoneNews')
+        # if inp[1]:
+        #     arg = inp[1]
+        #
+        #     if arg.startswith('N'):
+        #         try:
+        #             news = News.objects.get(id=arg[1:])
+        #             bot_template.publish_news(bot, news, user, page=1)
+        #         except News.DoesNotExist:
+        #             return error_text(bot, msg, 'NoneNews')
 
 
 def stop_command(bot, msg, user):
