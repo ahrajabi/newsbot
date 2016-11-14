@@ -36,7 +36,7 @@ class Entity(models.Model):
     news_count = models.IntegerField(default=0)
     latest_news = models.ForeignKey(News, null=True, blank=True)
     summary = models.TextField(null=True)
-
+    min_should = models.IntegerField(default=1)
     def __str__(self):
         return self.name
 

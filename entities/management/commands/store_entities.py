@@ -28,10 +28,11 @@ class Command(BaseCommand):
                                                                defaults={
                                                                    'status': row[1],
                                                                    'summary': row[6],
+                                                                   'min_should': row[2]
                                                                })
                 # SYNONYM
                 obj.synonym.clear()
-                for item in row[2].split(','):
+                for item in row[3].split(','):
                     inp = item.strip()
                     if len(inp) == 0:
                         continue
@@ -43,7 +44,7 @@ class Command(BaseCommand):
                         obj.synonym.add(sobj)
                 # RELATED
                 obj.related.clear()
-                for item in row[3].split(','):
+                for item in row[4].split(','):
                     inp = item.strip()
                     if len(inp) == 0:
                         continue
@@ -55,7 +56,7 @@ class Command(BaseCommand):
                         obj.related.add(robj)
                 # POSITIVE
                 obj.positive.clear()
-                for item in row[4].split(','):
+                for item in row[5].split(','):
                     inp = item.strip()
                     if len(inp) == 0:
                         continue
@@ -67,7 +68,7 @@ class Command(BaseCommand):
                         obj.positive.add(pobj)
                 # NEGATIVE
                 obj.negative.clear()
-                for item in row[5].split(','):
+                for item in row[6].split(','):
                     inp = item.strip()
                     if len(inp) == 0:
                         continue
