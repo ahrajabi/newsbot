@@ -2,7 +2,7 @@ from telegram.emoji import Emoji
 from telegram import InlineKeyboardMarkup
 from telegram.inlinekeyboardbutton import InlineKeyboardButton
 import datetime
-
+from django.db.models import Q
 from entities.models import Entity
 from rss.ml import normalize, word_tokenize, bi_gram, tri_gram
 from telegrambot.bot_template import prepare_advice_entity_link
@@ -168,11 +168,9 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
     print("HMLLL")
     print(text)
 
-    ent = Entity.objects.filter(name__exact=text, status='A') | \
-          Entity.objects.filter(synonym__name__exact=text, status='A')
+    ent = Entity.objects.filter(Q(name__exact=text, status='A') | Q(synonym__name__exact=text, status='A'))
     for item in word_tokenize(text):
-        ent = ent | Entity.objects.filter(name__exact=item, status='A') | \
-              Entity.objects.filter(synonym__name__exact=item, status='A')
+        ent = ent | Entity.objects.filter(Q(name__exact=item, status='A') | Q(synonym__name__exact=item, status='A'))
 
     text = 'نشان‌های مرتبط با جست و جوی شما' + '\n'
     if ent:
@@ -184,6 +182,7 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
         for item in ent:
             if item.related:
                 rel += item.related.all()
+        print(rel)
         rel = list(set(rel))
         if rel:
             text += '\n' + 'نشان‌های نزدیک به جست و جوی شما' + '\n'

@@ -22,6 +22,13 @@ class Command(BaseCommand):
         # path = '../../../rss_list.csv'
         with open(path) as f:
             reader = list(csv.reader(f))
+            print(reader[1][0])
+            print(reader[1][1])
+            print(reader[1][2])
+            print(reader[1][3])
+            print(reader[1][4])
+            print(reader[1][5])
+            print(reader[1][6])
             for row in reader[1:]:
                 print(row[0])
                 obj, created = Entity.objects.update_or_create(name=row[0],
