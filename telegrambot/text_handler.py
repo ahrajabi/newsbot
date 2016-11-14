@@ -176,7 +176,10 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
         for item in ent.distinct():
             text += get_link(user, item) + '\n'
 
-        rel = [item.related.get() for item in ent]
+        rel = []
+        for item in ent:
+            if item.related:
+                rel += item.related.all()
         rel = list(set(rel))
         if rel:
             text += '\n' + 'نشان‌های نزدیک به جست و جوی شما' + '\n'
