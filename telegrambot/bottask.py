@@ -62,6 +62,7 @@ def commands(bot, msg):
             if new_user:
                 print("YESS")
                 x = msg.message.text
+                print(x)
                 msg.message.text = '/symbols'
                 if SYMBOL_WIZARD.check_update(msg):
                     SYMBOL_WIZARD.handle_update(msg, dispatcher)
