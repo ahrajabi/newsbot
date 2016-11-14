@@ -148,12 +148,19 @@ def more_like_this(query, number):
     return news_id
 
 
-def similar_news_to_query(query, size, days, offset=0):
+def similar_news_to_query(query, size=10, start_time=7, end_time='now', offset=0, sort='_score'):
     ''' return most similar docs to query where published in range (today - days, today), sorted by score'''
     # TODO limit results that have score more than thresholde
-    today = datetime.datetime.now()
-    another_day = today - datetime.timedelta(days=days)
+    if not isinstance(start_time, six.string_types):
+        start_time = start_time.strftime('%Y-%m-%dT%H:%M:%S')
+
+    if not isinstance(end_time, six.string_types):
+        end_time = end_time.strftime('%Y-%m-%dT%H:%M:%S')
+
     body = {
+        "sort": [
+            {sort: {"order": "desc"}},
+        ],
         "query": {
             "multi_match": {
                 "query": query,
@@ -168,19 +175,18 @@ def similar_news_to_query(query, size, days, offset=0):
         "filter": {
             "range": {
                 "published_date": {
-                    "gte": another_day,
-                    "lte": today
+                    "gte": start_time,
+                    "lte": end_time
                 }
             }
         }
     }
 
     r = es.search(index=settings.ELASTIC_NEWS['index'], body=body, request_timeout=20)
-    print(r['hits']['hits'])
-    return [hit['_id'] for hit in r['hits']['hits']]
+    return r
 
 
-def news_with_terms(terms_list, size=10, start_time='now-3h', end_time='now', offset=0, sort='_score'):
+def news_with_terms(entity_list, size=10, start_time='now-3h', end_time='now', offset=0, sort='_score'):
     if not isinstance(start_time, six.string_types):
         start_time = start_time.strftime('%Y-%m-%dT%H:%M:%S')
 
@@ -188,6 +194,36 @@ def news_with_terms(terms_list, size=10, start_time='now-3h', end_time='now', of
         end_time = end_time.strftime('%Y-%m-%dT%H:%M:%S')
 
     print(start_time)
+
+    mquery = []
+    for entity_item in entity_list:
+        should = []
+
+        if len(entity_item.get_positive()) > 0:
+            should = [{"match_phrase": {"_all": item}} for item in entity_item.get_positive()],
+
+        must = []
+        if len(entity_item.get_synonym()) > 0:
+            must = [{"match_phrase": {"_all": item}} for item in entity_item.get_synonym()],
+            must = {
+                "bool": {
+                    "should": must,
+                    "minimum_should_match": 1
+                }
+            }
+
+        must_not = []
+        if len(entity_item.get_negative()) > 0:
+            must_not = [{"match_phrase": {"_all": item}} for item in entity_item.get_negative()],
+
+        mquery.append({
+            "bool": {
+                "should": should,
+                "must": must,
+                "must_not": must_not,
+            }
+        })
+
     body = {
         "sort": [
             {sort: {"order": "desc"}},
@@ -196,7 +232,8 @@ def news_with_terms(terms_list, size=10, start_time='now-3h', end_time='now', of
             "filtered": {
                 "query": {
                     "bool": {
-                        "should": [{"match_phrase": {"_all": item}} for item in terms_list]
+                        "should": mquery,
+                        "minimum_should_match": 1
                     }
                 },
                 "filter": {
@@ -212,7 +249,7 @@ def news_with_terms(terms_list, size=10, start_time='now-3h', end_time='now', of
         "size": size,
         "from": offset
     }
-    print(size, offset, start_time, end_time, terms_list)
+
     r = es.search(index=settings.ELASTIC_NEWS['index'], body=body, request_timeout=20)
     return r
 

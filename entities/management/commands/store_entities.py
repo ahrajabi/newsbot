@@ -29,22 +29,53 @@ class Command(BaseCommand):
                                                                    'status': row[1],
                                                                    'summary': row[6],
                                                                })
+                # SYNONYM
+                obj.synonym.clear()
                 for item in row[2].split(','):
                     inp = item.strip()
+                    if len(inp) == 0:
+                        continue
                     sobj, screated = Entity.objects.update_or_create(name=inp)
                     if screated:
                         sobj.status = 'R'
                         sobj.save()
                     if not sobj in obj.synonym.all():
                         obj.synonym.add(sobj)
-
+                # RELATED
+                obj.related.clear()
                 for item in row[3].split(','):
                     inp = item.strip()
+                    if len(inp) == 0:
+                        continue
                     robj, rcreated = Entity.objects.update_or_create(name=inp)
                     if rcreated:
                         robj.status = 'R'
                         robj.save()
                     if not robj in obj.related.all():
                         obj.related.add(robj)
+                # POSITIVE
+                obj.positive.clear()
+                for item in row[4].split(','):
+                    inp = item.strip()
+                    if len(inp) == 0:
+                        continue
+                    pobj, pcreated = Entity.objects.update_or_create(name=inp)
+                    if pcreated:
+                        pobj.status = 'R'
+                        pobj.save()
+                    if not pobj in obj.positive.all():
+                        obj.positive.add(pobj)
+                # NEGATIVE
+                obj.negative.clear()
+                for item in row[5].split(','):
+                    inp = item.strip()
+                    if len(inp) == 0:
+                        continue
+                    nobj, ncreated = Entity.objects.update_or_create(name=inp)
+                    if ncreated:
+                        nobj.status = 'R'
+                        nobj.save()
+                    if not nobj in obj.negative.all():
+                        obj.negative.add(nobj)
 
                 obj.save()

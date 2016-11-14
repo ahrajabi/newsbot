@@ -35,18 +35,14 @@ def prepare_periodic_publish_news(bot, job, up):
     user = up.user
     interval = up.user_settings.interval_news_list
     delta = timezone.now() - timedelta(minutes=interval)
-
-    ent = get_user_entity(user)
-
     if up.user_settings.last_news_list:
         start_time = up.user_settings.last_news_list.datetime_publish
     else:
         start_time = delta
 
-    el_news = elastic.news_with_terms(terms_list=[item.name for item in ent],
+    el_news = elastic.news_with_terms(entity_list=get_user_entity(user),
                                       size=settings.NEWS_PER_PAGE,
                                       start_time=start_time)
-
 
     try:
         news_ent = [item['_id'] for item in el_news['hits']['hits']]

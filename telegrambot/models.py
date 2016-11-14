@@ -16,9 +16,19 @@ class UserNewsList(models.Model):
     page = models.PositiveIntegerField(verbose_name="Page that list is", default=1)
 
 
+class UserSearchList(models.Model):
+    user = models.ForeignKey(User, verbose_name='User')
+    query = models.TextField()
+    datetime_start = models.DateTimeField(default=datetime(2001, 8, 15, 8, 15, 12, 0, pytz.UTC))
+    datetime_publish = models.DateTimeField(default=datetime(2001, 8, 15, 8, 15, 12, 0, pytz.UTC))
+    number_of_news = models.PositiveIntegerField(verbose_name='Number of News of list')
+    message_id = models.PositiveIntegerField(verbose_name="Message ID", null=True)
+    page = models.PositiveIntegerField(verbose_name="Page that list is", default=1)
+
+
 class UserSettings(models.Model):
     live_news = models.BooleanField(default=False)
-    interval_news_list = models.PositiveSmallIntegerField(default=1440)
+    interval_news_list = models.PositiveSmallIntegerField(default=120)
     last_news_list = models.OneToOneField(UserNewsList, verbose_name='Last News List', null=True)
 
 

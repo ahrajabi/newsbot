@@ -26,10 +26,9 @@ def get_user_news(username):
         # raise ValueError(u'invalid user')
         return 0
 
-    ent = get_user_entity(user)
-    el_news = news_with_terms(terms_list=[item.name for item in ent],
+    el_news = news_with_terms(entity_list=get_user_entity(user),
                               size=NEWS_PER_PAGE,
-                              start_time='now-120m',
+                              start_time='now-1d',
                               sort='published_date')
     try:
         news_ent = [item['_id'] for item in el_news['hits']['hits']]

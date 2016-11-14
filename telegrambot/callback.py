@@ -10,12 +10,12 @@ from telegrambot import command_handler, news_template
 from telegrambot.text_handler import search_box_result
 from telegrambot.bot_send import send_telegram_user, error_text
 from telegrambot.news_template import prepare_multiple_sample_news
-from telegrambot.models import UserNews, MessageFromUser, UserNewsList
+from telegrambot.models import UserNews, MessageFromUser, UserNewsList, UserSearchList
 from rss.elastic import elastic_search_entity, similar_news_to_query
 from newsbot.global_settings import NEWS_PER_PAGE, DAYS_FOR_SEARCH_NEWS, SAMPLE_NEWS_COUNT
 from django.conf import settings
 from rss import elastic
-from entities.tasks import get_user_entity
+from entities.tasks import get_user_entity, get_link
 from rss.models import CategoryCode
 from telegrambot.models import UserProfile
 from telegrambot.wizard import category_page
@@ -151,9 +151,7 @@ def entitynewslist_inline_command(bot, msg, user):
     elif func == 'previous':
         next_page = unl.page-1
 
-
-    ent = get_user_entity(user)
-    el_news = elastic.news_with_terms(terms_list=[item.name for item in ent],
+    el_news = elastic.news_with_terms(entity_list=get_user_entity(user),
                                       size=settings.NEWS_PER_PAGE,
                                       start_time=unl.datetime_start,
                                       end_time=unl.datetime_publish,
@@ -182,6 +180,52 @@ def entitynewslist_inline_command(bot, msg, user):
     output += prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
 
     unl.page= next_page
+    unl.save()
+
+    send_telegram_user(bot, user, output, msg, keyboard, unl.message_id)
+
+
+def searchlist_inline_command(bot, msg, user):
+    import logging
+    logging.config.dictConfig(settings.LOGGING)
+
+    unl = UserSearchList.objects.get(message_id=msg.callback_query.message.message_id)
+    p = re.compile(r'[a-z]+')
+    func = p.findall(msg.callback_query.data.lower())[1]
+
+    if func == 'next':
+        next_page = unl.page + 1
+    elif func == 'previous':
+        next_page = unl.page - 1
+
+    similar_news = similar_news_to_query(query=unl.query,
+                                         size=settings.NEWS_PER_PAGE,
+                                         start_time=unl.datetime_start,
+                                         end_time=unl.datetime_publish,
+                                         offset=(next_page - 1) * settings.NEWS_PER_PAGE,
+                                         )
+
+    # start_time=up.user_settings.last_news_list.datetime_publish)
+    if next_page > 1 and next_page < math.ceil(unl.number_of_news / settings.NEWS_PER_PAGE):
+        buttons = [[
+            InlineKeyboardButton(text='صفحه قبل', callback_data='searchlist-previous'),
+            InlineKeyboardButton(text='صفحه بعد', callback_data='searchlist-next'),
+        ], ]
+    elif next_page == 1:
+        buttons = [[
+            InlineKeyboardButton(text='صفحه بعد', callback_data='searchlist-next'),
+        ], ]
+    else:
+        buttons = [[
+            InlineKeyboardButton(text='صفحه قبل', callback_data='searchlist-previous'),
+        ], ]
+    keyboard = InlineKeyboardMarkup(buttons)
+
+    news_ent = [item['_id'] for item in similar_news['hits']['hits']]
+    news_list = list(set([item for item in news_ent]))
+    output = prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
+
+    unl.page = next_page
     unl.save()
 
     send_telegram_user(bot, user, output, msg, keyboard, unl.message_id)
