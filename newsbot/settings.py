@@ -239,7 +239,7 @@ except ImportError:
 ## Debug Toolbar Configuration
 
 
-if DEBUG:
+if DEBUG and False:
     INSTALLED_APPS += ('debug_toolbar',)
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
     DEBUG_TOOLBAR_PATCH_SETTINGS = False

@@ -17,12 +17,19 @@ class Entity(models.Model):
 
     name = models.CharField(max_length=70)
     for_search = models.CharField(max_length=70)
+
     synonym = models.ManyToManyField("self", verbose_name='Synonym to Entity', symmetrical=False,
                                      related_name='combined+')
+
     negative = models.ManyToManyField("self", verbose_name='Negative to Entity', symmetrical=False,
                                       related_name='combined+')
+
+    positive = models.ManyToManyField("self", verbose_name='Positive to Entity', symmetrical=False,
+                                      related_name='combined+')
+
     related = models.ManyToManyField("self", verbose_name='Related to Entity', symmetrical=False,
                                      related_name='combined+')
+
     wiki_name = models.CharField(max_length=70, null=True)
     status = models.CharField(max_length=1, default='N', choices=STATUS)
     followers = models.IntegerField(default=0)
@@ -32,6 +39,18 @@ class Entity(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_synonym(self):
+        return [item.name for item in self.synonym.all()]
+
+    def get_negative(self):
+        return [item.name for item in self.negative.all()]
+
+    def get_related(self):
+        return [item.name for item in self.related.all()]
+
+    def get_positive(self):
+        return [item.name for item in self.positive.all()]
 
 
 class UserEntity(models.Model):

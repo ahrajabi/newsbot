@@ -76,7 +76,7 @@ def send_telegram_all_user(bot, text, keyboard=None, photo=None):
 def error_text(bot, msg, user, type=None):
     text = 'ERROR'
     if type == 'NoEntity':
-        text = '''        دسته مورد نظر موجود نمی‌باشد.'''
+        text = '''       متن مورد نظر صحیح نمی‌باشد.'''
 
     elif type == 'LongMessage':
         text = '''

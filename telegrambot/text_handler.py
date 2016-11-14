@@ -1,6 +1,7 @@
 from telegram.emoji import Emoji
 from telegram import InlineKeyboardMarkup
 from telegram.inlinekeyboardbutton import InlineKeyboardButton
+import datetime
 
 from entities.models import Entity
 from rss.ml import normalize, word_tokenize, bi_gram, tri_gram
@@ -11,6 +12,12 @@ from newsbot.settings import SAMPLE_NEWS_COUNT, MIN_HITS_ENTITY_VALIDATION, DAYS
 from telegrambot.bot_send import send_telegram_user, error_text
 from newsbot.settings import MAIN_BUTTONS
 from telegrambot import command_handler
+from telegrambot.models import UserSearchList
+from django.utils import timezone
+from django.conf import settings
+from entities.tasks import get_link
+from rss.ml import word_tokenize
+
 
 def handle(bot, msg, user):
     # TODO set len hits
@@ -29,7 +36,7 @@ def handle(bot, msg, user):
         search_box_result(bot, msg, user)
 
 
-def search_box_result(bot, msg, user, msg_id=None, text=None):
+def search_box_result2(bot, msg, user, msg_id=None, text=None):
 
     if not text:
         text = normalize(msg.message.text)
@@ -112,3 +119,65 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
     send_telegram_user(bot, user, response, msg, keyboard, final_destination)
 
 
+def search_box_result(bot, msg, user, msg_id=None, text=None):
+    if not text:
+        text = normalize(msg.message.text)
+
+    # def similar_news_to_query(query, size=10, days=7, end_time='now', offset=0, sort='_score'):
+    similar_news = similar_news_to_query(text, settings.NEWS_PER_PAGE,
+                                         start_time=timezone.now() - datetime.timedelta(days=DAYS_FOR_SEARCH_NEWS))
+
+    try:
+        news_ent = [item['_id'] for item in similar_news['hits']['hits']]
+    except Exception:
+        print("ES DIDNT RETURN RIGHT JSON! See publish.py")
+        return False
+
+    unl = UserSearchList.objects.create(user=user,
+                                        query=text,
+                                        datetime_start=timezone.now() - datetime.timedelta(days=DAYS_FOR_SEARCH_NEWS),
+                                        datetime_publish=timezone.now(),
+                                        number_of_news=similar_news['hits']['total'],
+                                        page=1)
+
+    if len(news_ent) > 0:
+        news_list = list(set([item for item in news_ent]))
+
+        output = prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
+        keyboard = None
+        if similar_news['hits']['total'] > settings.NEWS_PER_PAGE:
+            buttons = [[
+                InlineKeyboardButton(text='صفحه بعد', callback_data='searchlist-next'),
+            ], ]
+            keyboard = InlineKeyboardMarkup(buttons)
+
+        result = send_telegram_user(bot, user, output, keyboard=keyboard)
+        unl.message_id = result.message_id
+        unl.save()
+    else:
+        output = Emoji.OK_HAND_SIGN + 'نتیجه‌ای در یک هفته‌ی اخیر یافت نشد.'
+    print("HMLLL")
+    print(text)
+
+    ent = Entity.objects.filter(name__exact=text, status='A') | \
+          Entity.objects.filter(synonym__name__exact=text, status='A')
+    for item in word_tokenize(text):
+        ent = ent | Entity.objects.filter(name__exact=item, status='A') | \
+              Entity.objects.filter(synonym__name__exact=item, status='A')
+
+    text = 'نشان‌های مرتبط با جست و جوی شما' + '\n'
+    if ent:
+        print("RECOMMENDATION", ent)
+        for item in ent.distinct():
+            text += get_link(user, item) + '\n'
+
+        rel = [item.related.get() for item in ent]
+        rel = list(set(rel))
+        if rel:
+            text += '\n' + 'نشان‌های نزدیک به جست و جوی شما' + '\n'
+            for item in rel:
+                text += get_link(user, item) + '\n'
+
+        send_telegram_user(bot, user, text)
+    else:
+        print("NO RECOMM")
