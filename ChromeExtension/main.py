@@ -26,7 +26,7 @@ def get_user_news(username):
         # raise ValueError(u'invalid user')
         return 0
 
-    el_news = news_with_terms(entity_list=[item.name for item in get_user_entity(user)],
+    el_news = news_with_terms(entity_list=get_user_entity(user),
                               size=NEWS_PER_PAGE,
                               start_time='now-120m',
                               sort='published_date')
