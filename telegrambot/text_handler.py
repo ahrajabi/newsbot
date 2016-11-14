@@ -138,6 +138,7 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
                                         datetime_start=timezone.now() - datetime.timedelta(days=DAYS_FOR_SEARCH_NEWS),
                                         datetime_publish=timezone.now(),
                                         number_of_news=similar_news['hits']['total'],
+                                        order='N',
                                         page=1)
 
     if len(news_ent) > 0:
@@ -145,10 +146,12 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
 
         output = prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
         keyboard = None
+        print("HELLO")
         if similar_news['hits']['total'] > settings.NEWS_PER_PAGE:
-            buttons = [[
-                InlineKeyboardButton(text='صفحه بعد', callback_data='searchlist-next'),
-            ], ]
+            buttons = [
+                [InlineKeyboardButton(text='به ترتیب زمان', callback_data='searchlist-time')],
+                [InlineKeyboardButton(text='صفحه بعد', callback_data='searchlist-next')]
+            ]
             keyboard = InlineKeyboardMarkup(buttons)
 
         result = send_telegram_user(bot, user, output, keyboard=keyboard)
@@ -156,6 +159,7 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
         unl.save()
     else:
         output = Emoji.OK_HAND_SIGN + 'نتیجه‌ای در یک هفته‌ی اخیر یافت نشد.'
+        send_telegram_user(bot, user, output)
     print("HMLLL")
     print(text)
 
