@@ -6,8 +6,8 @@ from pytg.utils import coroutine
 from datetime import datetime
 
 tg = Telegram(
-    telegram="/home/amirhosssein/Downloads/tg/bin/telegram-cli",
-    pubkey_file="/home/amirhossein/Downloads/tg/tg-serer.pub"
+    telegram="/home/amirhossein/Documents/tg/bin/telegram-cli",
+    pubkey_file="/home/amirhossein/Documents/tg/tg-serer.pub"
 )
 
 
@@ -31,7 +31,7 @@ def main_loop(sender):
                 pass
             msg = (yield)
 
-            if msg.event == 'online-status':
+            if msg.event == 'online-status' or msg.event == 'read':
                 continue
 
             print(msg)
@@ -40,7 +40,6 @@ def main_loop(sender):
             file = None
 
             if hasattr(msg, 'media'):
-                print(msg.media.type)
                 if msg.media.type == 'photo':
                     image_file = File(open(sender.load_photo(msg.id), 'rb'))
                 elif msg.media.type == 'audio':
