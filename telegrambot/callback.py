@@ -239,7 +239,7 @@ def searchlist_inline_command(bot, msg, user):
     keyboard = InlineKeyboardMarkup(buttons)
 
     news_ent = [item['_id'] for item in similar_news['hits']['hits']]
-    news_list = list(set([item for item in news_ent]))
+    news_list = news_ent
     output = prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
 
     unl.page = next_page

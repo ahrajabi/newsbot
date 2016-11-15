@@ -147,7 +147,7 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
                                         page=1)
 
     if len(news_ent) > 0:
-        news_list = list(set([item for item in news_ent]))
+        news_list = news_ent
 
         output = prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
         keyboard = None
