@@ -2,7 +2,7 @@ from telegram.emoji import Emoji
 from telegram import InlineKeyboardMarkup
 from telegram.inlinekeyboardbutton import InlineKeyboardButton
 import datetime
-
+from django.db.models import Q
 from entities.models import Entity
 from rss.ml import normalize, word_tokenize, bi_gram, tri_gram
 from telegrambot.bot_template import prepare_advice_entity_link
@@ -143,6 +143,7 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
                                         datetime_start=timezone.now() - datetime.timedelta(days=DAYS_FOR_SEARCH_NEWS),
                                         datetime_publish=timezone.now(),
                                         number_of_news=similar_news['hits']['total'],
+                                        order='N',
                                         page=1)
 
     if len(news_ent) > 0:
@@ -150,10 +151,12 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
 
         output = prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
         keyboard = None
+        print("HELLO")
         if similar_news['hits']['total'] > settings.NEWS_PER_PAGE:
-            buttons = [[
-                InlineKeyboardButton(text='صفحه بعد', callback_data='searchlist-next'),
-            ], ]
+            buttons = [
+                [InlineKeyboardButton(text='به ترتیب زمان', callback_data='searchlist-time')],
+                [InlineKeyboardButton(text='صفحه بعد', callback_data='searchlist-next')]
+            ]
             keyboard = InlineKeyboardMarkup(buttons)
 
         result = send_telegram_user(bot, user, output, keyboard=keyboard)
@@ -161,14 +164,13 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
         unl.save()
     else:
         output = Emoji.OK_HAND_SIGN + 'نتیجه‌ای در یک هفته‌ی اخیر یافت نشد.'
+        send_telegram_user(bot, user, output)
     print("HMLLL")
     print(text)
 
-    ent = Entity.objects.filter(name__exact=text, status='A') | \
-          Entity.objects.filter(synonym__name__exact=text, status='A')
+    ent = Entity.objects.filter(Q(name__exact=text, status='A') | Q(synonym__name__exact=text, status='A'))
     for item in word_tokenize(text):
-        ent = ent | Entity.objects.filter(name__exact=item, status='A') | \
-              Entity.objects.filter(synonym__name__exact=item, status='A')
+        ent = ent | Entity.objects.filter(Q(name__exact=item, status='A') | Q(synonym__name__exact=item, status='A'))
 
     text = 'نشان‌های مرتبط با جست و جوی شما' + '\n'
     if ent:
@@ -180,6 +182,7 @@ def search_box_result(bot, msg, user, msg_id=None, text=None):
         for item in ent:
             if item.related:
                 rel += item.related.all()
+        print(rel)
         rel = list(set(rel))
         if rel:
             text += '\n' + 'نشان‌های نزدیک به جست و جوی شما' + '\n'

@@ -33,6 +33,18 @@ def normalize(text):
     return norm.normalize(text)
 
 
+def remove_emoji(text):
+    return text
+
+
+def remove_link(text):
+    return text
+
+
+def remove_sign(text):
+    return text
+
+
 def sent_tokenize(text, num_char=-1):
     ret = hazm.sent_tokenize(text)
     if num_char == -1:

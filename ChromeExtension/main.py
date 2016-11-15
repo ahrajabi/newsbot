@@ -28,7 +28,7 @@ def get_user_news(username):
 
     el_news = news_with_terms(entity_list=get_user_entity(user),
                               size=NEWS_PER_PAGE,
-                              start_time='now-1d',
+                              start_time='now-10d',
                               sort='published_date')
     try:
         news_ent = [item['_id'] for item in el_news['hits']['hits']]

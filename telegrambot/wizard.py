@@ -121,9 +121,11 @@ def choose_namad(bot, msg):
     #     comm = '/next'
     # else:
     #     comm = '/exit'
-
+    print(0)
     up = UserProfile.objects.get(telegram_id=msg.message.chat.id)
+    print(1)
     user = up.user
+    print(2)
     print(msg)
     print(msg.message.text)
     text = ''

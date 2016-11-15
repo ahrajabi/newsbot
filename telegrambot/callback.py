@@ -197,26 +197,43 @@ def searchlist_inline_command(bot, msg, user):
         next_page = unl.page + 1
     elif func == 'previous':
         next_page = unl.page - 1
+    else:
+        next_page = unl.page
+
+    order = unl.order
+
+    if func == 'time':
+        order = 'N'
+    elif func == 'rel':
+        order = 'R'
+
+    if order == 'N':
+        sor = 'published_date'
+        sort_key = InlineKeyboardButton(text='به ترتیب شباهت', callback_data='searchlist-rel')
+    else:
+        sor = '_score'
+        sort_key = InlineKeyboardButton(text='به ترتیب زمان', callback_data='searchlist-time')
 
     similar_news = similar_news_to_query(query=unl.query,
                                          size=settings.NEWS_PER_PAGE,
                                          start_time=unl.datetime_start,
                                          end_time=unl.datetime_publish,
                                          offset=(next_page - 1) * settings.NEWS_PER_PAGE,
+                                         sort=sor
                                          )
 
     # start_time=up.user_settings.last_news_list.datetime_publish)
     if next_page > 1 and next_page < math.ceil(unl.number_of_news / settings.NEWS_PER_PAGE):
-        buttons = [[
+        buttons = [[sort_key], [
             InlineKeyboardButton(text='صفحه قبل', callback_data='searchlist-previous'),
             InlineKeyboardButton(text='صفحه بعد', callback_data='searchlist-next'),
         ], ]
     elif next_page == 1:
-        buttons = [[
+        buttons = [[sort_key], [
             InlineKeyboardButton(text='صفحه بعد', callback_data='searchlist-next'),
         ], ]
     else:
-        buttons = [[
+        buttons = [[sort_key], [
             InlineKeyboardButton(text='صفحه قبل', callback_data='searchlist-previous'),
         ], ]
     keyboard = InlineKeyboardMarkup(buttons)
