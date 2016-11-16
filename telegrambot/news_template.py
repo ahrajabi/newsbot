@@ -134,7 +134,7 @@ def news_image_page(bot, news, user=None, page=1, message_id=None, picture_numbe
     if user:
         UserNews.objects.update_or_create(user=user, news=news, defaults={'image_page': page})
 
-    text = "<a href= '%s'>''</a>" % image_url + '\n'
+    text = "<a href= '%s'>'‌'</a>" % image_url + '\n'
     return text
 
 
