@@ -240,7 +240,7 @@ def newslist_command(bot, msg, user):
         return error_text(bot, msg, user, 'NoneEntity')
     from telegrambot.publish import prepare_periodic_publish_news
     up = UserProfile.objects.get(user=user)
-    prepare_periodic_publish_news(bot, 0, up, no_news_post=False)
+    prepare_periodic_publish_news(bot, 0, up, no_news_post=True)
 
 
 def special_command(bot, msg, user):

@@ -126,8 +126,10 @@ def news_image_page(bot, news, user=None, page=1, message_id=None, picture_numbe
     image_url = ImageUrls.objects.filter(news=news)
     if image_url:
         image_url = image_url[picture_number].img_url
+    elif news.photo:
+        image_url = settings.SITE_URL + news.photo.url
     else:
-        image_url = settings.TELEGRAM_LOGO
+        image_url = 'http://khabareman.com/logo.jpg'
 
     if user:
         UserNews.objects.update_or_create(user=user, news=news, defaults={'image_page': page})
@@ -183,12 +185,17 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
             summary = news.body[:500]
             has_summary = False
 
-        text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n'
+        if not news.base_news.source_type == 3:
+            text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n'
 
-        for sentence in sent_tokenize(summary):
-            text += '    ' + Emoji.SMALL_BLUE_DIAMOND + sentence + '\n'
-            if len(text) > 300 and not has_summary:
-                break
+        if not news.base_news.source_type == 3:
+            for sentence in sent_tokenize(summary):
+                text += '    ' + Emoji.SMALL_BLUE_DIAMOND + sentence + '\n'
+                if len(text) > 300 and not has_summary:
+                    break
+        else:
+            text += summary + '\n'
+
         try:
             text += '    ' + Emoji.CALENDAR + ' ' + georgian_to_jalali(news.base_news.published_date) + '\n'
             text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ '
@@ -219,6 +226,8 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
     elif page == 3:
         related = more_like_this(news.base_news.title, 5)
         text, notext = prepare_multiple_sample_news(related, 5)
+
+    print("?", text)
 
     send_telegram_user(bot, user, text, keyboard=keyboard, message_id=message_id)
     UserNews.objects.update_or_create(user=user, news=news, defaults={'page': page})

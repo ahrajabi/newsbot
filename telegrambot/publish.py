@@ -31,7 +31,7 @@ def publish_handler(bot, job):
         print('live', cnt)
 
 
-def prepare_periodic_publish_news(bot, job, up, no_news_post=True):
+def prepare_periodic_publish_news(bot, job, up, no_news_post=False):
     user = up.user
     interval = up.user_settings.interval_news_list
     delta = timezone.now() - timedelta(minutes=interval)

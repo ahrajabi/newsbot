@@ -229,6 +229,9 @@ REST_FRAMEWORK = {
 
 SITE_URL = 'http://localhost:8000'
 
+TG_CLI = {'telegram': '/path/to/tg/bin/telegram-cli',
+          'pubkey_file': '/path/to/tg/tg-serer.pub'}
+
 try:
     from .global_settings import *
     from .local_settings import *

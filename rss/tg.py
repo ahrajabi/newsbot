@@ -4,10 +4,11 @@ from rss.models import News, NewsAgency, BaseNews
 from pytg import Telegram
 from pytg.utils import coroutine
 from datetime import datetime
+from django.conf import settings
 
 tg = Telegram(
-    telegram="/home/amirhossein/Documents/tg/bin/telegram-cli",
-    pubkey_file="/home/amirhossein/Documents/tg/tg-serer.pub"
+    telegram=settings.TG_CLI['telegram'],
+    pubkey_file=settings.TG_CLI['pubkey_file']
 )
 
 
@@ -67,7 +68,7 @@ def main_loop(sender):
                                                                     defaults={'fa_name': msg.sender.name,
                                                                               'url': 'http://telegram.me'})
 
-            title = text[0:255]
+            title = "پست تلگرام"
             body = text
             obj = BaseNews.objects.create(title=title,
                                           news_agency=news_agency,
