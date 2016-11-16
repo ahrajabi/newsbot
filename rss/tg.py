@@ -32,10 +32,15 @@ def main_loop(sender):
                 pass
             msg = (yield)
 
-            if msg.event == 'online-status' or msg.event == 'read':
+            if msg.event == 'online-status':
+                print('status')
                 continue
 
-            print(msg)
+            if not msg.sender.type == 'channel':
+                print('not channel')
+                continue
+
+            print('Full dump: {array}'.format(array=str(msg)))
 
             image_file = None
             file = None

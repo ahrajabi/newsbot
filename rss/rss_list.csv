@@ -1,7 +1,7 @@
 #Website_url,Name,Name fa,Category,Activation,Category code,Order,RSS link,Body,Summary,Image selector,is biased time
 tabnak.ir,tabnak,تابناک,کل اخبار,False,all,D,http://www.tabnak.ir/fa/rss/allnews,div.body,.subtitle,div.body img,False
 tabnak.ir,tabnak,تابناک,صفحه نخست,False,all,F,http://www.tabnak.ir/fa/rss/1,div.body,.subtitle,div.body img,False
-tabnak.ir,tabnak,تابناک,اقتصادی,True,economic,D,http://www.tabnak.ir/fa/rss/6,div.body,.subtitle,div.body img,False
+tabnak.ir,tabnak,تابناک,اقتصادی,False,economic,D,http://www.tabnak.ir/fa/rss/6,div.body,.subtitle,div.body img,False
 tabnak.ir,tabnak,تابناک,ورزشی,False,sport,D,http://www.tabnak.ir/fa/rss/2,div.body,.subtitle,div.body img,False
 tabnak.ir,tabnak,تابناک,اجتماعی,False,social,D,http://www.tabnak.ir/fa/rss/3,div.body,.subtitle,div.body img,False
 tabnak.ir,tabnak,تابناک,مجلس,False,politic,D,http://www.tabnak.ir/fa/rss/5,div.body,.subtitle,div.body img,False
@@ -12,13 +12,13 @@ asriran.com,asriran,عصرایران,صفحه نخست,False,all,F,http://www.as
 asriran.com,asriran,عصرایران,سیاسی,False,politic,D,http://www.asriran.com/fa/rss/1/1,div.body,.subtitle,div.body img,False
 asriran.com,asriran,عصرایران,سیاسی خارجی,False,politic,D,http://www.asriran.com/fa/rss/1/2,div.body,.subtitle,div.body img,False
 asriran.com,asriran,عصرایران,بین الملل,False,politic,D,http://www.asriran.com/fa/rss/1/3,div.body,.subtitle,div.body img,False
-asriran.com,asriran,عصرایران,اقتصادی,True,economic,D,http://www.asriran.com/fa/rss/1/4,div.body,.subtitle,div.body img,False
+asriran.com,asriran,عصرایران,اقتصادی,False,economic,D,http://www.asriran.com/fa/rss/1/4,div.body,.subtitle,div.body img,False
 asriran.com,asriran,عصرایران,اجتماعی,False,social,D,http://www.asriran.com/fa/rss/1/5,div.body,.subtitle,div.body img,False
 asriran.com,asriran,عصرایران,ورزشی,False,sport,D,http://www.asriran.com/fa/rss/1/6,div.body,.subtitle,div.body img,False
 asriran.com,asriran,عصرایران,علمی,False,science,D,http://www.asriran.com/fa/rss/1/7,div.body,.subtitle,div.body img,False
 asriran.com,asriran,عصرایران,فرهنگی/هنری,False,culture,D,http://www.asriran.com/fa/rss/1/8,div.body,.subtitle,div.body img,False
 asriran.com,asriran,عصرایران,حوادث,False,othernews,D,http://www.asriran.com/fa/rss/1/9,div.body,.subtitle,div.body img,False
-asriran.com,asriran,عصرایران,فناوری و IT,True,tech-startup,D,http://www.asriran.com/fa/rss/1/14,div.body,.subtitle,div.body img,False
+asriran.com,asriran,عصرایران,فناوری و IT,False,tech-startup,D,http://www.asriran.com/fa/rss/1/14,div.body,.subtitle,div.body img,False
 asriran.com,asriran,عصرایران,سرگرمی,False,othernews,D,http://www.asriran.com/fa/rss/1/15,div.body,.subtitle,div.body img,False
 asriran.com,asriran,عصرایران,عمومی,False,othernews,D,http://www.asriran.com/fa/rss/1/21,div.body,.subtitle,div.body img,False
 asriran.com,asriran,عصرایران,کاربران,False,othernews,D,http://www.asriran.com/fa/rss/1/22,div.body,.subtitle,div.body img,False
@@ -38,7 +38,7 @@ irna.ir,irna,ایرنا,مجلس,False,politic,D,http://www.irna.ir/fa/rss.aspx?
 irna.ir,irna,ایرنا,سیاست خارجی و هسته‌ای,False,politic,D,http://www.irna.ir/fa/rss.aspx?kind=11,"div.BodyText p, .NewsContectBody h3",div.ContentStyle h3,"div.BodyText > img , div.BodyText .PhotoGallery img",True
 irna.ir,irna,ایرنا,احزاب و تشکل‌ها,False,politic,D,http://www.irna.ir/fa/rss.aspx?kind=13,"div.BodyText p, .NewsContectBody h3",div.ContentStyle h3,"div.BodyText > img , div.BodyText .PhotoGallery img",True
 irna.ir,irna,ایرنا,سایر حوزه‌های سیاسی,False,politic,D,http://www.irna.ir/fa/rss.aspx?kind=89,"div.BodyText p, .NewsContectBody h3",div.ContentStyle h3,"div.BodyText > img , div.BodyText .PhotoGallery img",True
-irna.ir,irna,ایرنا,عناوین کل اخبار اقتصادی,True,economic,D,http://www.irna.ir/fa/rss.aspx?kind=20,"div.BodyText p, .NewsContectBody h3",div.ContentStyle h3,"div.BodyText > img , div.BodyText .PhotoGallery img",True
+irna.ir,irna,ایرنا,عناوین کل اخبار اقتصادی,False,economic,D,http://www.irna.ir/fa/rss.aspx?kind=20,"div.BodyText p, .NewsContectBody h3",div.ContentStyle h3,"div.BodyText > img , div.BodyText .PhotoGallery img",True
 irna.ir,irna,ایرنا,اقتصاد کلان,False,economic,D,http://www.irna.ir/fa/rss.aspx?kind=27,"div.BodyText p, .NewsContectBody h3",div.ContentStyle h3,"div.BodyText > img , div.BodyText .PhotoGallery img",True
 irna.ir,irna,ایرنا,انرژی,False,economic,D,http://www.irna.ir/fa/rss.aspx?kind=21,"div.BodyText p, .NewsContectBody h3",div.ContentStyle h3,"div.BodyText > img , div.BodyText .PhotoGallery img",True
 irna.ir,irna,ایرنا,بانک - بیمه - بورس,False,economic,D,http://www.irna.ir/fa/rss.aspx?kind=26,"div.BodyText p, .NewsContectBody h3",div.ContentStyle h3,"div.BodyText > img , div.BodyText .PhotoGallery img",True
@@ -113,8 +113,8 @@ mehrnews.com,mehrnews,خبرگزاری مهر,دانش و فن‌آوری,False,
 mehrnews.com,mehrnews,خبرگزاری مهر,حوزه و دانشگاه,False,science,D,http://www.mehrnews.com/rss/tp/4,".full-text, .item-body p",.intro-text,".large-image img, .gallery-items img, .item-body img",False
 mehrnews.com,mehrnews,خبرگزاری مهر,سلامت,False,health,D,http://www.mehrnews.com/rss/tp/550,".full-text, .item-body p",.intro-text,".large-image img, .gallery-items img, .item-body img",False
 mehrnews.com,mehrnews,خبرگزاری مهر,جامعه,False,social,D,http://www.mehrnews.com/rss/tp/6,".full-text, .item-body p",.intro-text,".large-image img, .gallery-items img, .item-body img",False
-mehrnews.com,mehrnews,خبرگزاری مهر,اقتصاد,True,economic,D,http://www.mehrnews.com/rss/tp/25,".full-text, .item-body p",.intro-text,".large-image img, .gallery-items img, .item-body img",False
-mehrnews.com,mehrnews,خبرگزاری مهر,بازار,True,economic,D,http://www.mehrnews.com/rss/tp/653,".full-text, .item-body p",.intro-text,".large-image img, .gallery-items img, .item-body img",False
+mehrnews.com,mehrnews,خبرگزاری مهر,اقتصاد,False,economic,D,http://www.mehrnews.com/rss/tp/25,".full-text, .item-body p",.intro-text,".large-image img, .gallery-items img, .item-body img",False
+mehrnews.com,mehrnews,خبرگزاری مهر,بازار,False,economic,D,http://www.mehrnews.com/rss/tp/653,".full-text, .item-body p",.intro-text,".large-image img, .gallery-items img, .item-body img",False
 mehrnews.com,mehrnews,خبرگزاری مهر,ورزش,False,sport,D,http://www.mehrnews.com/rss/tp/9,".full-text, .item-body p",.intro-text,".large-image img, .gallery-items img, .item-body img",False
 mehrnews.com,mehrnews,خبرگزاری مهر,سیاست,False,politic,D,http://www.mehrnews.com/rss/tp/7,".full-text, .item-body p",.intro-text,".large-image img, .gallery-items img, .item-body img",False
 mehrnews.com,mehrnews,خبرگزاری مهر,بین الملل,False,international,D,http://www.mehrnews.com/rss/tp/8,".full-text, .item-body p",.intro-text,".large-image img, .gallery-items img, .item-body img",False
@@ -124,7 +124,7 @@ mehrnews.com,mehrnews,خبرگزاری مهر,تمام اخبار,False,all,V,ht
 isna.ir,isna,ایسنا,سیاسی,False,politic,D,http://www.isna.ir/rss/tp/14,".full-news-text .item-text, gallery .summary",.summary,".content-full-news img, article .header-clean img",False
 isna.ir,isna,ایسنا,علمی و دانشگاه,False,science,D,http://www.isna.ir/rss/tp/5,".full-news-text .item-text, gallery .summary",.summary,".content-full-news img, article .header-clean img",False
 isna.ir,isna,ایسنا,فرهنگی و هنری,False,culture,D,http://www.isna.ir/rss/tp/20,".full-news-text .item-text, gallery .summary",.summary,".content-full-news img, article .header-clean img",False
-isna.ir,isna,ایسنا,اقتصادی,True,economic,D,http://www.isna.ir/rss/tp/34,".full-news-text .item-text, gallery .summary",.summary,".content-full-news img, article .header-clean img",False
+isna.ir,isna,ایسنا,اقتصادی,False,economic,D,http://www.isna.ir/rss/tp/34,".full-news-text .item-text, gallery .summary",.summary,".content-full-news img, article .header-clean img",False
 isna.ir,isna,ایسنا,اجتماعی,False,social,D,http://www.isna.ir/rss/tp/9,".full-news-text .item-text, gallery .summary",.summary,".content-full-news img, article .header-clean img",False
 isna.ir,isna,ایسنا,بین الملل,False,politic,D,http://www.isna.ir/rss/tp/17,".full-news-text .item-text, gallery .summary",.summary,".content-full-news img, article .header-clean img",False
 isna.ir,isna,ایسنا,ورزشی,False,sport,D,http://www.isna.ir/rss/tp/24,".full-news-text .item-text, gallery .summary",.summary,".content-full-news img, article .header-clean img",False
@@ -132,14 +132,14 @@ isna.ir,isna,ایسنا,استان‌ها,False,politic,D,http://www.isna.ir/rss
 isna.ir,isna,ایسنا,عکس,False,multimedia,D,http://www.isna.ir/rss/tp/28,".full-news-text .item-text, gallery .summary",.summary,".content-full-news img, article .header-clean img",False
 rajanews.com,rajanews,رجانیوز,سیاست,False,politic,D,http://www.rajanews.com/rss/%D8%B3%DB%8C%D8%A7%D8%B3%D8%AA,.body,.news-head .lead,".news-head, .body img",False
 rajanews.com,rajanews,رجانیوز,بین الملل,False,politic,D,http://www.rajanews.com/rss/%D8%A8%DB%8C%D9%86-%D8%A7%D9%84%D9%85%D9%84%D9%84,.body,.news-head .lead,".news-head, .body img",False
-rajanews.com,rajanews,رجانیوز,اقتصاد,True,economic,D,http://www.rajanews.com/rss/%D8%A7%D9%82%D8%AA%D8%B5%D8%A7%D8%AF,.body,.news-head .lead,".news-head, .body img",False
+rajanews.com,rajanews,رجانیوز,اقتصاد,False,economic,D,http://www.rajanews.com/rss/%D8%A7%D9%82%D8%AA%D8%B5%D8%A7%D8%AF,.body,.news-head .lead,".news-head, .body img",False
 rajanews.com,rajanews,رجانیوز,فرهنگ,False,culture,D,http://www.rajanews.com/rss/%D9%81%D8%B1%D9%87%D9%86%DA%AF,.body,.news-head .lead,".news-head, .body img",False
 rajanews.com,rajanews,رجانیوز,جامعه,False,social,D,http://www.rajanews.com/rss/%D8%AC%D8%A7%D9%85%D8%B9%D9%87,.body,.news-head .lead,".news-head, .body img",False
 rajanews.com,rajanews,رجانیوز,تاریخ,False,culture,D,http://www.rajanews.com/rss/%D8%AA%D8%A7%D8%B1%DB%8C%D8%AE,.body,.news-head .lead,".news-head, .body img",False
 rajanews.com,rajanews,رجانیوز,ورزش,False,sport,D,http://www.rajanews.com/rss/%D9%88%D8%B1%D8%B2%D8%B4,.body,.news-head .lead,".news-head, .body img",False
 varzesh3.com,varzesh3,ورزش سه,ورزشی,False,sport,D,http://www.varzesh3.com/rss/all,#main-body p,#NewsTable h2,"#NewsTable img, #main-body p img",False
 farsnews.com,fars,فارس,اجتماعی,False,culture,D,http://www.farsnews.com/rss/social,"#nwstxtBodyPane, .phitmlead",#photoframe h2,"#photoframe img,#nwstxtBodyPane img, .phitmpaneitems img",True
-farsnews.com,fars,فارس,اقتصادی,True,economic,D,http://www.farsnews.com/rss/economy,"#nwstxtBodyPane, .phitmlead",#photoframe h2,"#photoframe img,#nwstxtBodyPane img, .phitmpaneitems img",True
+farsnews.com,fars,فارس,اقتصادی,False,economic,D,http://www.farsnews.com/rss/economy,"#nwstxtBodyPane, .phitmlead",#photoframe h2,"#photoframe img,#nwstxtBodyPane img, .phitmpaneitems img",True
 farsnews.com,fars,فارس,بین الملل,False,politic,D,http://www.farsnews.com/rss/world,"#nwstxtBodyPane, .phitmlead",#photoframe h2,"#photoframe img,#nwstxtBodyPane img, .phitmpaneitems img",True
 farsnews.com,fars,فارس,سیاسی,False,politic,D,http://www.farsnews.com/rss/social,"#nwstxtBodyPane, .phitmlead",#photoframe h2,"#photoframe img,#nwstxtBodyPane img, .phitmpaneitems img",True
 farsnews.com,fars,فارس,دانشگاه,False,science,D,http://www.farsnews.com/rss/politics,"#nwstxtBodyPane, .phitmlead",#photoframe h2,"#photoframe img,#nwstxtBodyPane img, .phitmpaneitems img",True
@@ -172,7 +172,7 @@ http://donya-e-eqtesad.com/,donya-e-eqtesad,دنیای اقتصاد,فرهنگ �
 http://donya-e-eqtesad.com/,donya-e-eqtesad,دنیای اقتصاد,کتاب,False,culture,D,http://donya-e-eqtesad.com/art-culture/rss/,.NewsText,.textform,".textform img, .cadr .largepic img",False
 http://donya-e-eqtesad.com/,donya-e-eqtesad,دنیای اقتصاد,تاریخ و اقتصاد,True,culture,D,http://donya-e-eqtesad.com/tarikhandeghtesad/rss/,.NewsText,.textform,".textform img, .cadr .largepic img",False
 http://donya-e-eqtesad.com/,donya-e-eqtesad,دنیای اقتصاد,سرمقاله,False,culture,D,http://donya-e-eqtesad.com/editorial/rss/,.NewsText,.textform,".textform img, .cadr .largepic img",False
-http://eghtesadnews.com/,eghtesadnews,اقتصاد نیوز,تمام اخبار,True,all,D,http://eghtesadnews.com/Live/Services/Rss/Selected/latest,.newsContent,.newsBrief,.newsContent img,False
+http://eghtesadnews.com/,eghtesadnews,اقتصاد نیوز,تمام اخبار,False,all,D,http://eghtesadnews.com/Live/Services/Rss/Selected/latest,.newsContent,.newsBrief,.newsContent img,False
 http://www.econews.ir/,econews,خبرگزاری اقتصادی ایران,تمام اخبار,True,economic,D,http://www.econews.ir/fa/rss.aspx?kind=-1,".BodyText p, .ContentStyle > p",.ContentStyle h3,".ContentStyle > img, .MediaContent .Center img, .BodyText .PhotoGallery img",True
 boursenews.ir,boursenews,بورس نیوز,تمام اخبار,True,economic,D,http://www.boursenews.ir/fa/rss/allnews,.body,.subtitle,.body img,False
 eghtesadonline.com/,eghtesadonline,اقتصاد آنلاین,تمام اخبار,True,economic,D,http://www.eghtesadonline.com/fa/feeds/,.df-text p,.df-lead,".df-text img, .df-img img",False
@@ -184,11 +184,11 @@ shana.ir,shana,شبکه اطلاع رسانی نفت و انرژ‌ی,تمام �
 http://fararu.com/fa/rss/allnews,fararu,فرارو,تمام اخبار,False,all,D,,,,,
 http://codal.ir,codal,کدال,,,,,,,,,
 http://sena.ir,sena,سنا,تمام اخبار,True,economic,D,http://sena.ir/RSS.ashx?ID=101,#ctl00_ContentPlaceHolder1_pNews p,.tdSumNews,"#slidelinks img, #ctl00_ContentPlaceHolder1_pNews p img",False
-https://mag.digikala.com/,digikala,دیجی‌کالا مگ,تمام اخبار,True,technology,D,https://mag.digikala.com/feed/,.post-body,,".post-body div.post-attachment > img , .post-body p > img",False
-http://www.zoomit.ir/,zoomit,زومیت,تمام اخبار,True,technology,D,http://www.zoomit.ir/feed/,.article-section,.article-summery,"img.cover, .article-section img",False
-http://digiato.com/,digiato,دیجیاتو,تمام اخبار,True,technology,D,http://digiato.com/feed/,.article-content,,".hero-article figure img, .article-content img",False
-http://shanbemag.ir,shanbemag,شنبه مگ,تمام اخبار,True,tech-startup,D,http://shanbemag.ir/rss.xml,.views-field-body-1,.views-field-body,".view-display-id-block_5 .views-field-field-image img, .views-field-body-1 img",
-http://www.irstartup.com,irstartup,ایران استارت آپ,تمام اخبار,True,entrepreneurship,D,http://www.irstartup.com/feed/,.entry,,".single-post-thumb img, .entry img",False
-http://techera.ir/,techera,تکرا,تمام اخبار,True,entrepreneurship,D,http://techera.ir/feed/,.entry,,.entry img,False
-http://www.musicema.com,musicema,موسیقی ما,تمام اخبار,True,music,D,http://www.musicema.com/rss,.field-name-body,,.field-type-image img,False
-http://www.fardanama.com,fardanama,فردانما,تمام اخبار,True,tech-startup,D,http://www.fardanama.com/feed/,.post_content p,,".post_content img.sp-image, .post_content img.size-full",
+https://mag.digikala.com/,digikala,دیجی‌کالا مگ,تمام اخبار,False,technology,D,https://mag.digikala.com/feed/,.post-body,,".post-body div.post-attachment > img , .post-body p > img",False
+http://www.zoomit.ir/,zoomit,زومیت,تمام اخبار,False,technology,D,http://www.zoomit.ir/feed/,.article-section,.article-summery,"img.cover, .article-section img",False
+http://digiato.com/,digiato,دیجیاتو,تمام اخبار,False,technology,D,http://digiato.com/feed/,.article-content,,".hero-article figure img, .article-content img",False
+http://shanbemag.ir,shanbemag,شنبه مگ,تمام اخبار,False,tech-startup,D,http://shanbemag.ir/rss.xml,.views-field-body-1,.views-field-body,".view-display-id-block_5 .views-field-field-image img, .views-field-body-1 img",
+http://www.irstartup.com,irstartup,ایران استارت آپ,تمام اخبار,False,entrepreneurship,D,http://www.irstartup.com/feed/,.entry,,".single-post-thumb img, .entry img",False
+http://techera.ir/,techera,تکرا,تمام اخبار,False,entrepreneurship,D,http://techera.ir/feed/,.entry,,.entry img,False
+http://www.musicema.com,musicema,موسیقی ما,تمام اخبار,False,music,D,http://www.musicema.com/rss,.field-name-body,,.field-type-image img,False
+http://www.fardanama.com,fardanama,فردانما,تمام اخبار,False,tech-startup,D,http://www.fardanama.com/feed/,.post_content p,,".post_content img.sp-image, .post_content img.size-full",

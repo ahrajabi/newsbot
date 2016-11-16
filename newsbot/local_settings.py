@@ -20,4 +20,7 @@ DATABASES = {
     # }
 }
 
+TG_CLI = {'telegram': '/home/amirhossein/Documents/tg/bin/telegram-cli',
+          'pubkey_file': '/home/amirhossein/Documents/tg/tg-serer.pub'}
+
 DEBUG = True

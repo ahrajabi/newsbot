@@ -89,7 +89,7 @@ def bot_help(bot, msg, user):
         if not up.stopped:
             menu.append(('/stop', 'توقف', 'توقف دریافت پیام از روبات'))
         else:
-            menu.append(('/start', '',
+            menu.append(('/start', ' ',
                          'شما دریافت پیام از روبات را متوقف کرده اید. توسط این گزینه می توانید این محدودیت را بردارید.'))
 
     text = Emoji.LEFT_POINTING_MAGNIFYING_GLASS + 'راهنما' + '\n\n'
