@@ -134,7 +134,7 @@ def news_image_page(bot, news, user=None, page=1, message_id=None, picture_numbe
     if user:
         UserNews.objects.update_or_create(user=user, news=news, defaults={'image_page': page})
 
-    text = "<a href= '%s'>''</a>" % image_url
+    text = "<a href= '%s'>''</a>" % image_url + '\n'
     return text
 
 
@@ -173,6 +173,8 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
     text = ''
     if page == 1:
         del buttons[0][1]
+        if news.base_news.source_type == 3:
+            del buttons[0][0]
         try:
             text += news_image_page(bot, news, user, page=1, message_id=message_id, picture_number=picture_number)
         except Exception:
