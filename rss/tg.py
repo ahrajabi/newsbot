@@ -1,6 +1,6 @@
 from django.core.files import File
 
-from rss.models import News, NewsAgency, BaseNews, TelegramPost
+from rss.models import News, NewsAgency, BaseNews, TelegramPost, BadNews
 from pytg import Telegram
 from pytg.utils import coroutine
 from datetime import datetime
@@ -78,17 +78,30 @@ def main_loop(sender):
 
             title = "پست تلگرام"
             body = text
+
+            if find_advertisement(body):
+                model = News
+            else:
+                model = BadNews
+
             obj = BaseNews.objects.create(title=title,
                                           news_agency=news_agency,
                                           published_date=datetime.fromtimestamp(msg.date),
                                           source_type=3)
 
-            news = News.objects.create(base_news=obj,
-                                       body=body,
-                                       pic_number=0,
-                                       summary=body,
-                                       photo=image_file,
-                                       file=file)
+            news = model.objects.create(base_news=obj,
+                                        body=body,
+                                        pic_number=0,
+                                        summary=body,
+                                        photo=image_file,
+                                        file=file)
 
             obj.complete_news = True
             obj.save()
+
+
+def find_advertisement(text):
+    if 'telegram.me/joinchat/' in text:
+        return 1
+    else:
+        return 0

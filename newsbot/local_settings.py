@@ -1,5 +1,6 @@
 ELASTIC_URL = 'http://localhost:9200'
-TELEGRAM_TOKEN = '256460947:AAE3Glgg0-NVC78Cn7J58wsrYyEFzqWGBzA'
+# TELEGRAM_TOKEN = '256460947:AAE3Glgg0-NVC78Cn7J58wsrYyEFzqWGBzA'
+TELEGRAM_TOKEN = '221098756:AAHa_e2kadI-4IEtVMOStRTrwmUftK9vWR4'
 
 DATABASES = {
     #     'default': {
@@ -10,8 +11,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'newsbot',
         'USER': 'postgres',
-        'PASSWORD': 'asdfjkl;',
-        'HOST': 'localhost',
+        'PASSWORD': '',
+        'HOST': '',
         'PORT': '',
     },
     #  'news_db': {
@@ -20,7 +21,7 @@ DATABASES = {
     # }
 }
 
-TG_CLI = {'telegram': '/home/amirhossein/Documents/tg/bin/telegram-cli',
-          'pubkey_file': '/home/amirhossein/Documents/tg/tg-serer.pub'}
+TG_CLI = {'telegram': '/home/khabareman/tg/bin/telegram-cli',
+          'pubkey_file': '/home/khabareman/tg/tg-serer.pub'}
 
 DEBUG = True
