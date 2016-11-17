@@ -68,11 +68,8 @@ def get_new_codal():
             if is_created:
                 obj.complete_news = True
                 obj.save()
-
-        # if 'نماد ' + item['named'] not in Entity.objects.filter(status == 'A').values_list('name', flat = True):
-        #     Entity.objects.create(
-        #         name = item['named']
-        #
-        #
-        #     )
-
+        if 'نماد ' + item['namad'] not in Entity.objects.filter(status='A').values_list('name', flat=True):
+            company = Entity.objects.get_or_create(name=item['company'], status='R')[0]
+            symbol = Entity.objects.get_or_create(name=item['namad'], status='R')[0]
+            obj = Entity.objects.create(name='نماد ' + item['namad'], status='A')
+            obj.related.add(company, symbol)
