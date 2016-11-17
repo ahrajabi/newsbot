@@ -108,3 +108,7 @@ class NewsLike(models.Model):
     user = models.ForeignKey(User)
     status = models.BooleanField(default=True, choices=STATUS)
 
+
+class TelegramPost(models.Model):
+    id = models.CharField(max_length=63, verbose_name="Message ID", primary_key=True)
+    channel_id = models.CharField(max_length=63, verbose_name='Peer ID')

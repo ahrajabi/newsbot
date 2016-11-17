@@ -1,7 +1,7 @@
 from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
 
-from .models import RssFeeds, News, BaseNews, ImageUrls, NewsLike, CategoryCode, NewsAgency
+from .models import RssFeeds, News, BaseNews, ImageUrls, NewsLike, CategoryCode, NewsAgency, TelegramPost
 
 
 def related_obj_id(obj):
@@ -52,3 +52,7 @@ admin.site.register(CategoryCode, CategoryCodeAdmin)
 class NewsAgencyAdmin(admin.ModelAdmin):
     list_display = [x.name for x in NewsAgency._meta.local_fields]
 
+
+@admin.register(TelegramPost)
+class TelegramPostAdmin(admin.ModelAdmin):
+    list_display = [x.name for x in TelegramPost._meta.local_fields]

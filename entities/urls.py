@@ -17,17 +17,9 @@ from django.conf.urls import include, patterns, url
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
+from entities import views
 
 urlpatterns = [
-    url(r'^grappelli/', include('grappelli.urls')), # grappelli URLS
-    url(r'^admin/', admin.site.urls),
-    url(r'^api/', include('ChromeExtension.urls')),
-    url(r'^r/', include('shortenersite.urls', namespace='shortenersite')),
-    url(r'^symbols/', include('entities.urls', namespace='entities'))
+    url(r'^(?P<entity_id>[0-9]+)$', views.symbols_id, name='Symbols_id'),
+    url(r'^$', views.symbols, name='symbols'),
 ]
-
-if settings.DEBUG:
-    import debug_toolbar
-    urlpatterns += [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
-                   ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

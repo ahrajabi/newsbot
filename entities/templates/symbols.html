@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Symbols</title>
+
+    <style type="text/css">
+        body {
+            direction: rtl;
+        }
+    </style>
+</head>
+<body>
+{% for item in items %}
+    <div><a href="/symbols/{{ item.id }}">{{ item.name }}</a></div>
+{% endfor %}
+</body>
+</html>

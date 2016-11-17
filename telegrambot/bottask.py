@@ -57,8 +57,9 @@ def commands(bot, msg):
     func = p.findall(msg.message.text.lower())[0] + '_command'
     if hasattr(command_handler, func):
         print(func, new_user)
-        if func == 'start_command':
-            getattr(command_handler, func)(bot, msg, new_user, user)
+        if func == 'start_command' or new_user:
+            if not new_user:
+                getattr(command_handler, func)(bot, msg, new_user, user)
             if new_user:
                 print("YESS")
                 x = msg.message.text

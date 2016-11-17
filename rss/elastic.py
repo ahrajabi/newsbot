@@ -208,7 +208,7 @@ def news_with_terms(entity_list, size=10, start_time='now-3h', end_time='now', o
             must = {
                 "bool": {
                     "should": must,
-                    "minimum_should_match": 1
+                    "minimum_should_match": entity_item.min_should
                 }
             }
 

@@ -1,10 +1,11 @@
 from django.core.files import File
 
-from rss.models import News, NewsAgency, BaseNews
+from rss.models import News, NewsAgency, BaseNews, TelegramPost
 from pytg import Telegram
 from pytg.utils import coroutine
 from datetime import datetime
 from django.conf import settings
+from pytg.exceptions import NoResponse
 
 tg = Telegram(
     telegram=settings.TG_CLI['telegram'],
@@ -12,35 +13,37 @@ tg = Telegram(
 )
 
 
-def start():
+def telegram_crawler():
     receiver = tg.receiver
     sender = tg.sender
 
     receiver.start()
-    receiver.message(main_loop(sender))
+    main_loop(sender)
     receiver.stop()
 
 
-@coroutine
 def main_loop(sender):
-    quit = False
     try:
-        while not quit:
-            try:
-                sender.status_online()
-            except:
-                pass
-            msg = (yield)
+        channel_list = sender.channel_list()
+    except NoResponse:
+        return
+    for channel in channel_list:
+        print(channel['title'])
+        try:
+            history = sender.history(channel['id'], 5)
+        except NoResponse:
+            continue
 
-            if msg.event == 'online-status':
-                print('status')
+        for msg in history:
+
+            if not msg.event == 'message':
+                continue
+            if not msg['from']['id'] == channel['id']:
                 continue
 
-            if not msg.sender.type == 'channel':
-                print('not channel')
+            obj, created = TelegramPost.objects.get_or_create(id=msg['id'], channel_id=channel['id'])
+            if not created:
                 continue
-
-            print('Full dump: {array}'.format(array=str(msg)))
 
             image_file = None
             file = None
@@ -69,8 +72,8 @@ def main_loop(sender):
             except AttributeError:
                 text = msg.media.caption
 
-            news_agency, created = NewsAgency.objects.get_or_create(name=msg.sender.name,
-                                                                    defaults={'fa_name': msg.sender.name,
+            news_agency, created = NewsAgency.objects.get_or_create(name=channel['id'],
+                                                                    defaults={'fa_name': channel['title'],
                                                                               'url': 'http://telegram.me'})
 
             title = "پست تلگرام"
@@ -89,14 +92,3 @@ def main_loop(sender):
 
             obj.complete_news = True
             obj.save()
-
-
-    except GeneratorExit:
-        # the generator (pytg) exited (got a KeyboardIterrupt).
-        pass
-    except KeyboardInterrupt:
-        # we got a KeyboardIterrupt(Ctrl+C)
-        pass
-    else:
-        # the loop exited without exception, becaues _quit was set True
-        pass

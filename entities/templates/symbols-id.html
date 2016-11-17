@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Symbols</title>
+    <style type="text/css">
+        body {
+            direction: rtl;
+        }
+    </style>
+</head>
+<body>
+<a type="input" href="{% url 'entities:symbols' %}">back</a>
+{% for item in items %}
+    <div><a href="">{{ item.base_news.title }}</a></div>
+    <div>{{ item.summary }}</div>
+    <br>
+{% endfor %}
+</body>
+</html>
