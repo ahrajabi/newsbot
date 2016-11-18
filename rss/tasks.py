@@ -20,13 +20,12 @@ LOCK_EXPIRE = 60 * 2
 def get_all_new_news():
     HOUR_NOW = timezone.localtime(timezone.now()).hour
     # Reject get news in 24:00 - 06:00
-    telegram_crawler_async.delay()
 
     if 0 < HOUR_NOW < 6:
         return False
 
-    THREAD_RSS_NUM = settings.CELERY_WORKER_NUM
-    all_rss = RssFeeds.objects.all()
+    THREAD_RSS_NUM = settings.CELERY_WORKER_NUM - 1
+    all_rss = RssFeeds.objects.filter(activation=True)
     all_rss = [item.id for item in all_rss]
 
     for j in range(THREAD_RSS_NUM):

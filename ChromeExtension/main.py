@@ -42,12 +42,15 @@ def get_user_news(username):
             news = News.objects.get(id=news_id)
         except News.DoesNotExist:
             continue
-
+        if news.base_news.source_type == 3:
+            link = ""
+        else:
+            link = shorten(news.base_news.url)
         news = {'id': news.id,
                 'summary': news.summary,
                 'title': news.base_news.title,
                 'published_date': timezone.localtime(news.base_news.published_date),
-                'link': shorten(news.base_news.url),
+                'link': link,
                 'agency': news.base_news.news_agency.fa_name
                 }
         response.append(news)

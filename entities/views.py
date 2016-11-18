@@ -6,7 +6,7 @@ from rss.models import News
 
 
 def symbols(request):
-    en = Entity.objects.filter(status='A')
+    en = Entity.objects.filter(status='A').order_by('name')
     return render(request, "symbols.html", {'items': en})
 
 

@@ -56,10 +56,10 @@ def save_news(base_news):
         # fake random like count
         news.like_count = random.choice([0, 0, 0, 1, 2, 3])
 
-        if news_summary != '':
-            highlights_news(query=news_summary)
-        else:
-            highlights_news(query=base_news.title)
+        # if news_summary != '':
+        #     highlights_news(query=news_summary)
+        # else:
+        #     highlights_news(query=base_news.title)
         ent_news = get_entity_news(news)
         live_entity_news(news, ent_news)
 
