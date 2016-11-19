@@ -32,7 +32,16 @@ def error_callback(bot, update, error):
 def handle(bot, msg):
     print(msg)
     bot.sendChatAction(chat_id=msg.message.chat_id, action=telegram.ChatAction.TYPING)
-    user = command_handler.verify_user(bot, msg)[0]
+    user, new_user = command_handler.verify_user(bot, msg)
+    if new_user:
+        print("YESS")
+        x = msg.message.text
+        print(x)
+        msg.message.text = '/symbols'
+        if SYMBOL_WIZARD.check_update(msg):
+            SYMBOL_WIZARD.handle_update(msg, dispatcher)
+        msg.message.text = x
+        return
 
     MessageFromUser.objects.create(user=user,
                                    message_id=msg.message.message_id,
@@ -53,13 +62,13 @@ def commands(bot, msg):
                                    chat_id=msg.message.chat_id,
                                    type=2,
                                    message=msg.message.text)
+
     p = re.compile(r'[a-z]+')
     func = p.findall(msg.message.text.lower())[0] + '_command'
     if hasattr(command_handler, func):
         print(func, new_user)
-        if func == 'start_command' or new_user:
-            if not new_user:
-                getattr(command_handler, func)(bot, msg, new_user, user)
+        if func == 'start_command':
+            getattr(command_handler, func)(bot, msg, new_user, user)
             if new_user:
                 print("YESS")
                 x = msg.message.text

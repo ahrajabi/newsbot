@@ -10,6 +10,7 @@ from entities.models import Entity, UserEntity
 from rss.ml import normalize
 from entities.tasks import set_entity
 from django.conf import settings
+from telegrambot.models import MessageFromUser
 X1, X2, E = range(3)
 
 
@@ -121,13 +122,15 @@ def choose_namad(bot, msg):
     #     comm = '/next'
     # else:
     #     comm = '/exit'
-    print(0)
     up = UserProfile.objects.get(telegram_id=msg.message.chat.id)
-    print(1)
     user = up.user
-    print(2)
-    print(msg)
-    print(msg.message.text)
+
+    MessageFromUser.objects.create(user=user,
+                                   message_id=msg.message.message_id,
+                                   chat_id=msg.message.chat_id,
+                                   type=2,
+                                   message=msg.message.text)
+
     text = ''
     if msg.message.text == '/symbols':
         text += '''

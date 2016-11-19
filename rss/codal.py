@@ -11,6 +11,8 @@ from django.conf import settings
 from django.utils.timezone import tzinfo
 from rss.rss import repair_datetime
 from entities.models import Entity
+from rss.ml import normalize
+
 
 def farsidate_to_date(farsidate):
     farsidate = re.split(':|/| ', farsidate)
@@ -41,13 +43,14 @@ def get_new_codal():
         if not link.startswith('http'):
             link = 'http://codal.ir/' + link
         data.append({
-            "namad": td[0].text.strip(),
-            "company": td[1].text.strip(),
-            "title": td[2].text.strip(),
-            "time": td[3].text.strip(),
+            "namad": normalize(td[0].text.strip()),
+            "company": normalize(td[1].text.strip()),
+            "title": normalize(td[2].text.strip()),
+            "time": normalize(td[3].text.strip()),
             "datetime": farsidate_to_date(td[3].text.strip()),
             "link": link
         })
+
     codalagency = NewsAgency.objects.get(name='codal')
 
     for item in data:
