@@ -1,6 +1,6 @@
 import wikipedia
 from telegram import user
-
+from rss.ml import word_tokenize
 from telegrambot.models import UserProfile, UserLiveNews
 
 from .models import UserEntity, Entity, NewsEntity
@@ -82,26 +82,26 @@ def set_entity(user, entity_id, mark=True):
 
 #َWe can use of yield for get running function!
 def get_entity_news(news):
-    ent = Entity.objects.filter(status__in=['N', 'P', 'A'])
+    entity = Entity.objects.filter(status__in=['N', 'P', 'A'])
 
     news_ent = []
-    for entity in ent:
-        score = 0
-        if entity.name in news.base_news.title:
-            score = 3
-            news_ent.append({'entity': entity, 'score': score})
-        elif entity.name in news.summary:
-            score = 2
-            news_ent.append({'entity': entity, 'score': score})
-        elif entity.name in news.body:
-            score = 1
-            news_ent.append({'entity': entity, 'score': score})
-        if score > 0:
-            NewsEntity.objects.create(news=news, entity=entity, score=score)
-            entity.news_count += 1
-            entity.latest_news = news
-            entity.save()
+    for en in entity:
+        word_list = [en.name]
+        word_list += [syn.name for syn in en.synonym.all()]
+        word_occurrence = 0
 
+        for word in word_list:
+            if word in word_tokenize(news.base_news.title) or word in word_tokenize(news.summary) or\
+                            word in word_tokenize(news.body):
+                word_occurrence +=1
+
+            if word_occurrence >= en.min_should:
+                news_ent.append({'entity': en, 'score': 1})
+                NewsEntity.objects.create(news=news, entity=en, score=1)
+                en.news_count +=1
+                en.latest_news = news
+                en.save()
+                break
     return news_ent
 
 

@@ -112,3 +112,7 @@ class NewsLike(models.Model):
 class TelegramPost(models.Model):
     id = models.CharField(max_length=63, verbose_name="Message ID", primary_key=True)
     channel_id = models.CharField(max_length=63, verbose_name='Peer ID')
+
+
+class BadNews(News):
+    pass

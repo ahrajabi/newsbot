@@ -215,6 +215,8 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
 
     elif page == 2:
         del buttons[0][0]
+        if news.base_news.source_type == 3:
+            del buttons[0][1]
         try:
             text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n    '
         except Exception:
@@ -226,6 +228,9 @@ def news_page(bot, news, user, page=1, message_id=None, picture_number=0, **kwar
             text += news.body[:3500].rsplit(' ', 1)[0]
             text += '\n' + 'ادامه دارد...' + '\n'
     elif page == 3:
+        if news.base_news.source_type == 3:
+            del buttons[0][0]
+
         related = more_like_this(news.base_news.title, 5)
         text, notext = prepare_multiple_sample_news(related, 5)
 

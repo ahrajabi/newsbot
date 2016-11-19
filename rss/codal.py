@@ -10,7 +10,7 @@ from rss.ml import per_to_eng
 from django.conf import settings
 from django.utils.timezone import tzinfo
 from rss.rss import repair_datetime
-
+from entities.models import Entity
 
 def farsidate_to_date(farsidate):
     farsidate = re.split(':|/| ', farsidate)
@@ -68,3 +68,8 @@ def get_new_codal():
             if is_created:
                 obj.complete_news = True
                 obj.save()
+        if 'نماد ' + item['namad'] not in Entity.objects.filter(status='A').values_list('name', flat=True):
+            company = Entity.objects.get_or_create(name=item['company'], status='R')[0]
+            symbol = Entity.objects.get_or_create(name=item['namad'], status='R')[0]
+            obj = Entity.objects.create(name='نماد ' + item['namad'], status='A')
+            obj.related.add(company, symbol)
