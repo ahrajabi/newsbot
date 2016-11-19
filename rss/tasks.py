@@ -12,7 +12,6 @@ import random
 from django.conf import settings
 from rss.codal import get_new_codal
 from django.utils import timezone
-from rss.tg import telegram_crawler
 LOCK_EXPIRE = 60 * 2
 
 
@@ -20,7 +19,6 @@ LOCK_EXPIRE = 60 * 2
 def get_all_new_news():
     HOUR_NOW = timezone.localtime(timezone.now()).hour
     # Reject get news in 24:00 - 06:00
-
     if 0 < HOUR_NOW < 6:
         return False
 
@@ -49,7 +47,13 @@ def get_all_new_news():
 
 @shared_task
 def telegram_crawler_async():
-    telegram_crawler()
+    HOUR_NOW = timezone.localtime(timezone.now()).hour
+    # Reject get news in 24:00 - 06:00
+    if 0 < HOUR_NOW < 6:
+        return False
+    from rss import tg
+    tg.telegram_crawler()
+
 
 @shared_task
 def get_new_rss_async(rss_list):

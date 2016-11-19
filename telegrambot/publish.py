@@ -23,12 +23,13 @@ def publish_handler(bot, job):
         cache.set('publish_handler_counter', 1)
     cnt = cache.get('publish_handler_counter')
 
-    if cnt * job.interval % 200 == 0:
-        periodic_publish_news(bot, job)
-        print('periodic', cnt)
-    else:
-        live_publish_news(bot, job)
-        print('live', cnt)
+    # if cnt * job.interval % 200 == 0:
+    #     periodic_publish_news(bot, job)
+    #     print('periodic', cnt)
+    # else:
+    #     live_publish_news(bot, job)
+    #     print('live', cnt)
+    periodic_publish_news(bot, job)
 
 
 def prepare_periodic_publish_news(bot, job, up, no_news_post=False):

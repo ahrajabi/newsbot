@@ -96,7 +96,7 @@ dispatcher.add_handler(InlineQueryHandler(inline.handler))
 #    dispatcher.add_error_handler(error_callback)
 
 q_bot = updater.job_queue
-q_bot.put(Job(publish_handler, 20, repeat=True))
+q_bot.put(Job(publish_handler, 10, repeat=True))
 q_bot.put(Job(user_alert_handler, 100, repeat=True))
 if settings.DEBUG or True:
     updater.start_polling(bootstrap_retries=2)
