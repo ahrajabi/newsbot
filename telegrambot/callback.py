@@ -256,3 +256,27 @@ def category_inline_command(bot, msg, user):
     profile.toggle_interest_categories(cat)
     text, keyboard = category_page(bot, msg, user, level=task[2])
     send_telegram_user(bot, user, text, msg, keyboard, message_id=msg.callback_query.message.message_id, ps=False)
+
+
+def interval_inline_command(bot, msg, user):
+    time_interval = int(msg.callback_query.data.split('interval-')[1])
+    user_setting = UserProfile.objects.get(user=user).user_settings
+    last_interval = user_setting.interval_news_list
+
+    if last_interval == time_interval:
+        text = 'زمان انتخابی برابر با تنظیمات قبلی شماست.'
+        send_telegram_user(bot, user, text, msg)
+    else:
+        user_setting.interval_news_list = time_interval
+        user_setting.save()
+        text = 'تغییرات با موفقیت اعمال شد.\n'
+        if time_interval < 60:
+            time = time_interval
+            time_type = 'دقیقه'
+        else:
+            time = int(time_interval / 60)
+            time_type = 'ساعت'
+        text += 'از این پس اخبار زنده هر %d %s برای شما ارسال می‌شود.' %(time, time_type)
+        send_telegram_user(bot, user, text, msg)
+
+

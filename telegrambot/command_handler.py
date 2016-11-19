@@ -5,6 +5,9 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from datetime import timedelta
+from telegram import InlineKeyboardMarkup
+from telegram.inlinekeyboardbutton import InlineKeyboardButton
+
 from entities import tasks
 from entities.models import Entity
 from rss.models import News, CategoryCode
@@ -283,3 +286,27 @@ def contact_command(bot, msg, user):
     text = 'با ما در تماس باشید:\n'
     text += Emoji.MEMO + '@KhabareMan'
     send_telegram_user(bot, user, text, msg)
+
+
+def interval_command(bot, msg, user):
+    current_interval = UserProfile.objects.get(user=user).user_settings.interval_news_list
+    if current_interval < 60:
+        time = current_interval
+        time_type = 'دقیقه'
+    else:
+        time = int(current_interval / 60)
+        time_type = 'ساعت'
+    text = 'شما هم‌اکنون اخبار جدید را هر %d %s دریافت می‌کنید.\n' %(time, time_type)
+    text += 'تمایل دارید اخبار زنده با چه فاصله‌ی زمانی برای شما ارسال شود؟'
+    buttons = [
+        [InlineKeyboardButton(text='۱ ساعت', callback_data='interval-60'),
+         InlineKeyboardButton(text='۳۰ دقیقه', callback_data='interval-30'),
+         InlineKeyboardButton(text='۱۰ دقیقه', callback_data='interval-10')
+         ],
+        [InlineKeyboardButton(text='۲۴ ساعت', callback_data='interval-1440'),
+         InlineKeyboardButton(text='۵ ساعت', callback_data='interval-300'),
+         InlineKeyboardButton(text='۳ ساعت', callback_data='interval-180')
+         ],]
+
+    keyboard = InlineKeyboardMarkup(buttons)
+    send_telegram_user(bot, user, text, msg, keyboard)
