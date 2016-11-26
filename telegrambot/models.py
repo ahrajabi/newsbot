@@ -41,6 +41,7 @@ class UserProfile(models.Model):
     user = models.ForeignKey(User)
     activated = models.BooleanField(verbose_name='Bot Blocked', default=True)
     stopped = models.BooleanField(verbose_name='Bot Stopped', default=False)
+    private = models.BooleanField(verbose_name='Private', default=False)
     first_name = models.CharField(max_length=140, null=True)
     last_name = models.CharField(max_length=140, null=True)
     last_chat = models.DateTimeField()
@@ -98,3 +99,8 @@ class UserLiveNews(models.Model):
     user = models.ForeignKey(User)
     news = models.ForeignKey(News)
     is_sent = models.BooleanField(default=False)
+
+
+class ChannelPublish(models.Model):
+    channel_username = models.CharField(max_length=120)
+    last_news = models.PositiveIntegerField(default=0)

@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import UserProfile, UserAlert, UserNews, UserNewsList, UserSettings, MessageFromUser, UserLiveNews
+from .models import UserProfile, UserAlert, UserNews, UserNewsList, UserSettings, MessageFromUser, UserLiveNews, \
+    ChannelPublish
 
 def username(obj):
     return obj.user.username
@@ -50,3 +51,7 @@ class UserLiveNewsAdmin(admin.ModelAdmin):
 class UserSettingsAdmin(admin.ModelAdmin):
     list_display = [x.name for x in MessageFromUser._meta.local_fields]
 
+
+@admin.register(ChannelPublish)
+class ChannelPublishAdmin(admin.ModelAdmin):
+    list_display = [x.name for x in ChannelPublish._meta.local_fields]

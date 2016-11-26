@@ -5,10 +5,7 @@ from django.core.cache import cache
 from telegram.error import Unauthorized
 from telegram import InlineKeyboardMarkup
 from telegram.inlinekeyboardbutton import InlineKeyboardButton
-
-
 from rss import elastic
-from entities.models import NewsEntity
 from entities.tasks import get_user_entity
 from telegrambot import news_template, bot_send
 from telegrambot.models import UserNewsList, UserProfile, UserLiveNews
@@ -19,7 +16,7 @@ from telegram.emoji import Emoji
 def publish_handler(bot, job):
     try:
         cache.incr('publish_handler_counter')
-    except Exception:
+    except:
         cache.set('publish_handler_counter', 1)
     cnt = cache.get('publish_handler_counter')
 
@@ -28,11 +25,12 @@ def publish_handler(bot, job):
     #     print('periodic', cnt)
     # else:
     #     live_publish_news(bot, job)
-    #     print('live', cnt)
+    print('time', cnt)
     periodic_publish_news(bot, job)
 
 
 def prepare_periodic_publish_news(bot, job, up, no_news_post=False):
+    del job
     user = up.user
     interval = up.user_settings.interval_news_list
     delta = timezone.now() - timedelta(minutes=interval)
@@ -47,8 +45,8 @@ def prepare_periodic_publish_news(bot, job, up, no_news_post=False):
 
     try:
         news_ent = [item['_id'] for item in el_news['hits']['hits']]
-    except Exception:
-        print("ES DIDNT RETURN RIGHT JSON! See publish.py")
+    except:
+        print("ES DIDN'T RETURN RIGHT JSON! See publish.py")
         return False
 
     unl = UserNewsList.objects.create(user=user,
@@ -85,18 +83,14 @@ def prepare_periodic_publish_news(bot, job, up, no_news_post=False):
 
 
 def periodic_publish_news(bot, job):
-    HOUR_NOW = timezone.localtime(timezone.now()).hour
-    # Reject publish news in 24:00 - 06:00
+    hour_now = timezone.localtime(timezone.now()).hour
 
-    if 0 < HOUR_NOW < 6:
+    if 0 < hour_now < 6:
         return False
 
     for up in UserProfile.objects.all().order_by('?'):
         interval = up.user_settings.interval_news_list
         delta = timezone.now() - timedelta(minutes=interval)
-
-        if not get_user_entity(up.user):
-            continue
 
         if not up.activated or up.stopped or len(get_user_entity(up.user)) == 0:
             continue
@@ -107,6 +101,7 @@ def periodic_publish_news(bot, job):
 
 
 def live_publish_news(bot, job):
+    del job
     for up in UserProfile.objects.filter(user_settings__live_news=True, activated=True, stopped=False):
         news_ent = UserLiveNews.objects.filter(user=up.user, is_sent=False)
 
@@ -123,4 +118,3 @@ def live_publish_news(bot, job):
                 bot_send.send_telegram_user(bot, up.user, output)
             except Unauthorized:
                 deactive_profile(up)
-

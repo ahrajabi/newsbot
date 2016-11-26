@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 import sys
+import djcelery
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -87,10 +88,6 @@ WSGI_APPLICATION = 'newsbot.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 DATABASES = {
-    #     'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    # },
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'newsbot',
@@ -99,10 +96,6 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '',
     },
-   #  'news_db': {
-   #    'ENGINE': 'django_mongodb_engine',
-   #    'NAME': 'my_database'
-   # }
 }
 
 
@@ -161,9 +154,7 @@ GLOBAL_SETTINGS = {
 
 TELEGRAM_TOKEN = 'Add your telegram token in local_settings'
 
-
-## Celery Configuration
-import djcelery
+# Celery Configuration
 djcelery.setup_loader()
 
 BROKER_URL = 'redis://localhost:6379'
@@ -175,50 +166,6 @@ CELERY_TIMEZONE = 'Asia/Tehran'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERY_WORKER_NUM = 3
 DEBUG = False
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s '
-                      '%(process)d %(thread)d %(message)s'
-        },
-    },
-    'handlers': {
-        'sentry': {
-            'level': 'ERROR',  # To capture more than ERROR, change to WARNING, INFO, etc.
-            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-            'tags': {'custom-tag': 'x'},
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-        }
-    },
-    'loggers': {
-        'root': {
-            'level': 'WARNING',
-            'handlers': ['sentry'],
-        },
-        'django.db.backends': {
-            'level': 'ERROR',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'raven': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'sentry.errors': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-    },
-}
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -237,10 +184,7 @@ try:
     from .local_settings import *
 except ImportError:
     pass
-
-
-## Debug Toolbar Configuration
-
+# Debug Toolbar Configuration
 
 if DEBUG and False:
     INSTALLED_APPS += ('debug_toolbar',)

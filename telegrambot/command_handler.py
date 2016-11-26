@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-import sys
 from telegram.emoji import Emoji
 from django.utils import timezone
-from django.contrib.auth.models import User
+from telegram.error import Unauthorized
 from rest_framework.authtoken.models import Token
 from datetime import timedelta
 from telegram import InlineKeyboardMarkup
@@ -10,22 +8,10 @@ from telegram.inlinekeyboardbutton import InlineKeyboardButton
 
 from entities import tasks
 from entities.models import Entity
-from rss.models import News, CategoryCode
+from rss.models import News
 from telegrambot import bot_template
-from telegrambot.models import UserAlert, UserProfile, UserSettings
-from telegrambot.bot_send import send_telegram_user, error_text, send_telegram_all_user, send_telegram_document
-thismodule = sys.modules[__name__]
-
-
-def verify_user(bot, msg):
-    new_user = False
-    user = get_user(msg.message.chat.id)
-
-    if not user:
-        new_user = True
-        user = create_new_user_profile(bot, msg)
-
-    return user, new_user
+from telegrambot.models import UserAlert, UserProfile
+from telegrambot.bot_send import send_telegram_user, error_text
 
 
 def deactive_profile(up):
@@ -33,69 +19,26 @@ def deactive_profile(up):
     up.save()
 
 
-def create_new_user_profile(bot, msg):
-    if len(msg.message.chat.username) > 0:
-        username = msg.message.chat.username
-    else:
-        username = msg.message.chat.id
-
-    user = User.objects.create_user(username=username)
-    user_setting = UserSettings.objects.create()
-    try:
-        user.userprofile_set.create(first_name=msg.message.chat.first_name,
-                                    last_name=msg.message.chat.last_name,
-                                    last_chat=timezone.now(),
-                                    telegram_id=msg.message.chat.id,
-                                    user_settings=user_setting)
-    except Exception:
-        user.userprofile_set.create(last_chat=timezone.now(),
-                                    telegram_id=msg.message.from_user.id)
-
-    get_user(msg.message.from_user.id)
-    return user
-
-
-def get_user(telegram_id):
-    profiles = UserProfile.objects.filter(telegram_id=telegram_id)
-    if not profiles:
-        return None
-    user = [i.user for i in profiles][0]
-    if not user:
-        return None
-
-    ##
-    up = UserProfile.objects.get(user=user)
-    if up:
-        up.last_chat = timezone.now()
-        up.activated = True
-        if not up.user_settings:
-            up.user_settings = UserSettings.objects.create()
-
-        up.save()
-    ##
-    return user
-
-
-def add_command(bot, msg, user):
-    entity_id = int(msg.message.text[5:])
+def add_command(bot, update, user):
+    entity_id = int(update.message.text[5:])
     try:
         entity = Entity.objects.get(id=entity_id)
     except Entity.DoesNotExist:
         entity = None
 
     if entity in tasks.get_user_entity(user):
-        error_text(bot, msg, user, type='PriorFollow')
+        error_text(bot, update, user, error_type='PriorFollow')
         return
     if tasks.set_entity(user, entity_id, 1):
-        bot_template.change_entity(bot, msg, entity,user, type=1)
+        bot_template.change_entity(bot, update, entity, user, change_type=True)
         entity.followers += 1
         entity.save()
     else:
-        error_text(bot, msg, user)
+        error_text(bot, update, user)
 
 
-def remove_command(bot, msg, user):
-    entity_id = int(msg.message.text[8:])
+def remove_command(bot, update, user):
+    entity_id = int(update.message.text[8:])
 
     try:
         entity = Entity.objects.get(id=entity_id)
@@ -103,67 +46,44 @@ def remove_command(bot, msg, user):
         entity = None
 
     if entity not in tasks.get_user_entity(user):
-        error_text(bot, msg, user, type='NoFallow')
+        error_text(bot, update, user, error_type='NoFallow')
         return
 
     if tasks.set_entity(user, entity_id, 0):
-        bot_template.change_entity(bot, msg, entity, user, type=0)
+        bot_template.change_entity(bot, update, entity, user, change_type=False)
         entity.followers -= 1
         entity.save()
     else:
-        error_text(bot, msg, user)
+        error_text(bot, update, user)
 
 
-def list_command(bot, msg, user):
-    bot_template.show_user_entity(bot, msg, user, tasks.get_user_entity(user))
+def list_command(bot, update, user):
+    bot_template.show_user_entity(bot, update, user, tasks.get_user_entity(user))
 
 
-def help_command(bot, msg, user):
-    bot_template.bot_help(bot, msg, user)
+def help_command(bot, update, user):
+    bot_template.bot_help(bot, update, user)
 
 
 def user_alert_handler(bot, job):
+    del job
     bulk = UserAlert.objects.filter(is_sent=False)
     for item in bulk:
         all_profile = UserProfile.objects.all()
         for profile in all_profile:
-            id = profile.telegram_id
-            if id:
+            pid = profile.telegram_id
+            if pid:
                 try:
                     send_telegram_user(bot, profile.user, item.text)
-                except Exception:
+                except Unauthorized:
                     pass
 
         item.is_sent = True
         item.save()
 
 
-def start_command(bot, msg, new_user, user):
-    inp = msg.message.text.split(' ')
-    if new_user:
-        bot_template.welcome_text(bot, msg, user)
-
-    else:
-        up = UserProfile.objects.get(user=user)
-        if up and up.stopped:
-            up.stopped = False
-            up.save()
-        text = '''
-        حساب شما مجددا فعال شد.
-        '''
-        send_telegram_user(bot, user, text, msg)
-        # if inp[1]:
-        #     arg = inp[1]
-        #
-        #     if arg.startswith('N'):
-        #         try:
-        #             news = News.objects.get(id=arg[1:])
-        #             bot_template.publish_news(bot, news, user, page=1)
-        #         except News.DoesNotExist:
-        #             return error_text(bot, msg, 'NoneNews')
-
-
-def stop_command(bot, msg, user):
+def stop_command(bot, update, user):
+    del update
     up = UserProfile.objects.get(user=user)
     if up and not up.stopped:
         up.stopped = True
@@ -175,22 +95,34 @@ def stop_command(bot, msg, user):
         send_telegram_user(bot, user, text)
 
 
-def news_command(bot, msg, user):
-    news_id = command_separator(msg, 'add')
+def active_command(bot, update, user):
+    del update
+    up = UserProfile.objects.get(user=user)
+    if up and up.stopped:
+        up.stopped = False
+        up.save()
+        text = '''
+        حساب شما فعال شد.
+        '''
+        send_telegram_user(bot, user, text)
+
+
+def news_command(bot, update, user):
+    news_id = command_separator(update, 'add')
     try:
         news = News.objects.get(id=news_id)
         bot_template.publish_news(bot, news, user, page=1, message_id=None, user_entity=tasks.get_user_entity(user))
     except News.DoesNotExist:
-        return error_text(bot, msg, user, 'NoneNews')
+        return error_text(bot, update, user, 'NoneNews')
 
 
-def command_separator(msg, command):
-    return int(msg.message.text[len(command)+3:])
+def command_separator(update, command):
+    return int(update.message.text[len(command) + 3:])
 
 
-def live_command(bot, msg, user):
+def live_command(bot, update, user):
     if not tasks.get_user_entity(user):
-        return error_text(bot, msg, user, 'NoneEntity')
+        return error_text(bot, update, user, 'NoneEntity')
     user_settings = UserProfile.objects.get(user=user).user_settings
     live_news_status = user_settings.live_news
     if not live_news_status:
@@ -200,12 +132,13 @@ def live_command(bot, msg, user):
    از این پس اخبار نشان‌ها به صورت لحظه ای ارسال می شود.'''
     else:
         text = 'ارسال اخبار نشان‌ها به صورت بر خط فعال است.'
-    send_telegram_user(bot, user, text, msg)
+    send_telegram_user(bot, user, text, update)
 
 
-def browser_command(bot, msg, user):
+def browser_command(bot, update, user):
     commands = ['/extension', '/token']
-    response = Emoji.SMALL_BLUE_DIAMOND + '''شما میتوانید با نصب <b>افزونه‌ی خبرمن</b>، اخبار را از طریق مرورگر گوگل کروم خود دریافت نمایید.
+    response = Emoji.SMALL_BLUE_DIAMOND + '''شما میتوانید با نصب
+    <b>افزونه‌ی خبرمن</b>، اخبار را از طریق مرورگر گوگل کروم خود دریافت نمایید.
 
     کافیست دو مرحله زیر را انجام دهید :
 1⃣ افزونه خبر من را از طریق <a href='https://chrome.google.com/webstore/detail/khabare-man/lbjgcnoliaijdlncdjcpgbnjagjbbcld'>این لینک</a> با مرورگر گوگل کروم دریافت و نصب کنید.
@@ -213,17 +146,15 @@ def browser_command(bot, msg, user):
 2⃣ نام کاربری و توکن خود را با لمس بر روی %s دریافت نمایید.
 
     ''' % commands[1]
-    send_telegram_user(bot, user, response, msg, ps=False)
+    send_telegram_user(bot, user, response, update, ps=False)
 
 
-def extension_command(bot, msg, user):
-    # file = ''
-    # send_telegram_document(bot, user, msg, file)
+def extension_command(bot, update, user):
     text = 'افزونه خبر من به زودی اضافه میشود.'
-    send_telegram_user(bot, user, text, msg)
+    send_telegram_user(bot, user, text, update)
 
 
-def token_command(bot, msg, user):
+def token_command(bot, update, user):
     if not user.username:
         response = '''جهت استفاده از افزونه باید برای حساب کاربری تلگرام خود نام کاربردی تعریف کنید
         نام کاربری خود را از طریق تنظیمات تلگرام ایجاد کنید و برای دریافت توکن مجددا اقدام کنید.
@@ -231,29 +162,30 @@ def token_command(bot, msg, user):
     else:
         user_token, is_new = Token.objects.get_or_create(user=user)
         if is_new:
-            response =Emoji.THUMBS_UP_SIGN + 'توکن با موفقیت ایجاد شد :)\n '
+            response = Emoji.THUMBS_UP_SIGN + 'توکن با موفقیت ایجاد شد :)\n '
         else:
             response = 'شما قبلا توکن را ایجاد کرده بودید ، اطلاعات شما:\n'
         response += 'نام کاربری : %s \n توکن : %s ' % (user.username, user_token)
-    send_telegram_user(bot, user, response, msg)
+    send_telegram_user(bot, user, response, update)
 
 
-def newslist_command(bot, msg, user):
+def newslist_command(bot, update, user):
     if not tasks.get_user_entity(user):
-        return error_text(bot, msg, user, 'NoneEntity')
+        return error_text(bot, update, user, 'NoneEntity')
     from telegrambot.publish import prepare_periodic_publish_news
     up = UserProfile.objects.get(user=user)
     prepare_periodic_publish_news(bot, 0, up, no_news_post=True)
 
 
-def special_command(bot, msg, user):
+def special_command(bot, update, user):
     delta = timezone.now() - timedelta(hours=20)
-    #    exl = ['irna', 'mehrnews', 'fars', 'tasnim', 'codal', 'isna', 'shana', 'akhbarrasmi', 'sena', 'boursenews', 'naftema']
+    # exl = ['irna', 'mehrnews', 'fars', 'tasnim', 'codal', 'isna', 'shana',
+    #  'akhbarrasmi', 'sena', 'boursenews', 'naftema']
     exl = []
     up = UserProfile.objects.get(user=user)
 
     if up.interest_categories.all().count() == 0:
-        return error_text(bot, msg, user, 'NoCategory')
+        return error_text(bot, update, user, 'NoCategory')
 
     news = News.objects.filter(base_news__published_date__range=(delta, timezone.now()),
                                base_news__all_rss__category_ref__in=up.interest_categories.all()) \
@@ -261,15 +193,15 @@ def special_command(bot, msg, user):
         .order_by('?')
 
     if not news:
-        return error_text(bot, msg, user, 'NoNews')
+        return error_text(bot, update, user, 'NoNews')
     news = news[0]
     try:
         bot_template.publish_news(bot, news, user, page=1, message_id=None)
     except News.DoesNotExist:
-        return error_text(bot, msg, user, 'NoneNews')
+        return error_text(bot, update, user, 'NoneNews')
 
 
-def stoplive_command(bot, msg, user):
+def stoplive_command(bot, update, user):
     user_settings = UserProfile.objects.get(user=user).user_settings
     live_news_status = user_settings.live_news
     if live_news_status:
@@ -279,16 +211,16 @@ def stoplive_command(bot, msg, user):
     else:
 
         text = 'ارسال اخبار به صورت بر خط غیرفعال است.'
-    send_telegram_user(bot, user, text, msg)
+    send_telegram_user(bot, user, text, update)
 
 
-def contact_command(bot, msg, user):
+def contact_command(bot, update, user):
     text = 'با ما در تماس باشید:\n'
     text += Emoji.MEMO + '@KhabareMan'
-    send_telegram_user(bot, user, text, msg)
+    send_telegram_user(bot, user, text, update)
 
 
-def interval_command(bot, msg, user):
+def interval_command(bot, update, user):
     current_interval = UserProfile.objects.get(user=user).user_settings.interval_news_list
     if current_interval < 60:
         time = current_interval
@@ -296,7 +228,7 @@ def interval_command(bot, msg, user):
     else:
         time = int(current_interval / 60)
         time_type = 'ساعت'
-    text = 'شما هم‌اکنون اخبار جدید را هر %d %s دریافت می‌کنید.\n' %(time, time_type)
+    text = 'شما هم‌اکنون اخبار جدید را هر %d %s دریافت می‌کنید.\n' % (time, time_type)
     text += 'تمایل دارید اخبار زنده با چه فاصله‌ی زمانی برای شما ارسال شود؟'
     buttons = [
         [InlineKeyboardButton(text='۱ ساعت', callback_data='interval-60'),
@@ -306,7 +238,7 @@ def interval_command(bot, msg, user):
         [InlineKeyboardButton(text='۲۴ ساعت', callback_data='interval-1440'),
          InlineKeyboardButton(text='۵ ساعت', callback_data='interval-300'),
          InlineKeyboardButton(text='۳ ساعت', callback_data='interval-180')
-         ],]
+         ], ]
 
     keyboard = InlineKeyboardMarkup(buttons)
-    send_telegram_user(bot, user, text, msg, keyboard)
+    send_telegram_user(bot, user, text, update, keyboard)
