@@ -243,7 +243,7 @@ def interval_inline_command(bot, update):
 
     if last_interval == time_interval:
         text = 'زمان انتخابی برابر با تنظیمات قبلی شماست.'
-        send_telegram_user(bot, user, text, update)
+        bot.answerCallbackQuery(update.callback_query.id, text=text)
     else:
         user_setting.interval_news_list = time_interval
         user_setting.save()
@@ -254,5 +254,5 @@ def interval_inline_command(bot, update):
         else:
             time = int(time_interval / 60)
             time_type = 'ساعت'
-        text += 'از این پس اخبار زنده هر %d %s برای شما ارسال می‌شود.' % (time, time_type)
-        send_telegram_user(bot, user, text, update)
+        text += 'از این پس اخبار زنده هر %d %s ارسال می‌شود.' % (time, time_type)
+        bot.answerCallbackQuery(update.callback_query.id, text=text)
