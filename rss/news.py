@@ -14,6 +14,8 @@ def save_news(base_news):
     # fix catch HeaderParsingError
     print(str(base_news.url))
     page = requests.get(str(base_news.url), timeout=20)
+    if page.encoding is not 'utf-8':
+        page.encoding='utf-8'
     page_soup = bs(page.text, 'html.parser')
 
     if page_soup:
@@ -25,7 +27,6 @@ def save_news(base_news):
             news_body = normalize(news_body)
         except IndexError:
             news_body = ''
-
         try:
             news_summary = page_soup.select(base_news.rss.news_agency.summary_selector)[0].text
             news_summary = normalize(news_summary)
@@ -35,10 +36,22 @@ def save_news(base_news):
         if news_body == '' and news_summary == '':
             return False
 
+        if base_news.rss.news_agency.name == 'tse':
+            try:
+                pdf_link = page_soup.select('ul#relFiles a')[0]
+                if hasattr(pdf_link, 'href'):
+                    pdf_link = base_news.rss.news_agency.url + pdf_link['href']
+                else:
+                    pdf_link = None
+            except IndexError:
+                pdf_link = None
+        else:
+            pdf_link = None
         news, is_created = News.objects.update_or_create(base_news=base_news,
                                                          defaults={'body': news_body,
                                                                    'pic_number': 0,
-                                                                   'summary': news_summary,})
+                                                                   'summary': news_summary,
+                                                                   'pdf_link': pdf_link,})
 
         news_images = page_soup.select(base_news.rss.news_agency.image_selector)
         cnt = 0

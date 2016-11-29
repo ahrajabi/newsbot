@@ -12,6 +12,7 @@ import random
 from django.conf import settings
 from rss.codal import get_new_codal
 from django.utils import timezone
+from rss.heterogeneous_rss import get_all_hg_news
 LOCK_EXPIRE = 60 * 2
 
 
@@ -40,7 +41,8 @@ def get_all_new_news():
             finally:
                 release_lock()
 
-    get_new_codal()
+    # get_new_codal()
+    get_all_hg_news()
 
     bulk_save_to_elastic()
 

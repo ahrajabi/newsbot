@@ -192,3 +192,6 @@ http://www.irstartup.com,irstartup,ایران استارت آپ,تمام اخب�
 http://techera.ir/,techera,تکرا,تمام اخبار,False,entrepreneurship,D,http://techera.ir/feed/,.entry,,.entry img,False
 http://www.musicema.com,musicema,موسیقی ما,تمام اخبار,False,music,D,http://www.musicema.com/rss,.field-name-body,,.field-type-image img,False
 http://www.fardanama.com,fardanama,فردانما,تمام اخبار,False,tech-startup,D,http://www.fardanama.com/feed/,.post_content p,,".post_content img.sp-image, .post_content img.size-full",
+http://www.tsetmc.com/,tsetmc,شركت مديريت فناوري بورس تهران,تمام اخبار,True,economic,D,http://www.tsetmc.com/tsev2/feed/TseMsg.aspx?type=RSS,,,,False
+http://www.ifb.ir/,ifb,شرکت فرابورس ایران,تمام اخبار,True,economic,D,http://www.ifb.ir/RSSForCoInfo.aspx,,,,False
+http://new.tse.ir/,tse,بورس اوراق بهادار تهران,تمام اخبار,True,economic,D,http://new.tse.ir/news/rss.xml,div#newsBody,div#newsQuote,img#newsMainImg,False

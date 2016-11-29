@@ -28,8 +28,6 @@ def repair_datetime(input_datetime, rss_delay=False):
 def get_new_rss(rss):
     feed = feedparser.parse(rss.main_rss)
 
-    if not rss.news_agency.name == 'eghtesadonline':
-        return
     try:
         if 'updated' in feed['feed'].keys():
             feed_time = feed['feed']['updated']
@@ -55,6 +53,8 @@ def get_new_rss(rss):
                 link = item['link']
                 if rss.news_agency.name == 'eghtesadonline':
                     link = 'http://www.eghtesadonline.com' + item.guid
+                if rss.news_agency.name == 'tse':
+                    link = item['link'][:18] + item['link'][23:]
                 obj, created = BaseNews.objects.get_or_create(title=item['title'],
                                                               url=link[
                                                                   0:BaseNews._meta.get_field('url').max_length - 2],

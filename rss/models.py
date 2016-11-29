@@ -82,6 +82,7 @@ class News(models.Model):
     like_count = models.PositiveIntegerField('Number of Likes', default=0)
     photo = models.ImageField(upload_to='telegram/%Y/%m/%d/', null=True, blank=True)
     file = models.FileField(upload_to='telegram/%Y/%m/%d/', null=True, blank=True)
+    pdf_link = models.URLField('pdf link', max_length=600, null=True, blank=True)
 
     def get_summary(self):
         if len(self.summary) > 5:

@@ -186,11 +186,13 @@ def news_page(news, page=1, picture_number=0, **kwargs):
     elif page == 2:
         text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n'
 
-        if len(news.body) < 3500:
+        if len(news.body) < 3400:
             text += news.body + '\n'
+            text += news.pdf_link + '\n'
         else:
-            text += news.body[:3500].rsplit(' ', 1)[0]
+            text += news.body[:3400].rsplit(' ', 1)[0]
             text += '\n' + 'ادامه دارد...' + '\n'
+            text += news.pdf_link + '\n'
     elif page == 3:
 
         related = more_like_this(news.base_news.title, 5)
