@@ -8,6 +8,7 @@ from telegram.inlinekeyboardbutton import InlineKeyboardButton
 from rss import elastic
 from rss.models import News
 from entities.tasks import get_user_entity
+from entities.models import UserEntity
 from telegrambot import news_template, bot_send
 from telegrambot.models import UserNewsList, UserProfile, UserLiveNews
 from telegrambot.command_handler import deactive_profile
@@ -34,12 +35,17 @@ def prepare_periodic_publish_news(bot, job, up, alert_no_news=False):
     del job
     user = up.user
     interval = up.user_settings.interval_news_list
-    delta = timezone.now() - timedelta(minutes=interval)
 
     if hasattr(up.user_settings, 'last_news_list') and up.user_settings.last_news_list:
         start_time = up.user_settings.last_news_list.datetime_publish
     else:
-        start_time = delta
+        ue = UserEntity.objects.filter(user=user, status=True)
+
+        if ue.count() >= settings.REQUIRED_ENTITY:
+            start_time = timezone.now() - timedelta(days=7)
+        else:
+            start_time = timezone.now() - timedelta(minutes=interval)
+
     el_news = elastic.news_with_terms(entity_list=get_user_entity(user),
                                       size=settings.NEWS_PER_PAGE,
                                       start_time=start_time)

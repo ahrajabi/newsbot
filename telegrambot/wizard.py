@@ -1,12 +1,13 @@
-from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters
-from telegrambot import bot_send
-from telegram import ReplyKeyboardMarkup, KeyboardButton
-from telegrambot.models import UserProfile
-from entities.models import Entity, UserEntity
-from rss.ml import normalize
-from entities.tasks import set_entity
 from django.conf import settings
-from telegrambot.models import MessageFromUser
+from telegram import ReplyKeyboardMarkup, KeyboardButton
+
+from rss.ml import normalize
+from telegrambot import bot_send
+from entities.tasks import set_entity
+from entities.models import Entity, UserEntity
+from telegrambot.models import UserProfile, MessageFromUser
+from telegrambot.publish import prepare_periodic_publish_news
+from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters
 
 X1, X2, E = range(3)
 
@@ -16,7 +17,7 @@ def keyboard_symbols():
                     'خپارس', 'خگستر', 'دانا', 'شبندر', 'شتران', 'شپنا', 'غالبر', 'غشاذر', 'فاذر', 'فاراک', 'فاسمین',
                     'فخوز', 'فلوله', 'فملی', 'فملی2', 'فولاد', 'فولاد2', 'فولاژ', 'قزوین', 'همراه', 'واتی', 'وبانک',
                     'وبانک2', 'ورنا', 'وساپا', 'کاما', 'کسرا', 'کطبس', 'کچاد', 'کگل']
-
+    # Todo show entities base on followers of them
     key = Entity.objects.filter(synonym__name__in=symbols_list).order_by('synonym__name').values('synonym__name')
     buttons = [KeyboardButton(text=item['synonym__name']) for item in key]
     but = list()
@@ -52,22 +53,21 @@ def choose_symbols(bot, update):
     try:
         ee = Entity.objects.get(synonym__name__in=[normalize(update.message.text)])
         set_entity(user, ee.id, mark=True)
-        text += 'نماد #' + ee.synonym.all()[0].name + ' برای شما ثبت شد.'
+        text += 'نماد ' + ee.synonym.all()[0].name + ' برای شما ثبت شد.'
         text += '\n'
         if ue.count() >= settings.REQUIRED_ENTITY:
             text += '''
 هر سه نماد به درستی به نشان‌های شما اضافه شدند.
+از این پس اخبار جدید مرتبط با نشان‌های شما به صورت زنده ارسال می‌شود.
 
 امکانات روبات به شرح زیر برای شما فعال شده است:
 ✳️ جست و جوی اخبار - کافیست متن مورد نظر خود را تایپ نمایید تا اخبار مرتبط را دریافت کنید.
 
 ✳️ مدیریت نشان‌ها - با دستور /list می‌توانید نشان‌های خود را مشاهده و مدیریت نمایید. برای اضافه کردن نشان جدید کافیست نام آن را تایپ نمایید.
 
-✳️ دریافت اخبار - اخبار مرتبط با نشان‌های شما به صورت اتوماتیک ارسال می‌شود اما برای مشاهده‌ی دستی کافیست خبرهای نشان‌شده را لمس نمایید.
-
 ✳ افزونه گوگل - از طریق افزونه گوگل می‌توانید اخبار را هرچه سریع‌تر دریافت نمایید.
 
-✳ کانال‌های تلگرام - به زودی کانال‌های معتبر تلگرام به منابع روبات تلگرام اضافه خواهد شد.
+✳ کانال‌های تلگرام - علاوه بر سایت‌های خبری، منابع روبات تلگرام شامل کانال‌های معتبر تلگرام نیز می‌باشد.
 
 ✳️ برای استفاده از امکانات بیشتر روبات، راهنما را لمس نمایید.
             '''

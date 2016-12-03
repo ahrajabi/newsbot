@@ -90,7 +90,7 @@ def stop_command(bot, update, user):
         up.save()
         text = '''
         حساب شما متوقف شد.
-        برای فعال سازی مجدد حساب خود /start را لمس نمایید.
+        برای فعال سازی مجدد حساب خود /active را لمس نمایید.
         '''
         send_telegram_user(bot, user, text)
 
@@ -120,19 +120,19 @@ def command_separator(update, command):
     return int(update.message.text[len(command) + 3:])
 
 
-def live_command(bot, update, user):
-    if not tasks.get_user_entity(user):
-        return error_text(bot, update, user, 'NoneEntity')
-    user_settings = UserProfile.objects.get(user=user).user_settings
-    live_news_status = user_settings.live_news
-    if not live_news_status:
-        user_settings.live_news = True
-        user_settings.save()
-        text = Emoji.WHITE_HEAVY_CHECK_MARK + ''' ارسال اخبار نشان‌ها به صورت بر خط فعال شد.\n
-   از این پس اخبار نشان‌ها به صورت لحظه ای ارسال می شود.'''
-    else:
-        text = 'ارسال اخبار نشان‌ها به صورت بر خط فعال است.'
-    send_telegram_user(bot, user, text, update)
+# def live_command(bot, update, user):
+#     if not tasks.get_user_entity(user):
+#         return error_text(bot, update, user, 'NoneEntity')
+#     user_settings = UserProfile.objects.get(user=user).user_settings
+#     live_news_status = user_settings.live_news
+#     if not live_news_status:
+#         user_settings.live_news = True
+#         user_settings.save()
+#         text = Emoji.WHITE_HEAVY_CHECK_MARK + ''' ارسال اخبار نشان‌ها به صورت بر خط فعال شد.\n
+#    از این پس اخبار نشان‌ها به صورت لحظه ای ارسال می شود.'''
+#     else:
+#         text = 'ارسال اخبار نشان‌ها به صورت بر خط فعال است.'
+#     send_telegram_user(bot, user, text, update)
 
 
 def browser_command(bot, update, user):
@@ -177,41 +177,41 @@ def newslist_command(bot, update, user):
     prepare_periodic_publish_news(bot, 0, up, alert_no_news=True)
 
 
-def special_command(bot, update, user):
-    delta = timezone.now() - timedelta(hours=20)
-    # exl = ['irna', 'mehrnews', 'fars', 'tasnim', 'codal', 'isna', 'shana',
-    #  'akhbarrasmi', 'sena', 'boursenews', 'naftema']
-    exl = []
-    up = UserProfile.objects.get(user=user)
+# def special_command(bot, update, user):
+#     delta = timezone.now() - timedelta(hours=20)
+#     # exl = ['irna', 'mehrnews', 'fars', 'tasnim', 'codal', 'isna', 'shana',
+#     #  'akhbarrasmi', 'sena', 'boursenews', 'naftema']
+#     exl = []
+#     up = UserProfile.objects.get(user=user)
+#
+#     if up.interest_categories.all().count() == 0:
+#         return error_text(bot, update, user, 'NoCategory')
+#
+#     news = News.objects.filter(base_news__published_date__range=(delta, timezone.now()),
+#                                base_news__all_rss__category_ref__in=up.interest_categories.all()) \
+#         .exclude(base_news__news_agency__name__in=exl) \
+#         .order_by('?')
+#
+#     if not news:
+#         return error_text(bot, update, user, 'NoNews')
+#     news = news[0]
+#     try:
+#         bot_template.publish_news(bot, news, user, page=1, message_id=None)
+#     except News.DoesNotExist:
+#         return error_text(bot, update, user, 'NoneNews')
 
-    if up.interest_categories.all().count() == 0:
-        return error_text(bot, update, user, 'NoCategory')
 
-    news = News.objects.filter(base_news__published_date__range=(delta, timezone.now()),
-                               base_news__all_rss__category_ref__in=up.interest_categories.all()) \
-        .exclude(base_news__news_agency__name__in=exl) \
-        .order_by('?')
-
-    if not news:
-        return error_text(bot, update, user, 'NoNews')
-    news = news[0]
-    try:
-        bot_template.publish_news(bot, news, user, page=1, message_id=None)
-    except News.DoesNotExist:
-        return error_text(bot, update, user, 'NoneNews')
-
-
-def stoplive_command(bot, update, user):
-    user_settings = UserProfile.objects.get(user=user).user_settings
-    live_news_status = user_settings.live_news
-    if live_news_status:
-        user_settings.live_news = False
-        user_settings.save()
-        text = Emoji.CROSS_MARK + 'ارسال اخبار به صورت بر خط قطع شد'
-    else:
-
-        text = 'ارسال اخبار به صورت بر خط غیرفعال است.'
-    send_telegram_user(bot, user, text, update)
+# def stoplive_command(bot, update, user):
+#     user_settings = UserProfile.objects.get(user=user).user_settings
+#     live_news_status = user_settings.live_news
+#     if live_news_status:
+#         user_settings.live_news = False
+#         user_settings.save()
+#         text = Emoji.CROSS_MARK + 'ارسال اخبار به صورت بر خط قطع شد'
+#     else:
+#
+#         text = 'ارسال اخبار به صورت بر خط غیرفعال است.'
+#     send_telegram_user(bot, user, text, update)
 
 
 def contact_command(bot, update, user):
