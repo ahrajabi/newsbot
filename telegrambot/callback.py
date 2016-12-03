@@ -38,15 +38,21 @@ def news_inline_command(bot, update):
     news = News.objects.get(id=news_id)
     p = re.compile(r'[a-z]+')
     title = p.findall(update.callback_query.data.lower())[1]
-    page = UserNews.objects.filter(news=news, user=user)[0].page
+    try:
+        page = UserNews.objects.filter(news=news, user=user)[0].page
+    except IndexError:
+        page = 1
     picture_n = int(d[1])
 
     if title == 'like':
-        set_news_like(user, news, mark='Like')
+        set_news_like(user, news, mark='L')
         ttt = 'پسندش شما ثبت شد!'
-    elif title == 'unlike':
-        set_news_like(user, news, mark='Unlike')
+    elif title == 'discard':
+        set_news_like(user, news, mark='D')
         ttt = 'پسندش شما پس گرفته شد!'
+    elif title == 'unlike':
+        set_news_like(user, news, mark='U')
+        ttt = 'نارضایتی شما ثبت شد!'
     elif title == 'overview':
         page = 1
         ttt = 'خلاصه‌ی خبر'
@@ -73,9 +79,41 @@ def news_inline_command(bot, update):
                                            picture_number=picture_n)
     UserNews.objects.update_or_create(user=user, news=news, defaults={'page': page, 'image_page': picture_n})
     print(update.callback_query.message.chat)
+
     send_telegram_chat(bot, update.callback_query.message.chat.id, text,
                        keyboard=keyboard,
                        message_id=update.callback_query.message.message_id)
+    bot.answerCallbackQuery(update.callback_query.id, text=ttt)
+
+
+def channel_inline_command(bot, update):
+    d = re.compile(r'\d+').findall(update.callback_query.data.lower())
+    news_id = d[0]
+    user = update.callback_query.from_user.up.user
+    news = News.objects.get(id=news_id)
+    p = re.compile(r'[a-z]+')
+    title = p.findall(update.callback_query.data.lower())[1]
+
+    if title == 'like':
+        res = set_news_like(user, news, mark='L')
+    elif title == 'unlike':
+        res = set_news_like(user, news, mark='U')
+    else:
+        res = "?"
+
+    if res == 'L':
+        ttt = 'پسندش شما ثبت شد!'
+    elif res == 'U':
+        ttt = 'نارضایتی شما ثبت شد!'
+    elif res == 'D':
+        ttt = 'نظری از شما ثبت نشد!'
+    else:
+        ttt = 'دستور نامشخص'
+
+    keyboard = news_template.news_keyboard_channel(news)
+    bot.editMessageReplyMarkup(chat_id=update.callback_query.message.chat.id,
+                               message_id=update.callback_query.message.message_id,
+                               reply_markup=keyboard)
     bot.answerCallbackQuery(update.callback_query.id, text=ttt)
 
 
@@ -120,7 +158,7 @@ def continue_inline_command(bot, update):
 
         keyboard = InlineKeyboardMarkup(buttons)
 
-        response = prepare_multiple_sample_news(news_id_list, NEWS_PER_PAGE)[0]
+        response = prepare_multiple_sample_news(news_id_list, NEWS_PER_PAGE)
 
         send_telegram_user(bot, user, response, update, keyboard, update.callback_query.message.message_id)
     else:
@@ -165,7 +203,7 @@ def entitynewslist_inline_command(bot, msg):
     news_list = list(set([item for item in news_ent]))
     output = 'اخبار مرتبط با دسته‌های شما'
     output += '\n'
-    output += prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
+    output += prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)
 
     unl.page = next_page
     unl.save()
@@ -227,7 +265,7 @@ def searchlist_inline_command(bot, update):
 
     news_ent = [item['_id'] for item in similar_news['hits']['hits']]
     news_list = news_ent
-    output = prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
+    output = prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)
 
     unl.page = next_page
     unl.save()

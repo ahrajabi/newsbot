@@ -1,43 +1,7 @@
-import wikipedia
-from telegram import user
-from rss.ml import word_tokenize
-from telegrambot.models import UserProfile, UserLiveNews
-
-from .models import UserEntity, Entity, NewsEntity
+from rss.ml import word_tokenize, remove_no_text, bi_gram, tri_gram
+from telegrambot.models import UserProfile
+from entities.models import UserEntity, Entity, NewsEntity
 from telegrambot.models import UserLiveNews
-
-
-# wikipedia.set_lang('fa')
-
-#
-# def get_entity_contain(name):
-#     wik = wikipedia.search(name, results=3, suggestion=True)
-#     ret = list()
-#     print(wik[0])
-#     for item in wik[0]:
-#         ent = Entity.objects.filter(wiki_name=item)
-#         if not ent:
-#             try:
-#                 wiki_page = wikipedia.page(item, redirect=True, auto_suggest=True)
-#                 ent = Entity.objects.create(name=item, wiki_name=item, status='P',
-#                                             summary=wiki_page.summary)
-#                 ret.append(ent)
-#             except wikipedia.exceptions.DisambiguationError as e:
-#                 wiki_page = wikipedia.page(e.options, redirect=True, auto_suggest=True)
-#                 ent = Entity.objects.create(name=e.options, wiki_name=e.options, status='P',
-#                                             summary=wiki_page.summary)
-#                 ret.append(ent)
-#
-#         else:
-#             ret.extend(ent)
-#     return ret
-
-
-# def get_entity(e_id):
-#     s = Entity.objects.filter(id=e_id)
-#     if not s:
-#         return None
-#     return s[0]
 
 
 def get_user_entity(user):
@@ -80,7 +44,6 @@ def set_entity(user, entity_id, mark=True):
 #     return True
 
 
-#َWe can use of yield for get running function!
 def get_entity_news(news):
     entity = Entity.objects.filter(status__in=['N', 'P', 'A'])
 
@@ -91,14 +54,17 @@ def get_entity_news(news):
         word_occurrence = 0
 
         for word in word_list:
-            if word in word_tokenize(news.base_news.title) or word in word_tokenize(news.summary) or\
-                            word in word_tokenize(news.body):
-                word_occurrence +=1
+            text = remove_no_text(news.body)
+            check_list = word_tokenize(text)
+            check_list.extend(bi_gram(text))
+            check_list.extend(tri_gram(text))
 
+            if word in check_list:
+                word_occurrence += 1
             if word_occurrence >= en.min_should:
                 news_ent.append({'entity': en, 'score': 1})
                 NewsEntity.objects.create(news=news, entity=en, score=1)
-                en.news_count +=1
+                en.news_count += 1
                 en.latest_news = news
                 en.save()
                 break

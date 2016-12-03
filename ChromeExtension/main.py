@@ -10,6 +10,7 @@ from entities.tasks import get_user_entity
 from newsbot.settings import NEWS_PER_PAGE
 from django.utils import timezone
 from shortenersite.views import shorten
+from telegrambot.news_template import news_image_page
 
 
 @api_view(['GET'])
@@ -51,7 +52,8 @@ def get_user_news(username):
                 'title': news.base_news.title,
                 'published_date': timezone.localtime(news.base_news.published_date),
                 'link': link,
-                'agency': news.base_news.news_agency.fa_name
+                'agency': news.base_news.news_agency.fa_name,
+                'image_link': news_image_page(news),
                 }
         response.append(news)
     return response

@@ -80,6 +80,7 @@ class News(models.Model):
     base_news = models.OneToOneField(BaseNews, verbose_name='Related base news', null=True, blank=True)
     pic_number = models.PositiveSmallIntegerField('Number of Pictures')
     like_count = models.PositiveIntegerField('Number of Likes', default=0)
+    unlike_count = models.PositiveIntegerField('Number of Un-Likes', default=0)
     photo = models.ImageField(upload_to='telegram/%Y/%m/%d/', null=True, blank=True)
     file = models.FileField(upload_to='telegram/%Y/%m/%d/', null=True, blank=True)
     pdf_link = models.URLField('pdf link', max_length=600, null=True, blank=True)
@@ -101,18 +102,21 @@ class ImageUrls(models.Model):
 
 class NewsLike(models.Model):
     STATUS = (
-        (True, 'Like'),
-        (False, 'Unlike'),
+        ('L', 'Like'),
+        ('U', 'Unlike'),
+        ('D', 'Discard'),
     )
 
     news = models.ForeignKey(News)
     user = models.ForeignKey(User)
-    status = models.BooleanField(default=True, choices=STATUS)
+    vote = models.CharField(default='D', max_length=1, choices=STATUS)
 
 
 class TelegramPost(models.Model):
     id = models.CharField(max_length=63, verbose_name="Message ID", primary_key=True)
     channel_id = models.CharField(max_length=63, verbose_name='Peer ID')
+    news = models.OneToOneField(News, verbose_name='News', null=True, blank=True)
+    reply_to = models.ForeignKey('self', verbose_name='Replied to', null=True, blank=True)
 
 
 class BadNews(News):

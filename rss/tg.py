@@ -1,8 +1,7 @@
 from django.core.files import File
-
+from django.utils import timezone
 from rss.models import News, NewsAgency, BaseNews, TelegramPost, BadNews
 from pytg import Telegram
-from pytg.utils import coroutine
 from datetime import datetime
 from django.conf import settings
 from pytg.exceptions import NoResponse
@@ -35,13 +34,20 @@ def main_loop(sender):
             continue
 
         for msg in history:
+            try:
+                reply_to = TelegramPost.objects.get(id=msg['reply_id'])
+            except KeyError:
+                reply_to = None
+            except TelegramPost.DoesNotExist:
+                reply_to = None
 
             if not msg.event == 'message':
                 continue
             if not msg['from']['id'] == channel['id']:
                 continue
 
-            obj, created = TelegramPost.objects.get_or_create(id=msg['id'], channel_id=channel['id'])
+            obj, created = TelegramPost.objects.get_or_create(id=msg['id'], channel_id=channel['id'],
+                                                              defaults={'reply_to': reply_to})
             if not created:
                 continue
 
@@ -84,19 +90,21 @@ def main_loop(sender):
             else:
                 model = BadNews
 
-            obj = BaseNews.objects.create(title=title,
-                                          news_agency=news_agency,
-                                          published_date=datetime.fromtimestamp(msg.date),
-                                          source_type=3)
+            obj_base = BaseNews.objects.create(title=title,
+                                               news_agency=news_agency,
+                                               published_date=timezone.make_aware(datetime.fromtimestamp(msg.date)),
+                                               source_type=3)
 
-            news = model.objects.create(base_news=obj,
+            news = model.objects.create(base_news=obj_base,
                                         body=body,
                                         pic_number=0,
                                         summary=body,
                                         photo=image_file,
                                         file=file)
 
-            obj.complete_news = True
+            obj_base.complete_news = True
+            obj_base.save()
+            obj.news = news
             obj.save()
 
 

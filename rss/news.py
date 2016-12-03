@@ -80,22 +80,60 @@ def save_news(base_news):
     return True
 
 
-def set_news_like(user, news, mark='Like'):
-    obj, created = NewsLike.objects.update_or_create(news=news, user=user,
-                                                     defaults={'status': (mark == 'Like')})
-    if mark == 'Like':
-        news.like_count += 1
-    elif mark == 'Unlike':
-        if news.like_count > 0:
+def set_news_like(user, news, mark='L'):
+    obj, created = NewsLike.objects.update_or_create(news=news, user=user)
+
+    if mark == 'L':
+        if obj.vote == 'D':
+            news.like_count += 1
+            obj.vote = 'L'
+            obj.save()
+            news.save()
+        elif obj.vote == 'U':
+            news.like_count += 1
+            news.unlike_count -= 1
+            obj.vote = 'L'
+            obj.save()
+            news.save()
+        elif obj.vote == 'L':
             news.like_count -= 1
-    news.save()
+            obj.vote = 'D'
+            obj.save()
+            news.save()
+    elif mark == 'U':
+        if obj.vote == 'D':
+            news.unlike_count += 1
+            obj.vote = 'U'
+            obj.save()
+            news.save()
+        elif obj.vote == 'L':
+            news.like_count -= 1
+            news.unlike_count += 1
+            obj.vote = 'U'
+            obj.save()
+            news.save()
+        elif obj.vote == 'U':
+            news.unlike_count -= 1
+            obj.vote = 'D'
+            obj.save()
+            news.save()
+    elif mark == 'D':
+        if obj.vote == 'U':
+            news.unlike_count -= 1
+            obj.vote = 'D'
+            obj.save()
+            news.save()
+        elif obj.vote == 'L':
+            news.like_count -= 1
+            obj.vote = 'D'
+            obj.save()
+            news.save()
+    return obj.vote
 
-    return obj
 
-
-def is_liked_news(user, news):
+def user_news_vote(user, news):
     newslike = NewsLike.objects.filter(news=news, user=user)
     if newslike:
-        return newslike[0].status
+        return newslike[0].vote
     else:
-        return False
+        return 'D'

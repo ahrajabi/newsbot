@@ -52,7 +52,7 @@ def search_box_result2(bot, update, user, msg_id=None, text=None):
     if len(en_validation_hits) >= MIN_HITS_ENTITY_VALIDATION:
         hits = elastic_search_entity(text, SAMPLE_NEWS_COUNT + 1)
 
-        h_response, h_response_len = prepare_multiple_sample_news(list(map(int, [hit['_id'] for hit in hits])),
+        h_response = prepare_multiple_sample_news(list(map(int, [hit['_id'] for hit in hits])),
                                                                   SAMPLE_NEWS_COUNT)
         from django.db.models import Q
         entity = Entity.objects.filter(Q(name=text, status='A'))
@@ -98,12 +98,12 @@ def search_box_result(bot, update, user, msg_id=None, text=None):
         text = normalize(update.message.text)
 
     # def similar_news_to_query(query, size=10, days=7, end_time='now', offset=0, sort='_score'):
-    similar_news = similar_news_to_query(text, settings.NEWS_PER_PAGE,
+    similar_news = similar_news_to_query(text, size=settings.NEWS_PER_PAGE,
                                          start_time=timezone.now() - datetime.timedelta(days=DAYS_FOR_SEARCH_NEWS))
 
     try:
         news_ent = [item['_id'] for item in similar_news['hits']['hits']]
-    except:
+    except KeyError:
         print("ES DIDN'T RETURN RIGHT JSON! See publish.py")
         return False
 
@@ -118,7 +118,7 @@ def search_box_result(bot, update, user, msg_id=None, text=None):
     if len(news_ent) > 0:
         news_list = news_ent
 
-        output = prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
+        output = prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)
         keyboard = None
         print("HELLO")
         if similar_news['hits']['total'] > settings.NEWS_PER_PAGE:

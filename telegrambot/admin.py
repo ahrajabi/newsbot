@@ -4,19 +4,24 @@ from django.contrib import admin
 from .models import UserProfile, UserAlert, UserNews, UserNewsList, UserSettings, MessageFromUser, UserLiveNews, \
     ChannelPublish
 
+
 def username(obj):
     return obj.user.username
+
 
 def email(obj):
     return obj.user.email
 
+
 def joined(obj):
     return obj.user.date_joined
 
-class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('telegram_id', 'activated', username, email, joined, 'first_name', 'last_name', 'last_chat')
 
-admin.site.register(UserProfile,UserProfileAdmin)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('telegram_id', 'private', 'activated', 'stopped', username, email, joined,
+                    'first_name', 'last_name', 'last_chat')
+
+admin.site.register(UserProfile, UserProfileAdmin)
 
 
 class UserAlertListAdmin(admin.ModelAdmin):

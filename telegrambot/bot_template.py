@@ -1,8 +1,8 @@
-from telegram.emoji import Emoji
 from telegrambot.models import UserProfile, UserNews
 from entities import tasks
 from telegrambot.bot_send import send_telegram_user
 from telegrambot.news_template import news_page, news_keyboard
+from rss.models import TelegramPost
 
 
 def show_user_entity(bot, msg, user, entities):
@@ -13,7 +13,7 @@ def show_user_entity(bot, msg, user, entities):
     else:
         text = ''' شما هیچ نشانی را دنبال نمی‌کنید %s
         می‌توانید موضوعات مورد علاقه خود (مثل پتروشیمی) را تایپ %s و سپس با افزودن آن به لیست نشان‌ها، دنبال نمایید.
-        ''' % (Emoji.FACE_SCREAMING_IN_FEAR, Emoji.WHITE_DOWN_POINTING_BACKHAND_INDEX)
+        ''' % ('😱', '👇')
     send_telegram_user(bot, user, text, msg)
 
 
@@ -51,13 +51,20 @@ def bot_help(bot, msg, user):
         else:
             menu.append(('/active', ' ',
                          'دریافت پیام از روبات را متوقف کرده‌اید. توسط این گزینه می‌توانید این محدودیت را بردارید.'))
-    text = Emoji.LEFT_POINTING_MAGNIFYING_GLASS + 'راهنما' + '\n\n'
+    text = '🔍' + 'راهنما' + '\n\n'
     for i in menu:
-        text += Emoji.WHITE_RIGHT_POINTING_BACKHAND_INDEX + i[0] + ' ' + i[1] + '\n❔' + i[2] + '\n\n'
+        text += '👉' + i[0] + ' ' + i[1] + '\n❔' + i[2] + '\n\n'
     send_telegram_user(bot, user, text, msg)
 
 
 def publish_news(bot, news, user, page=1, message_id=None, **kwargs):
+    if news.base_news.source_type == 3:
+        try:
+            tp = TelegramPost.objects.get(news=news)
+            if tp and tp.reply:
+                publish_news(bot, tp.reply.news, user)
+        except TelegramPost.DoesNotExist:
+            pass
     text = news_page(news, page, picture_number=0, **kwargs)
     keyboard = news_keyboard(news, user, page, picture_number=0)
     UserNews.objects.update_or_create(user=user, news=news, defaults={'page': 1, 'image_page': 1})
@@ -65,22 +72,22 @@ def publish_news(bot, news, user, page=1, message_id=None, **kwargs):
 
 
 def after_user_add_entity(bot, msg, user, entity, entities):
-    text = "دسته ' %s ' اضافه شد %s" % (entity, Emoji.PUSHPIN)
+    text = "دسته ' %s ' اضافه شد %s" % (entity, '📌')
     send_telegram_user(bot, user, text, msg)
     show_user_entity(bot, msg, user, entities)
 
 
 def prepare_advice_entity_link(entity):
-    return Emoji.SMALL_ORANGE_DIAMOND + "/add_"+str(entity.id)+" " + entity.name + ""
+    return '🔸' + "/add_"+str(entity.id)+" " + entity.name + ""
 
 
 def show_related_entities(related_entities):
-    text = Emoji.HEAVY_MINUS_SIGN * 6 + Emoji.WHITE_LEFT_POINTING_BACKHAND_INDEX
+    text = '➖' * 6 + '👈'
     text += " دسته های مرتبط "
-    text += Emoji.WHITE_RIGHT_POINTING_BACKHAND_INDEX + Emoji.HEAVY_MINUS_SIGN * 6
+    text += '👉' + '➖' * 6
     text += '''
      %s نشان‌های مرتبط با متن وارد شده در زیر آمده است.
-    با انتخاب هرکدام، می‌توانید اخبار مرتبط با آن را به صورت بر خط دنبال نمایید.\n''' % Emoji.BOOKMARK
+    با انتخاب هرکدام، می‌توانید اخبار مرتبط با آن را به صورت بر خط دنبال نمایید.\n''' % '🔖'
     # for entity in (related_entities.sort(key=lambda e: e.followers, reverse=True)):
     for entity in related_entities:
         text += prepare_advice_entity_link(entity) + '\n'

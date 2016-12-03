@@ -3,6 +3,7 @@ from nltk import bigrams, trigrams
 from elasticsearch import Elasticsearch
 
 from newsbot.settings import ELASTIC_URL
+import re
 
 norm = hazm.Normalizer()
 lemmatizer = hazm.Lemmatizer()
@@ -38,11 +39,22 @@ def remove_emoji(text):
 
 
 def remove_link(text):
+    text = re.sub(r'http\S+', "", text)
+    text = re.sub(r'@\S+', "", text)
+    text = re.sub(r'\S+goo.gl\S+', "", text)
     return text
 
 
-def remove_sign(text):
-    return text
+def remove_no_text(text):
+    ret = []
+    valid = "ضْصٌثٍقًفُغِعَهّخحجچشؤسئیيبإلأاآتةنمکگظكطٓزژرذ‌دٔپءو۱۲۳۴۵۶۷۸۹۰ ‌"
+    for c in text:
+        if c in valid:
+            ret += c
+        else:
+            ret += ' '
+
+    return "".join(ret)
 
 
 def sent_tokenize(text, num_char=-1):

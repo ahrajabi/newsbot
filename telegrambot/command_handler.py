@@ -174,7 +174,7 @@ def newslist_command(bot, update, user):
         return error_text(bot, update, user, 'NoneEntity')
     from telegrambot.publish import prepare_periodic_publish_news
     up = UserProfile.objects.get(user=user)
-    prepare_periodic_publish_news(bot, 0, up, no_news_post=True)
+    prepare_periodic_publish_news(bot, 0, up, alert_no_news=True)
 
 
 def special_command(bot, update, user):

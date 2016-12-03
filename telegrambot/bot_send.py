@@ -11,7 +11,7 @@ def default_keyboard():
     return ReplyKeyboardMarkup(keyboard=[
         [
             MAIN_BUTTONS[4][0],
-            MAIN_BUTTONS[0][0]
+            # MAIN_BUTTONS[0][0]
         ]
     ], resize_keyboard=True)
 

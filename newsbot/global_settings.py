@@ -1,7 +1,7 @@
 SAMPLE_NEWS_COUNT = 3
 MIN_HITS_ENTITY_VALIDATION = 3
 NEWS_PER_PAGE = 5
-DAYS_FOR_SEARCH_NEWS = 40
+DAYS_FOR_SEARCH_NEWS = 10
 REQUIRED_ENTITY = 3
 MAIN_BUTTONS = [
     ('📢 خبرهای نشان شده', 'newslist_command',),

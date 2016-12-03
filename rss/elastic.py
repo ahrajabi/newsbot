@@ -2,7 +2,7 @@ import datetime
 from django.conf import settings
 from elasticsearch import Elasticsearch
 import six
-from rss.models import News, BaseNews
+from rss.models import News
 
 es = Elasticsearch([settings.ELASTIC_URL])
 
@@ -88,7 +88,6 @@ def elastic_search_entity(query, size, offset=0):
 
     }
     r = es.search(index=settings.ELASTIC_NEWS['index'], body=body, request_timeout=20)
-    for x in r['hits']['hits']: print(x['_score'], x['_id'])
     return r['hits']['hits']
 
 
@@ -149,7 +148,7 @@ def more_like_this(query, number):
 
 
 def similar_news_to_query(query, size=10, start_time=7, end_time='now', offset=0, sort='_score'):
-    ''' return most similar docs to query where published in range (today - days, today), sorted by score'''
+    """ return most similar docs to query where published in range (today - days, today), sorted by score"""
     # TODO limit results that have score more than thresholde
     if not isinstance(start_time, six.string_types):
         start_time = start_time.strftime('%Y-%m-%dT%H:%M:%S')
@@ -192,8 +191,6 @@ def news_with_terms(entity_list, size=10, start_time='now-3h', end_time='now', o
 
     if not isinstance(end_time, six.string_types):
         end_time = end_time.strftime('%Y-%m-%dT%H:%M:%S')
-
-    print(start_time)
 
     mquery = []
     for entity_item in entity_list:
@@ -316,12 +313,6 @@ def news_elastic_setup():
     es.indices.put_settings(index=index, body=settings.NEWS_SETTING['index'])
     es.indices.open(index)
     es.indices.put_settings(index=index, body={'index': settings.ELASTIC_NEWS['settings']})
-
-
-
-
-
-
 
     #
     # {

@@ -22,4 +22,5 @@ from entities import views
 urlpatterns = [
     url(r'^(?P<entity_id>[0-9]+)$', views.symbols_id, name='Symbols_id'),
     url(r'^$', views.symbols, name='symbols'),
+    url(r'^test$', views.symbols_test.as_view(), name='symbols_test'),
 ]

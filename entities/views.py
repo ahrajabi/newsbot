@@ -2,6 +2,9 @@ from django.shortcuts import render
 from entities.models import Entity
 from rss.elastic import news_with_terms
 from rss.models import News
+from django import forms
+from django.views.generic.edit import FormView
+
 # Create your views here.
 
 
@@ -32,3 +35,27 @@ def symbols_id(request, entity_id):
         response.append(news)
 
     return render(request, "symbols-id.html", {'items': response})
+
+
+class ContactForm(forms.Form):
+    name = forms.CharField()
+    message = forms.CharField(widget=forms.Textarea)
+
+    def send_email(self):
+        # send email using the self.cleaned_data dictionary
+        pass
+
+
+class symbols_test(FormView):
+    template_name = 'symbols-test.html'
+    form_class = ContactForm
+    success_url = '/thanks/'
+
+    def form_valid(self, form):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        form.send_email()
+        return super(symbols_test, self).form_valid(form)
+
+
+

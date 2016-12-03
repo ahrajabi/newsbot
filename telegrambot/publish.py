@@ -6,17 +6,18 @@ from telegram.error import Unauthorized
 from telegram import InlineKeyboardMarkup
 from telegram.inlinekeyboardbutton import InlineKeyboardButton
 from rss import elastic
+from rss.models import News
 from entities.tasks import get_user_entity
 from telegrambot import news_template, bot_send
 from telegrambot.models import UserNewsList, UserProfile, UserLiveNews
 from telegrambot.command_handler import deactive_profile
-from telegram.emoji import Emoji
+from telegrambot.bot_template import publish_news
 
 
 def publish_handler(bot, job):
     try:
         cache.incr('publish_handler_counter')
-    except:
+    except ValueError:
         cache.set('publish_handler_counter', 1)
     cnt = cache.get('publish_handler_counter')
 
@@ -29,23 +30,23 @@ def publish_handler(bot, job):
     periodic_publish_news(bot, job)
 
 
-def prepare_periodic_publish_news(bot, job, up, no_news_post=False):
+def prepare_periodic_publish_news(bot, job, up, alert_no_news=False):
     del job
     user = up.user
     interval = up.user_settings.interval_news_list
     delta = timezone.now() - timedelta(minutes=interval)
-    if up.user_settings.last_news_list:
+
+    if hasattr(up.user_settings, 'last_news_list') and up.user_settings.last_news_list:
         start_time = up.user_settings.last_news_list.datetime_publish
     else:
         start_time = delta
-
     el_news = elastic.news_with_terms(entity_list=get_user_entity(user),
                                       size=settings.NEWS_PER_PAGE,
                                       start_time=start_time)
 
     try:
         news_ent = [item['_id'] for item in el_news['hits']['hits']]
-    except:
+    except KeyError:
         print("ES DIDN'T RETURN RIGHT JSON! See publish.py")
         return False
 
@@ -53,16 +54,26 @@ def prepare_periodic_publish_news(bot, job, up, no_news_post=False):
                                       datetime_start=start_time,
                                       datetime_publish=timezone.now(),
                                       number_of_news=el_news['hits']['total'],
-                                      page=1
-                                      )
+                                      page=1)
 
     up.user_settings.last_news_list = unl
     up.user_settings.save()
-    if len(news_ent) > 0:
-        news_list = list(set([item for item in news_ent]))
-        output = 'اخبار مرتبط با دسته‌های شما'
+    if len(news_ent) == 0:
+        if alert_no_news:
+            output = '👌' + 'شما تمام خبرهای مرتبط با دسته های خود را خوانده اید.'
+            bot_send.send_telegram_user(bot, user, output)
+    elif len(news_ent) < 4:
+        for item in news_ent:
+            try:
+                news = News.objects.get(id=item)
+                publish_news(bot, news, user)
+            except News.DoesNotExist:
+                pass
+    else:
+        news_list = news_ent
+        output = 'اخبار مرتبط با نشان‌های شما'
         output += '\n'
-        output += news_template.prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)[0]
+        output += news_template.prepare_multiple_sample_news(news_list, settings.NEWS_PER_PAGE)
         keyboard = None
         if el_news['hits']['total'] > settings.NEWS_PER_PAGE:
             buttons = [[
@@ -76,10 +87,6 @@ def prepare_periodic_publish_news(bot, job, up, no_news_post=False):
             unl.save()
         except Unauthorized:
             deactive_profile(up)
-    else:
-        if no_news_post:
-            output = Emoji.OK_HAND_SIGN + 'شما تمام خبرهای مرتبط با دسته های خود را خوانده اید.'
-            bot_send.send_telegram_user(bot, user, output)
 
 
 def periodic_publish_news(bot, job):
@@ -88,7 +95,7 @@ def periodic_publish_news(bot, job):
     if 0 < hour_now < 6:
         return False
 
-    for up in UserProfile.objects.all().order_by('?'):
+    for up in UserProfile.objects.all():
         interval = up.user_settings.interval_news_list
         delta = timezone.now() - timedelta(minutes=interval)
 
@@ -97,6 +104,7 @@ def periodic_publish_news(bot, job):
 
         if up.user_settings.last_news_list and up.user_settings.last_news_list.datetime_publish >= delta:
             continue
+
         prepare_periodic_publish_news(bot, job, up)
 
 
@@ -113,7 +121,7 @@ def live_publish_news(bot, job):
             news_list = list(set([item.news.id for item in news_ent]))
             output = 'اخبار زنده نشان‌های شما'
             output += '\n'
-            output += news_template.prepare_multiple_sample_news(news_list, 20)[0]
+            output += news_template.prepare_multiple_sample_news(news_list, 20)
             try:
                 bot_send.send_telegram_user(bot, up.user, output)
             except Unauthorized:

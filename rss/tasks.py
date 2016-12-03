@@ -4,33 +4,34 @@ from rss.models import RssFeeds
 from rss.models import BaseNews, News
 import datetime
 from rss.news import save_news
-from rss.elastic import source_generator, es
+from rss.ml import normalize
+from rss.elastic import es
 from elasticsearch import helpers
 from django.core.cache import cache
-from hashlib import md5
 import random
 from django.conf import settings
 from rss.codal import get_new_codal
 from django.utils import timezone
 from rss.heterogeneous_rss import get_all_hg_news
+
 LOCK_EXPIRE = 60 * 2
 
 
 @shared_task
 def get_all_new_news():
-    HOUR_NOW = timezone.localtime(timezone.now()).hour
+    hour_now = timezone.localtime(timezone.now()).hour
     # Reject get news in 24:00 - 06:00
-    if 0 < HOUR_NOW < 6:
+    if 0 < hour_now< 6:
         return False
 
-    THREAD_RSS_NUM = settings.CELERY_WORKER_NUM - 1
+    thread_rss_num = settings.CELERY_WORKER_NUM - 1
     all_rss = RssFeeds.objects.filter(activation=True)
     all_rss = [item.id for item in all_rss]
 
-    for j in range(THREAD_RSS_NUM):
-        rss_list = all_rss[j::THREAD_RSS_NUM]
+    for j in range(thread_rss_num):
+        rss_list = all_rss[j::thread_rss_num]
         print(rss_list)
-        lock_id = '{0}-lock-{1}-{2}'.format('rss', str(j), str(THREAD_RSS_NUM))
+        lock_id = '{0}-lock-{1}-{2}'.format('rss', str(j), str(thread_rss_num))
         acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
         release_lock = lambda: cache.delete(lock_id)
         get_new_rss_async.delay(rss_list)
@@ -49,9 +50,9 @@ def get_all_new_news():
 
 @shared_task
 def telegram_crawler_async():
-    HOUR_NOW = timezone.localtime(timezone.now()).hour
+    hour_now = timezone.localtime(timezone.now()).hour
     # Reject get news in 24:00 - 06:00
-    if 0 < HOUR_NOW < 6:
+    if 0 < hour_now < 6:
         return False
     from rss import tg
     tg.telegram_crawler()
@@ -62,8 +63,8 @@ def get_new_rss_async(rss_list):
     start_time = datetime.datetime.now()
 
     random.shuffle(rss_list)
-    for id in rss_list:
-        rss = RssFeeds.objects.get(id=id)
+    for item in rss_list:
+        rss = RssFeeds.objects.get(id=item)
         print(rss.news_agency.name)
         if not rss.activation:
             continue
@@ -72,8 +73,8 @@ def get_new_rss_async(rss_list):
     print('GET NEW RSS', datetime.datetime.now() - start_time)
 
 
-def save_base_news_async(id):
-    obj = BaseNews.objects.get(id=id)
+def save_base_news_async(ide):
+    obj = BaseNews.objects.get(id=ide)
     if obj.complete_news:
         return
     try:
@@ -89,7 +90,8 @@ def bulk_save_to_elastic():
     sources = list()
     for obj in News.objects.filter(base_news__save_to_elastic=False)[0:500]:
         fields_keys = ('body', 'summary', 'title', 'published_date')
-        fields_values = (obj.body, obj.summary, obj.base_news.title, obj.base_news.published_date)
+        fields_values = (normalize(obj.body), normalize(obj.summary),
+                         normalize(obj.base_news.title), obj.base_news.published_date)
         source = dict(zip(fields_keys, fields_values))
         sources.append((obj, source))
 

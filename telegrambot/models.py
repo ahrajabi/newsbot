@@ -104,3 +104,6 @@ class UserLiveNews(models.Model):
 class ChannelPublish(models.Model):
     channel_username = models.CharField(max_length=120)
     last_news = models.PositiveIntegerField(default=0)
+    send_codal = models.BooleanField(default=False)
+    send_channel = models.BooleanField(default=False)
+    send_news_agency = models.BooleanField(default=False)

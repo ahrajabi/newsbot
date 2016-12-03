@@ -7,7 +7,7 @@ from django.utils import timezone
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from rss.models import News
 from rss.models import ImageUrls
-from rss.news import is_liked_news
+from rss.news import user_news_vote
 from entities.models import NewsEntity
 from rss.elastic import more_like_this
 from rss.ml import normalize, sent_tokenize
@@ -89,14 +89,17 @@ def prepare_multiple_sample_news(news_id_list, total_news):
         except News.DoesNotExist:
             continue
 
-    return text, news_count
+    return text
 
 
 def news_image_page(news, picture_number=0):
     # TODO fix not found image urls
     image_url = ImageUrls.objects.filter(news=news)
     if image_url:
-        image_url = image_url[picture_number].img_url
+        try:
+            image_url = image_url[picture_number].img_url
+        except KeyError:
+            return None
     elif news.photo:
         image_url = settings.SITE_URL + news.photo.url
     else:
@@ -104,13 +107,33 @@ def news_image_page(news, picture_number=0):
     return image_url
 
 
-def news_keyboard(news, user=None, page=1, picture_number=0):
+def news_keyboard_channel(news):
     like = InlineKeyboardButton(text=Emoji.THUMBS_UP_SIGN + "(" + normalize(str(news.like_count)) + ")",
+                                callback_data='channel-' + str(news.id) + '-like')
+
+    unlike = InlineKeyboardButton(text=Emoji.THUMBS_DOWN_SIGN + "(" + normalize(str(news.unlike_count)) + ")",
+                                  callback_data='channel-' + str(news.id) + '-unlike')
+
+    buttons = list()
+    for item in [[unlike, like]]:
+        buttons.append([key for key in item if key])
+    return InlineKeyboardMarkup(buttons)
+
+
+def news_keyboard(news, user=None, page=1, picture_number=0):
+    like = InlineKeyboardButton(text="👍🏻" + "(" + normalize(str(news.like_count)) + ")",
                                 callback_data='news-' + str(news.id) + '-like-' + str(picture_number))
 
-    if user and is_liked_news(news=news, user=user):
-        like = InlineKeyboardButton(text=Emoji.THUMBS_DOWN_SIGN + "(" + normalize(str(news.like_count)) + ")",
-                                    callback_data='news-' + str(news.id) + '-unlike-' + str(picture_number))
+    if user and (user_news_vote(news=news, user=user) == 'L'):
+        like = InlineKeyboardButton(text="👍" + "(" + normalize(str(news.like_count)) + ")",
+                                    callback_data='news-' + str(news.id) + '-discard-' + str(picture_number))
+
+    unlike = InlineKeyboardButton(text="👎🏻" + "(" + normalize(str(news.unlike_count)) + ")",
+                                callback_data='news-' + str(news.id) + '-unlike-' + str(picture_number))
+
+    if user and (user_news_vote(news=news, user=user) == 'U'):
+        unlike = InlineKeyboardButton(text="👎" + "(" + normalize(str(news.unlike_count)) + ")",
+                                    callback_data='news-' + str(news.id) + '-discard-' + str(picture_number))
 
     full_button = InlineKeyboardButton(text='متن کامل خبر',
                                        callback_data='news-' + str(news.id) + '-full-' + str(picture_number))
@@ -123,6 +146,7 @@ def news_keyboard(news, user=None, page=1, picture_number=0):
     first_image_button = InlineKeyboardButton(text='عکس اول', callback_data='news-' + str(news.id) + '-img' +
                                                                             str(picture_number))
     image_button = None
+
     if news.pic_number > 1 and page == 1:
         if picture_number < news.pic_number - 1:
             image_button = next_image_button
@@ -130,21 +154,25 @@ def news_keyboard(news, user=None, page=1, picture_number=0):
             image_button = first_image_button
     buttons = list()
     keyboard = None
+
+    if news.base_news.source_type == 3:
+        full_button = None
+
     if page == 1:
         for item in [[full_button, image_button],
-                     [related_button, like]]:
+                     [related_button, unlike, like]]:
             buttons.append([key for key in item if key])
-        keyboard = InlineKeyboardMarkup(buttons)
+        return InlineKeyboardMarkup(buttons)
     elif page == 2:
         for item in [[overview_button],
-                     [related_button, like]]:
+                     [related_button, unlike, like]]:
             buttons.append([key for key in item if key])
-        keyboard = InlineKeyboardMarkup(buttons)
+        return InlineKeyboardMarkup(buttons)
     elif page == 3:
         for item in [[overview_button, full_button],
-                     [related_button, like]]:
+                     [related_button, unlike, like]]:
             buttons.append([key for key in item if key])
-        keyboard = InlineKeyboardMarkup(buttons)
+        return InlineKeyboardMarkup(buttons)
     return keyboard
 
 
@@ -196,6 +224,6 @@ def news_page(news, page=1, picture_number=0, **kwargs):
     elif page == 3:
 
         related = more_like_this(news.base_news.title, 5)
-        text, no_text = prepare_multiple_sample_news(related, 5)
+        text = prepare_multiple_sample_news(related, 5)
 
     return text

@@ -30,7 +30,7 @@ def handler(bot, msg):
             id=query,
             title="لیست جدیدترین خبر‌های %s"%(query),
             input_message_content=InputTextMessageContent(
-                news_template.prepare_multiple_sample_news(news_ent, settings.NEWS_PER_PAGE, inline=True)[0],
+                news_template.prepare_multiple_sample_news(news_ent, settings.NEWS_PER_PAGE, inline=True),
                 parse_mode=ParseMode.HTML
             )
         )
