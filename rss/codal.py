@@ -39,16 +39,27 @@ def get_new_codal():
     rows = page_soup.select('.ReportListGrid tr')
     for item in rows[1:]:
         td = item.select('td')
+
         link = td[2].select('a')[0]['href']
         if not link.startswith('http'):
             link = 'http://codal.ir/' + link
+
+        try:
+            if 'PDFIcon' in td[6].contents[1]['class']:
+                pdf_link = td[6].contents[1]['href']
+            else:
+                pdf_link = None
+        except KeyError:
+            pdf_link = None
+
         data.append({
             "namad": normalize(td[0].text.strip()),
             "company": normalize(td[1].text.strip()),
             "title": normalize(td[2].text.strip()),
             "time": normalize(td[3].text.strip()),
             "datetime": farsidate_to_date(td[3].text.strip()),
-            "link": link
+            "link": link,
+            "pdf_link": pdf_link
         })
 
     codalagency = NewsAgency.objects.get(name='codal')
@@ -67,7 +78,8 @@ def get_new_codal():
             news, is_created = News.objects.update_or_create(base_news=obj,
                                                              defaults={'body': body,
                                                                        'pic_number': 0,
-                                                                       'summary': body,})
+                                                                       'summary': body,
+                                                                       'pdf_link': item['pdf_link'],})
             if is_created:
                 obj.complete_news = True
                 obj.save()
