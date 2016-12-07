@@ -65,6 +65,8 @@ def publish_news(bot, news, user, page=1, message_id=None, **kwargs):
                 publish_news(bot, tp.reply.news, user)
         except TelegramPost.DoesNotExist:
             pass
+        except AttributeError:
+            pass
     text = news_page(news, page, picture_number=0, **kwargs)
     keyboard = news_keyboard(news, user, page, picture_number=0)
     UserNews.objects.update_or_create(user=user, news=news, defaults={'page': 1, 'image_page': 1})
