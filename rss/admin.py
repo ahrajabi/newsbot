@@ -1,7 +1,7 @@
 from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
 
-from .models import RssFeeds, News, BaseNews, ImageUrls, NewsLike, CategoryCode, NewsAgency, TelegramPost
+from .models import RssFeeds, News, BaseNews, ImageUrls, NewsLike, CategoryCode, NewsAgency, TelegramPost, BadNews
 
 
 def related_obj_id(obj):
@@ -17,6 +17,12 @@ class RssAdmin(admin.ModelAdmin):
 class NewsAdmin(admin.ModelAdmin):
     list_display = [x.name for x in News._meta.local_fields]
     list_display.remove('body')
+    search_fields = ('body', 'summary')
+
+@admin.register(BadNews)
+class NewsAdmin(admin.ModelAdmin):
+    list_display = [x.name for x in BadNews._meta.fields]
+    search_fields = ('body', 'summary')
 
 
 @admin.register(BaseNews)
