@@ -160,17 +160,17 @@ def news_keyboard(news, user=None, page=1, picture_number=0):
 
     if page == 1:
         for item in [[full_button, image_button],
-                     [related_button, unlike, like]]:
+                     [unlike, like]]:
             buttons.append([key for key in item if key])
         return InlineKeyboardMarkup(buttons)
     elif page == 2:
         for item in [[overview_button],
-                     [related_button, unlike, like]]:
+                     [unlike, like]]:
             buttons.append([key for key in item if key])
         return InlineKeyboardMarkup(buttons)
     elif page == 3:
         for item in [[overview_button, full_button],
-                     [related_button, unlike, like]]:
+                     [unlike, like]]:
             buttons.append([key for key in item if key])
         return InlineKeyboardMarkup(buttons)
     return keyboard
@@ -204,6 +204,8 @@ def news_page(news, page=1, picture_number=0, **kwargs):
         text += '    ' + Emoji.WHITE_HEAVY_CHECK_MARK + 'منبع:‌ '
         text += "<a href= '%s'> %s </a>" % (shorten(news.base_news.url), news.base_news.news_agency.fa_name)
 
+        text += "<a href= '%s'>‌‌</a> \n" % news.pdf_link
+
         if 'user_entity' in kwargs:
             news_user_entity = NewsEntity.objects.filter(news=news, entity__in=kwargs['user_entity'])
             if news_user_entity:
@@ -214,13 +216,12 @@ def news_page(news, page=1, picture_number=0, **kwargs):
     elif page == 2:
         text += Emoji.PUBLIC_ADDRESS_LOUDSPEAKER + news.base_news.title + '\n\n'
 
-        if len(news.body) < 3400:
+        if len(news.body) < 3500:
             text += news.body + '\n'
-            text += news.pdf_link + '\n'
+
         else:
-            text += news.body[:3400].rsplit(' ', 1)[0]
+            text += news.body[:3500].rsplit(' ', 1)[0]
             text += '\n' + 'ادامه دارد...' + '\n'
-            text += news.pdf_link + '\n'
     elif page == 3:
 
         related = more_like_this(news.base_news.title, 5)

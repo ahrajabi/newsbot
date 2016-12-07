@@ -118,6 +118,13 @@ class TelegramPost(models.Model):
     news = models.OneToOneField(News, verbose_name='News', null=True, blank=True)
     reply_to = models.ForeignKey('self', verbose_name='Replied to', null=True, blank=True)
 
+# class BadNews(models.Model):
+#     news_agency = models.ForeignKey(NewsAgency, verbose_name='News Agency')
+#     title = models.TextField('Tittle', blank=True, null=True)
+#     published_date = models.DateTimeField('Published date ', blank=True, null=True)
+#     body = models.TextField('News', blank=True, null=True)
+#     photo = models.ImageField(upload_to='telegram/%Y/%m/%d/', null=True, blank=True)
+
 
 class BadNews(News):
     pass
