@@ -86,9 +86,9 @@ def main_loop(sender):
             body = text
 
             if find_advertisement(body):
-                model = News
-            else:
                 model = BadNews
+            else:
+                model = News
 
             obj_base = BaseNews.objects.create(title=title,
                                                news_agency=news_agency,
