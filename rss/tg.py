@@ -86,7 +86,7 @@ def main_loop(sender):
             body = text
 
             if find_advertisement(body):
-                model = BadNews
+                model = News
             else:
                 model = News
 
