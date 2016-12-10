@@ -12,25 +12,11 @@ from telegrambot.PreprocessHandler import PreprocessHandler
 import re
 import logging
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
-def error_callback(bot, update, error):
-    del bot, update
-    try:
-        raise error
-    except Unauthorized:
-        print("# remove update.message.chat_id from conversation list")
-    except BadRequest:
-        print("# handle malformed requests - read more below!")
-    except TimedOut:
-        print("# handle slow connection problems")
-    except NetworkError:
-        print("# handle other connection problems")
-    except TelegramError:
-        print("# handle all other telegram related errors")
+def error(bot, update, error):
+    logger.warn('Update "%s" caused error "%s"' % (update, error))
 
 
 def commands(bot, update):
@@ -59,13 +45,12 @@ def channel_publish(bot, job):
 
 updater = Updater(token=settings.TELEGRAM_TOKEN)
 dispatcher = updater.dispatcher
-
+dispatcher.add_error_handler(error)
 dispatcher.add_handler(wizard.SYMBOL_WIZARD, group=2)
 dispatcher.add_handler(MessageHandler(Filters.command, commands), group=2)
 dispatcher.add_handler(MessageHandler(Filters.text, text_handler.handle), group=2)
 dispatcher.add_handler(CallbackQueryHandler(callback_query), group=2)
 dispatcher.add_handler(PreprocessHandler(None), group=1)
-dispatcher.add_error_handler(error_callback)
 
 q_bot = updater.job_queue
 q_bot.put(Job(publish_handler, 10, repeat=True))

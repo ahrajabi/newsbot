@@ -33,13 +33,13 @@ class UserSearchList(models.Model):
 
 class UserSettings(models.Model):
     live_news = models.BooleanField(default=False)
-    interval_news_list = models.PositiveSmallIntegerField(default=120)
+    interval_news_list = models.PositiveSmallIntegerField(default=10)
     last_news_list = models.OneToOneField(UserNewsList, verbose_name='Last News List', null=True)
 
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User)
-    activated = models.BooleanField(verbose_name='Bot Blocked', default=True)
+    activated = models.BooleanField(verbose_name='Activation', default=True)
     stopped = models.BooleanField(verbose_name='Bot Stopped', default=False)
     private = models.BooleanField(verbose_name='Private', default=False)
     first_name = models.CharField(max_length=140, null=True)

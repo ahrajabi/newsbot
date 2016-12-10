@@ -7,6 +7,8 @@ from telegrambot.bot_send import send_telegram_chat
 from telegram.ext.handler import Handler
 from telegrambot.wizard import SYMBOL_WIZARD
 from telegram import ChatAction
+import logging
+
 
 
 class PreprocessHandler(Handler):
@@ -27,12 +29,15 @@ class PreprocessHandler(Handler):
         self.pass_groups = pass_groups
         self.pass_group_dict = pass_groupdict
 
+
     def check_update(self, update):
         return True
 
     def handle_update(self, update, dispatcher):
         print("PreProcess")
+
         print(update)
+
         if hasattr(update, 'message') and update.message:
             dispatcher.bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING)
             if hasattr(update.message, 'chat') and update.message.chat.type == 'private':
@@ -58,7 +63,7 @@ class PreprocessHandler(Handler):
                                                 update.message.chat.username,
                                                 'from_user')
                 update.message.from_user.up = profile
-
+        print("HERE")
         if hasattr(update, 'callback_query') and update.callback_query:
             # dispatcher.bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING)
             profile, new_user = verify_user(update.callback_query.from_user.id,
@@ -105,10 +110,14 @@ def log(update):
 def verify_user(telegram_id, first_name, last_name, username, type_update='private'):
     try:
         up = UserProfile.objects.get(telegram_id=telegram_id)
-        if type_update == 'private' and not up.private:
-            up.private = True
-            up.save()
-            return up, True
+        if type_update == 'private':
+            if not up.private:
+                up.private = True
+                up.save()
+                return up, True
+            elif not up.activated:
+                up.activated = True
+                up.save()
         return up, False
     except ObjectDoesNotExist:
         if len(username) == 0:

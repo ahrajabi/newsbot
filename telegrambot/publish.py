@@ -13,6 +13,8 @@ from telegrambot import news_template, bot_send
 from telegrambot.models import UserNewsList, UserProfile, UserLiveNews
 from telegrambot.command_handler import deactive_profile
 from telegrambot.bot_template import publish_news
+from telegram.error import (TelegramError, Unauthorized, BadRequest,
+                            TimedOut, NetworkError)
 
 
 def publish_handler(bot, job):

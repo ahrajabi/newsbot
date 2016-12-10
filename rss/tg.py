@@ -5,6 +5,8 @@ from pytg import Telegram
 from datetime import datetime
 from django.conf import settings
 from pytg.exceptions import NoResponse
+import re
+
 
 tg = Telegram(
     telegram=settings.TG_CLI['telegram'],
@@ -81,6 +83,11 @@ def main_loop(sender):
             news_agency, created = NewsAgency.objects.get_or_create(name=channel['id'],
                                                                     defaults={'fa_name': channel['title'],
                                                                               'url': 'http://telegram.me'})
+            if news_agency.url == 'http://telegram.me':
+                un = get_username_channelid(news_agency.name)
+                if un:
+                    news_agency.url = 'http://telegram.me/' + un[1:].lower()
+                    news_agency.save()
 
             title = "پست تلگرام"
             body = text
@@ -113,3 +120,32 @@ def find_advertisement(text):
         return 1
     else:
         return 0
+
+
+def get_username_channelid(ch_id):
+    sender = tg.sender
+    username = []
+    try:
+        posts = sender.history(ch_id, 50)
+    except NoResponse:
+        return None
+    for post in posts:
+        # print(post)
+        if not hasattr(post, 'event'):
+            continue
+        if not post.event == 'message':
+            continue
+        if not post['from']['id'] == ch_id:
+            continue
+        try:
+            text = post.text
+        except AttributeError:
+            try:
+                text = post.media.caption
+            except AttributeError:
+                continue
+        username.extend(re.findall('@\S+', text))
+    if len(username) > 7:
+        return max(set(username), key=username.count)
+    else:
+        return None
