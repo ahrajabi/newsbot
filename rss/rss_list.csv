@@ -175,8 +175,8 @@ http://donya-e-eqtesad.com/,donya-e-eqtesad,دنیای اقتصاد,سرمقال
 http://eghtesadnews.com/,eghtesadnews,اقتصاد نیوز,تمام اخبار,False,all,D,http://eghtesadnews.com/Live/Services/Rss/Selected/latest,.newsContent,.newsBrief,.newsContent img,False
 http://www.econews.ir/,econews,خبرگزاری اقتصادی ایران,تمام اخبار,True,economic,D,http://www.econews.ir/fa/rss.aspx?kind=-1,".BodyText p, .ContentStyle > p",.ContentStyle h3,".ContentStyle > img, .MediaContent .Center img, .BodyText .PhotoGallery img",True
 boursenews.ir,boursenews,بورس نیوز,تمام اخبار,True,economic,D,http://www.boursenews.ir/fa/rss/allnews,.body,.subtitle,.body img,False
-eghtesadonline.com/,eghtesadonline,اقتصاد آنلاین,تمام اخبار,True,economic,D,http://www.eghtesadonline.com/fa/feeds/,.df-text p,.df-lead,".df-text img, .df-img img",False
-naftema.com,naftema,نفت ما,تمام اخبار,True,economic,D,http://naftema.com/page/rss,#story,#lead,.news-cnt img,True
+eghtesadonline.com/,eghtesadonline,اقتصاد آنلاین,تمام اخبار,False,economic,D,http://www.eghtesadonline.com/fa/feeds/,.df-text p,.df-lead,".df-text img, .df-img img",False
+naftema.com,naftema,نفت ما,تمام اخبار,False,economic,D,http://naftema.com/page/rss,#story,#lead,.news-cnt img,True
 http://www.ilna.ir,ilna,خبرگزاری کار ایران,تمام اخبار,False,all,D,http://www.ilna.ir/feeds/,".article_body p:not(.news_lead), .child p:not(.mp_lead)",".news_lead, .mp_lead",".article_body img, .gallery_thumb img",False
 akhbarrasmi.com,akhbarrasmi,اخبار رسمی,تمام اخبار,False,all,D,http://news.akhbarrasmi.com/rss.xml,.news-article-content,.lead,.fig-lead img,True
 http://www.tasnimnews.com/,tasnim,تسنیم,تمام اخبار,False,all,D,http://www.tasnimnews.com/fa/rss/feed/0/7/0/%D8%A2%D8%AE%D8%B1%DB%8C%D9%86-%D8%AE%D8%A8%D8%B1%D9%87%D8%A7,".story, article.media .lead",.lead,".single-news > div figure img, .story img, .images img",False
