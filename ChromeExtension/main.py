@@ -71,6 +71,7 @@ def get_telegram_codal(request):
 
 def get_one_tg(name):
     posts = News.objects.filter(base_news__news_agency__fa_name=name,
+                                base_news__source_type=3,
                                 base_news__published_date__gte=timezone.now() - datetime.timedelta(days=10)).order_by(
         '-base_news__published_date')[:50]
     response = []
