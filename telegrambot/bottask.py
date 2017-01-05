@@ -43,7 +43,7 @@ def channel_publish(bot, job):
     channel_publish_handler(bot, job)
 
 
-updater = Updater(token=settings.TELEGRAM_TOKEN)
+updater = Updater(token=settings.TELEGRAM_TOKEN, workers=2)
 dispatcher = updater.dispatcher
 dispatcher.add_error_handler(error)
 dispatcher.add_handler(wizard.SYMBOL_WIZARD, group=2)
