@@ -20,9 +20,10 @@ django-extensions==1.7.4
 django-filter==0.14.0
 django-grappelli==2.8.1
 django-mptt==0.8.6
-django-rest-swagger==2.0.5
+django-rest-swagger==2.0.1
 django-telegrambot==0.2.3
 djangorestframework==3.4.6
+drf-tracking==1.0.1
 elasticsearch==2.3.0
 elasticsearch-dsl==2.1.0
 entrypoints==0.2.2

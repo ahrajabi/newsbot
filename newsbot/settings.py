@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'mptt',
     'raven.contrib.django.raven_compat',
     'shortenersite',
+    'rest_framework_tracking',
 ]
 
 MIDDLEWARE_CLASSES = [
